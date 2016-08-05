@@ -23,7 +23,7 @@ var BasicUnit = (function (_super) {
         return u;
     };
     BasicUnit.prototype.getSightRadius = function () {
-        return 12.0;
+        return 12;
     };
     BasicUnit.prototype.getRadius = function () {
         return 0.6;

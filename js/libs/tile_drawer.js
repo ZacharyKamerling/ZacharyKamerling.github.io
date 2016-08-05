@@ -85,6 +85,8 @@ var TileDrawer = (function () {
         this.canvas.height = this.canvas.offsetHeight;
         var gl = this.ctx;
         gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        gl.clearColor(0, 0, 0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.useProgram(this.program.program);
@@ -106,6 +108,7 @@ var TileDrawer = (function () {
         gl.uniform1i(this.program.uniform['tiles'], 1);
         gl.bindTexture(gl.TEXTURE_2D, this.tileTexture);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.disable(gl.BLEND);
     };
     TileDrawer.vertexShader = [
         "attribute vec2 position;",

@@ -4,6 +4,7 @@ var Game = (function () {
         this.chef = null;
         this.tileDrawer = null;
         this.unitDrawer = null;
+        this.fowDrawer = null;
         this.control = new DoingNothing();
         this.camera = new Camera(0, 0);
         this.connection = null;
@@ -37,6 +38,9 @@ var Game = (function () {
     };
     Game.prototype.setUnitDrawer = function (ud) {
         this.unitDrawer = ud;
+    };
+    Game.prototype.setFOWDrawer = function (fd) {
+        this.fowDrawer = fd;
     };
     Game.prototype.processPacket = function (data) {
         var logic_frame = data.getU32();
@@ -198,6 +202,7 @@ var Game = (function () {
         this.stepMissiles(time_passed);
         this.tileDrawer.draw(this.camera.x, this.camera.y, 1);
         this.drawUnitsAndMissiles();
+        this.drawFogOfWar();
     };
     Game.prototype.stepUnits = function (time) {
         for (var i = 0; i < this.souls.length; i++) {
@@ -241,6 +246,18 @@ var Game = (function () {
             }
         }
         this.unitDrawer.draw(this.camera.x, this.camera.y, 1, flattened);
+    };
+    Game.prototype.drawFogOfWar = function () {
+        var circles = new Array();
+        for (var i = 0; i < this.souls.length; i++) {
+            var soul = this.souls[i];
+            if (soul) {
+                if (soul.current.team === this.team) {
+                    circles.push({ x: soul.current.x, y: soul.current.y, r: soul.current.getSightRadius() });
+                }
+            }
+        }
+        this.fowDrawer.draw(this.camera.x, this.camera.y, 1, circles);
     };
     Game.TILESIZE = 32;
     return Game;

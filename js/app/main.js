@@ -6,6 +6,7 @@ function main() {
     var conn = null;
     var game = new Game();
     var canvas = document.getElementById('drawCanvas');
+    var fowCanvas = document.getElementById('fowCanvas');
     var unitRefs = [
         {
             src: "img/basic_unit.png",
@@ -22,6 +23,7 @@ function main() {
     ];
     var spritemap = new SpriteMap(unitRefs);
     game.setTileDrawer(new TileDrawer(canvas, 'img/lttp-tiles.png', 'img/lttp-all.png'));
+    game.setFOWDrawer(new FOWDrawer(fowCanvas));
     spritemap.onload = function (e) {
         game.setUnitDrawer(new UnitDrawer(canvas, spritemap));
     };
@@ -59,7 +61,7 @@ function playGame(game, conn, spriteMap) {
     var content = document.getElementById('content');
     mainMenu.hidden = true;
     content.hidden = false;
-    var canvas = document.getElementById('drawCanvas');
+    var canvas = document.getElementById('fowCanvas');
     game.setChef(new Chef());
     game.setConnection(conn);
     interact(canvas, game.interact_canvas());

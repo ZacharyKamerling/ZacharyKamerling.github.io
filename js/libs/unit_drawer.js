@@ -79,11 +79,11 @@ var UnitDrawer = (function () {
         gl.enableVertexAttribArray(this.program.attribute['a_texture_coord']);
         gl.vertexAttribPointer(this.program.attribute['a_position'], 2, gl.FLOAT, false, 16, 0);
         gl.vertexAttribPointer(this.program.attribute['a_texture_coord'], 2, gl.FLOAT, false, 16, 8);
-        gl.uniform2f(this.program.uniform['viewOffset'], x * xm, y * ym);
         gl.activeTexture(gl.TEXTURE0);
         gl.uniform1i(this.program.uniform['sprites'], 2);
         gl.bindTexture(gl.TEXTURE_2D, this.spriteTex);
         gl.drawArrays(gl.TRIANGLES, 0, 6 * sprites.length);
+        gl.disable(gl.BLEND);
     };
     UnitDrawer.rotateAroundOrigin = function (cx, cy, x, y, ang) {
         // translate point to origin
