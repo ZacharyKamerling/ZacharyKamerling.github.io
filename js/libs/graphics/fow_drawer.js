@@ -1,8 +1,7 @@
 var FOWDrawer = (function () {
     function FOWDrawer(canvas) {
         this.canvas = canvas;
-        this.smallCanvas = document.createElement('canvas');
-        var gl = this.smallCanvas.getContext('webgl');
+        var gl = this.canvas.getContext('webgl');
         this.program = new MetaProgram(gl, createProgram(gl, FOWDrawer.vertexShader, FOWDrawer.fragmentShader));
         this.buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -10,17 +9,15 @@ var FOWDrawer = (function () {
     }
     FOWDrawer.prototype.draw = function (x, y, scale, circles) {
         var QUALITY = 1 / 4;
-        x = Math.floor(x) * QUALITY;
-        y = Math.floor(y) * QUALITY;
-        scale = scale / 4;
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
-        this.smallCanvas.width = this.canvas.offsetWidth * QUALITY;
-        this.smallCanvas.height = this.canvas.offsetHeight * QUALITY;
+        x = Math.floor(x * QUALITY);
+        y = Math.floor(y * QUALITY);
+        scale = scale * QUALITY;
+        this.canvas.width = Math.floor(this.canvas.offsetWidth * QUALITY);
+        this.canvas.height = Math.floor(this.canvas.offsetHeight * QUALITY);
         var FLOATS_PER_UNIT = 30;
         var drawData = new Float32Array(FLOATS_PER_UNIT * circles.length);
-        var xm = Game.TILESIZE / this.smallCanvas.width;
-        var ym = Game.TILESIZE / this.smallCanvas.height;
+        var xm = Game.TILESIZE / this.canvas.width;
+        var ym = Game.TILESIZE / this.canvas.height;
         for (var i = 0, n = 0; n < circles.length; n++) {
             var circle = circles[n];
             // Scale all coords to 1/4th their size (to match small canvas)
@@ -31,8 +28,8 @@ var FOWDrawer = (function () {
             circle.y = circle.y * QUALITY;
             // Normalize X & Y
             // ScrnX = ((x - ScrnL) / ScrnW) * 2 - 1
-            var normX = ((circle.x - (x - this.smallCanvas.width / 2)) / this.smallCanvas.width) * 2 - 1;
-            var normY = ((circle.y - (y - this.smallCanvas.height / 2)) / this.smallCanvas.height) * 2 - 1;
+            var normX = ((circle.x - (x - this.canvas.width / 2)) / this.canvas.width) * 2 - 1;
+            var normY = ((circle.y - (y - this.canvas.height / 2)) / this.canvas.height) * 2 - 1;
             // Coordinates of each corner on the sprite
             var east = normX + circle.r * xm;
             var north = normY + circle.r * ym;
@@ -72,10 +69,10 @@ var FOWDrawer = (function () {
             drawData[i + 29] = radius;
             i += FLOATS_PER_UNIT;
         }
-        var gl = this.smallCanvas.getContext('webgl');
+        var gl = this.canvas.getContext('webgl');
         gl.clearColor(0, 0, 0, 0.75);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.viewport(0, 0, this.smallCanvas.width, this.smallCanvas.height);
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         gl.useProgram(this.program.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.bufferData(gl.ARRAY_BUFFER, drawData, gl.STATIC_DRAW);
@@ -85,24 +82,8 @@ var FOWDrawer = (function () {
         gl.vertexAttribPointer(this.program.attribute['a_position'], 2, gl.FLOAT, false, 20, 0);
         gl.vertexAttribPointer(this.program.attribute['a_circle_position'], 2, gl.FLOAT, false, 20, 8);
         gl.vertexAttribPointer(this.program.attribute['a_circle_radius'], 1, gl.FLOAT, false, 20, 16);
-        gl.uniform1f(this.program.uniform['scaleY'], this.smallCanvas.width / this.smallCanvas.height);
+        gl.uniform1f(this.program.uniform['scaleY'], this.canvas.width / this.canvas.height);
         gl.drawArrays(gl.TRIANGLES, 0, 6 * circles.length);
-        var ctx = this.canvas.getContext('2d');
-        ctx.drawImage(this.smallCanvas, 0, 0, this.smallCanvas.width, this.smallCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
-    };
-    FOWDrawer.rotateAroundOrigin = function (cx, cy, x, y, ang) {
-        // translate point to origin
-        var tempX = x - cx;
-        var tempY = y - cy;
-        var cos = Math.cos(ang);
-        var sin = Math.sin(ang);
-        // now apply rotation
-        var rotatedX = tempX * cos - tempY * sin;
-        var rotatedY = tempX * sin + tempY * cos;
-        // translate back
-        x = rotatedX + cx;
-        y = rotatedY + cy;
-        return { x: x, y: y };
     };
     FOWDrawer.vertexShader = [
         "precision highp float;",

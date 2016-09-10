@@ -1,5 +1,17 @@
-var Unit = (function () {
-    function Unit(c, frame) {
+﻿class Unit {
+    unit_ID: number;
+    anim_ID: number;
+    team: number;
+    x: number;
+    y: number;
+    facing: number;
+    health: number;
+    progress: number;
+    frame_created: number;
+    isSelected: boolean;
+    isBeingSelected: boolean;
+
+    constructor(c: Cereal, frame: number) {
         if (c) {
             this.frame_created = frame;
             this.unit_ID = c.getU16();
@@ -12,7 +24,8 @@ var Unit = (function () {
             this.progress = c.getU8() / 255;
         }
     }
-    Unit.prototype.copycat = function (unit) {
+
+    copycat(unit: Unit) {
         unit.unit_ID = this.unit_ID;
         unit.anim_ID = this.anim_ID;
         unit.team = this.team;
@@ -24,31 +37,37 @@ var Unit = (function () {
         unit.frame_created = this.frame_created;
         unit.isSelected = this.isSelected;
         unit.isBeingSelected = this.isBeingSelected;
-    };
-    Unit.prototype.clone = function () {
+    }
+
+    clone(): Unit {
         throw new Error('Unit: clone() is abstract');
-    };
-    Unit.prototype.getSightRadius = function () {
+    }
+
+    getSightRadius(): number {
         throw new Error('Unit: getSightRadius() is abstract');
-    };
-    Unit.prototype.getRadius = function () {
+    }
+
+    getRadius(): number {
         throw new Error('Unit: getRadius() is abstract');
-    };
-    Unit.prototype.render = function (game, layers) {
+    }
+
+    render(game: Game, layers: { x: number, y: number, ang: number, ref: string }[][]): void {
         throw new Error('Unit: render() is abstract');
-    };
-    Unit.prototype.step = function (time, oldUnit, newUnit) {
-        var f1 = oldUnit.facing;
-        var f2 = newUnit.facing;
-        var turn = Misc.angularDistance(f1, f2) * time;
+    }
+
+    step(time: number, oldUnit: Unit, newUnit: Unit) {
+        let f1 = oldUnit.facing;
+        let f2 = newUnit.facing;
+        let turn = Misc.angularDistance(f1, f2) * time;
         this.facing = Misc.turnTowards(this.facing, f2, turn);
         this.x = this.x + (newUnit.x - oldUnit.x) * time;
         this.y = this.y + (newUnit.y - oldUnit.y) * time;
         this.health = this.health + (newUnit.health - oldUnit.health) * time;
         this.progress = this.progress + (newUnit.progress - oldUnit.progress) * time;
-    };
-    Unit.decodeUnit = function (data, frame) {
-        var unitType = data.getU8();
+    }
+
+    static decodeUnit(data: Cereal, frame: number): Unit {
+        let unitType = data.getU8();
         switch (unitType) {
             case 0:
                 return new BasicUnit(data, frame);
@@ -56,7 +75,5 @@ var Unit = (function () {
                 console.log("No unit of type " + unitType + " exists.");
                 return null;
         }
-    };
-    return Unit;
-})();
-//# sourceMappingURL=unit.js.map
+    }
+}
