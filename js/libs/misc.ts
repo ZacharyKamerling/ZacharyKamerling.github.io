@@ -1,6 +1,5 @@
-var Misc;
-(function (Misc) {
-    function normalizeAngle(f) {
+﻿module Misc {
+    export function normalizeAngle(f: number): number {
         while (f > Math.PI * 2.0) {
             f -= Math.PI * 2.0;
         }
@@ -9,9 +8,10 @@ var Misc;
         }
         return f;
     }
-    Misc.normalizeAngle = normalizeAngle;
-    function angularDistance(a, b) {
-        var dists = Math.abs(a - b);
+
+    export function angularDistance(a: number, b: number): number {
+        let dists = Math.abs(a - b);
+
         if (dists > Math.PI) {
             return 2.0 * Math.PI - dists;
         }
@@ -19,10 +19,11 @@ var Misc;
             return dists;
         }
     }
-    Misc.angularDistance = angularDistance;
+
     // Angle to turn, angle to turn towards, amount to turn
-    function turnTowards(a, b, turn) {
-        var dist = angularDistance(a, b);
+    export function turnTowards(a: number, b: number, turn: number): number {
+        let dist = angularDistance(a, b);
+
         if (turn > dist) {
             return b;
         }
@@ -45,21 +46,22 @@ var Misc;
             }
         }
     }
-    Misc.turnTowards = turnTowards;
-    function rotateAroundOrigin(cx, cy, x, y, ang) {
+
+    export function rotateAroundOrigin(cx: number, cy: number, x: number, y: number, ang: number): { x: number, y: number } {
         // translate point to origin
-        var tempX = x - cx;
-        var tempY = y - cy;
-        var cos = Math.cos(ang);
-        var sin = Math.sin(ang);
+        let tempX = x - cx;
+        let tempY = y - cy;
+        let cos = Math.cos(ang);
+        let sin = Math.sin(ang);
+
         // now apply rotation
-        var rotatedX = tempX * cos - tempY * sin;
-        var rotatedY = tempX * sin + tempY * cos;
+        let rotatedX = tempX * cos - tempY * sin;
+        let rotatedY = tempX * sin + tempY * cos;
+
         // translate back
         x = rotatedX + cx;
         y = rotatedY + cy;
+
         return { x: x, y: y };
     }
-    Misc.rotateAroundOrigin = rotateAroundOrigin;
-})(Misc || (Misc = {}));
-//# sourceMappingURL=misc.js.map
+}

@@ -1,5 +1,12 @@
-var Missile = (function () {
-    function Missile(c, frame, exploding) {
+﻿class Missile {
+    misl_ID: number;
+    x: number;
+    y: number;
+    facing: number;
+    exploding: boolean;
+    frame_created: number;
+
+    constructor(c: Cereal, frame: number, exploding: boolean) {
         if (c) {
             this.frame_created = frame;
             this.exploding = exploding;
@@ -8,41 +15,49 @@ var Missile = (function () {
             this.y = c.getU16() / (64 / Game.TILESIZE);
         }
     }
-    Missile.prototype.clone = function () {
+
+    clone(): Missile {
         throw new Error('Missile: clone() is abstract');
-    };
-    Missile.prototype.copycat = function (misl) {
+    }
+
+    copycat(misl: Missile) {
         misl.misl_ID = this.misl_ID;
         misl.x = this.x;
         misl.y = this.y;
         misl.exploding = this.exploding;
         misl.frame_created = this.frame_created;
-    };
-    Missile.prototype.render = function (game, layers) {
+    }
+
+    render(game: Game, layers: { x: number, y: number, ang: number, ref: string }[][]): void {
         throw new Error('Missile: render() is abstract');
-    };
-    Missile.prototype.renderExplosion = function (game, layers) {
+    }
+
+    renderExplosion(game: Game, layers: { x: number, y: number, ang: number, ref: string }[][]): void {
         throw new Error('Missile: renderExplosion() is abstract');
-    };
-    Missile.prototype.speed = function () {
+    }
+
+    speed(): number {
         throw new Error('Missile: speed() is abstract');
-    };
-    Missile.prototype.step = function (time, oldMisl, newMisl) {
+    }
+
+    step(time: number, oldMisl: Missile, newMisl: Missile) {
         this.facing = Math.atan2(newMisl.y - this.y, newMisl.x - this.x);
         this.x += this.speed() * Math.cos(this.facing) * time;
         this.y += this.speed() * Math.sin(this.facing) * time;
-        var xDifA = this.x - oldMisl.x;
-        var yDifA = this.y - oldMisl.y;
-        var xDifB = oldMisl.x - newMisl.x;
-        var yDifB = oldMisl.y - newMisl.y;
-        var distA = xDifA * xDifA + yDifA * yDifA;
-        var distB = xDifB * xDifB + yDifB * yDifB;
+        let xDifA = this.x - oldMisl.x;
+        let yDifA = this.y - oldMisl.y;
+        let xDifB = oldMisl.x - newMisl.x;
+        let yDifB = oldMisl.y - newMisl.y;
+        let distA = xDifA * xDifA + yDifA * yDifA;
+        let distB = xDifB * xDifB + yDifB * yDifB;
+
         if (newMisl.exploding && distA > distB) {
             this.exploding = true;
         }
-    };
-    Missile.decodeMissile = function (data, frame, exploding) {
-        var mislType = data.getU8();
+    }
+
+    static decodeMissile(data: Cereal, frame: number, exploding: boolean): Missile {
+        let mislType = data.getU8();
         switch (mislType) {
             case 0:
                 return new BasicMissile(data, frame, exploding);
@@ -50,7 +65,5 @@ var Missile = (function () {
                 console.log("No missile of type " + mislType + " exists.");
                 return null;
         }
-    };
-    return Missile;
-})();
-//# sourceMappingURL=missile.js.map
+    }
+}
