@@ -24,25 +24,20 @@
     export function turnTowards(a: number, b: number, turn: number): number {
         let dist = angularDistance(a, b);
 
-        if (turn > dist) {
-            return b;
-        }
-        else {
-            if (a > b) {
-                if (a - b > Math.PI) {
-                    return normalizeAngle(a + turn);
-                }
-                else {
-                    return normalizeAngle(a - turn);
-                }
+        if (a > b) {
+            if (a - b > Math.PI) {
+                return normalizeAngle(a + turn);
             }
             else {
-                if (b - a > Math.PI) {
-                    return normalizeAngle(a - turn);
-                }
-                else {
-                    return normalizeAngle(a + turn);
-                }
+                return normalizeAngle(a - turn);
+            }
+        }
+        else {
+            if (b - a > Math.PI) {
+                return normalizeAngle(a - turn);
+            }
+            else {
+                return normalizeAngle(a + turn);
             }
         }
     }
@@ -63,5 +58,12 @@
         y = rotatedY + cy;
 
         return { x: x, y: y };
+    }
+
+    export function rotatePoint(x: number, y: number, angle: number): { x: number, y: number } {
+        let cos = Math.cos(angle);
+        let sin = Math.sin(angle);
+
+        return { x: x * cos - y * sin, y: x * sin + y * cos };
     }
 }
