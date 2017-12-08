@@ -1,26 +1,5 @@
-﻿enum UnitType {
-    Artillery1,
-    Medium1,
-    Extractor1,
-    Fast1,
-}
-
-class Unit {
-    unit_ID: number;
-    anim_ID: number;
-    team: number;
-    x: number;
-    y: number;
-    facing: number;
-    health: number;
-    progress: number;
-    frameCreated: number;
-    timeCreated: number;
-    isDead: boolean;
-    isSelected: boolean;
-    isBeingSelected: boolean;
-
-    constructor(c: Cereal, time: number, frame: number) {
+var UnitProto = (function () {
+    function UnitProto(c, time, frame) {
         if (c) {
             this.frameCreated = frame;
             this.timeCreated = time;
@@ -34,56 +13,45 @@ class Unit {
             this.progress = c.getU8();
         }
     }
-
-    clone(): Unit {
+    UnitProto.prototype.clone = function () {
         return Object.create(this);
-    }
-
-    sightRadius(): number {
+    };
+    UnitProto.prototype.sightRadius = function () {
         throw new Error('Unit: getSightRadius() is abstract');
-    }
-
-    radius(): number {
+    };
+    UnitProto.prototype.radius = function () {
         throw new Error('Unit: getRadius() is abstract');
-    }
-
-    widthAndHeight(): { w: number, h: number } {
+    };
+    UnitProto.prototype.widthAndHeight = function () {
         throw new Error('Unit: widthAndHeight() is abstract');
-    }
-
-    render(game: Game, layers: { x: number, y: number, ang: number, ref: string }[][]): void {
+    };
+    UnitProto.prototype.render = function (game, layers) {
         throw new Error('Unit: render() is abstract');
-    }
-
-    renderMinimap(game: Game, layers: { x: number, y: number, ref: string }[][]): void {
+    };
+    UnitProto.prototype.renderMinimap = function (game, layers) {
         throw new Error('Unit: renderMinimap() is abstract');
-    }
-
-    renderDeath(game: Game, layers: { x: number, y: number, ang: number, ref: string }[][]): void {
+    };
+    UnitProto.prototype.renderDeath = function (game, layers) {
         throw new Error('Unit: renderDeath() is abstract');
-    }
-
-    commands(cmds: { [index: string]: void }) {
+    };
+    UnitProto.prototype.commands = function (cmds) {
         throw new Error('Unit: commands() is abstract');
-    }
-
-    buildables(blds: { [index: string]: void }) {
+    };
+    UnitProto.prototype.buildables = function (blds) {
         throw new Error('Unit: buildables() is abstract');
-    }
-
-    step(timeDelta: number, oldUnit: Unit, newUnit: Unit) {
-        let f1 = oldUnit.facing;
-        let f2 = newUnit.facing;
-        let turn = Misc.angularDistance(f1, f2) * timeDelta;
+    };
+    UnitProto.prototype.step = function (timeDelta, oldUnit, newUnit) {
+        var f1 = oldUnit.facing;
+        var f2 = newUnit.facing;
+        var turn = Misc.angularDistance(f1, f2) * timeDelta;
         this.facing = Misc.turnTowards(this.facing, f2, turn);
         this.x = this.x + (newUnit.x - oldUnit.x) * timeDelta;
         this.y = this.y + (newUnit.y - oldUnit.y) * timeDelta;
         this.progress = newUnit.progress;
         this.health = newUnit.health;
-    }
-
-    static decodeUnit(data: Cereal, time: number, frame: number): Unit {
-        let unitType = data.getU8();
+    };
+    UnitProto.decodeUnit = function (data, time, frame) {
+        var unitType = data.getU8();
         switch (unitType) {
             case UnitType.Medium1:
                 return new Medium1(data, time, frame);
@@ -97,5 +65,6 @@ class Unit {
                 console.log("No unit of type " + unitType + " exists.");
                 return null;
         }
-    }
-}
+    };
+    return UnitProto;
+}());

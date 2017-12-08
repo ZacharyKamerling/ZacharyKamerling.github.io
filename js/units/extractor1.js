@@ -11,16 +11,6 @@ var Extractor1 = (function (_super) {
             this.blade_facing = 0;
         }
     }
-    Extractor1.prototype.copycat = function (unit) {
-        _super.prototype.copycat.call(this, unit);
-        unit.blade_facing = this.blade_facing;
-    };
-    Extractor1.prototype.clone = function () {
-        var u = new Extractor1(null, this.timeCreated, this.frameCreated);
-        this.copycat(u);
-        u.blade_facing = this.blade_facing;
-        return u;
-    };
     Extractor1.prototype.sightRadius = function () {
         return 12;
     };

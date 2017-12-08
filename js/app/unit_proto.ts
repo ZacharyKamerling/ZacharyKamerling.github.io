@@ -1,11 +1,4 @@
-﻿enum UnitType {
-    Artillery1,
-    Medium1,
-    Extractor1,
-    Fast1,
-}
-
-class Unit {
+﻿class UnitProto {
     unit_ID: number;
     anim_ID: number;
     team: number;

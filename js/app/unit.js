@@ -1,7 +1,7 @@
 var UnitType;
 (function (UnitType) {
-    UnitType[UnitType["Medium1"] = 0] = "Medium1";
-    UnitType[UnitType["Artillery1"] = 1] = "Artillery1";
+    UnitType[UnitType["Artillery1"] = 0] = "Artillery1";
+    UnitType[UnitType["Medium1"] = 1] = "Medium1";
     UnitType[UnitType["Extractor1"] = 2] = "Extractor1";
     UnitType[UnitType["Fast1"] = 3] = "Fast1";
 })(UnitType || (UnitType = {}));
@@ -20,22 +20,8 @@ var Unit = (function () {
             this.progress = c.getU8();
         }
     }
-    Unit.prototype.copycat = function (unit) {
-        unit.unit_ID = this.unit_ID;
-        unit.anim_ID = this.anim_ID;
-        unit.team = this.team;
-        unit.x = this.x;
-        unit.y = this.y;
-        unit.facing = this.facing;
-        unit.health = this.health;
-        unit.progress = this.progress;
-        unit.frameCreated = this.frameCreated;
-        unit.timeCreated = this.timeCreated;
-        unit.isSelected = this.isSelected;
-        unit.isBeingSelected = this.isBeingSelected;
-    };
     Unit.prototype.clone = function () {
-        throw new Error('Unit: clone() is abstract');
+        return Object.create(this);
     };
     Unit.prototype.sightRadius = function () {
         throw new Error('Unit: getSightRadius() is abstract');
