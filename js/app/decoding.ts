@@ -4,6 +4,7 @@
         UnitMove,
         UnitDeath,
         OrderCompleted,
+        TrainingCompleted,
         MeleeSmack,
         MissileMove,
         MissileExplode,
@@ -11,6 +12,7 @@
         TeamInfo,
         MapInfo,
         UnitInfo,
+        MissileInfo,
     }
 
     export function processPacket(game: Game, data: Cereal): void {
@@ -23,7 +25,7 @@
 
             for (let i = 0; i < game.souls.length; i++) {
                 let soul = game.souls[i];
-                if (soul && (logicFrame - soul.new.frameCreated > 2)) {
+                if (soul && (logicFrame - soul.new.frame_created > 2)) {
                     game.souls[i] = null;
                 }
             }
@@ -43,74 +45,65 @@
             let msg_type = data.getU8();
             msg_switch:
             switch (msg_type) {
-
-                // Unit
                 case ClientMessage.UnitMove:
-                    let new_unit: Unit = Unit.decodeUnit(data, currentTime, logicFrame);
-
-                    // If unit_soul exists, update it with new_unit
-                    if (new_unit) {
-                        let soul = game.souls[new_unit.unit_ID];
-
-                        if (soul) {
-                            soul.old = soul.current.clone();
-                            soul.old.timeCreated = soul.new.timeCreated;
-                            soul.new = new_unit;
-                        }
-                        else {
-                            var cur = new_unit.clone();
-                            game.souls[new_unit.unit_ID] = { old: null, current: cur, new: new_unit };
-                        }
-                    }
+                    Unit.decodeUnit(game, data, currentTime, logicFrame);
                     break msg_switch;
-                // Missile
                 case ClientMessage.MissileMove:
-                case ClientMessage.MissileExplode:
+                case ClientMessage.MissileExplode: {
                     let exploding = msg_type === ClientMessage.MissileExplode;
-                    let new_misl: Missile = Missile.decodeMissile(data, currentTime, logicFrame, exploding);
-
-                    if (new_misl) {
-                        let soul = game.missileSouls[new_misl.misl_ID];
-
-                        if (soul) {
-                            soul.old = soul.current.clone();
-                            soul.old.timeCreated = soul.new.frameCreated;
-                            soul.new = new_misl;
-                        }
-                        else {
-                            let cur = new_misl.clone();
-                            game.missileSouls[new_misl.misl_ID] = { old: null, current: cur, new: new_misl };
-                        }
+                    Missile.decodeMissile(game, data, currentTime, logicFrame, exploding);
+                    break msg_switch;
+                }
+                case ClientMessage.UnitDeath: {
+                    let unit_ID = data.getU16();
+                    if (game.souls[unit_ID]) {
+                        game.souls[unit_ID].current.is_dead = true;
                     }
                     break msg_switch;
-                // Unit death
-                case ClientMessage.UnitDeath:
-                    let unit_ID = data.getU16();
-                    let dmg_type = data.getU8();
-                    game.souls[unit_ID].current.isDead = true;
-                    break msg_switch;
-                // Player Info
-                case ClientMessage.TeamInfo:
+                }
+                case ClientMessage.TeamInfo: {
                     game.team = data.getU8();
                     game.maxPrime = data.getU32();
                     game.prime = data.getU32();
                     game.primeOutput = data.getF64();
                     game.primeDrain = data.getF64();
-
                     game.maxEnergy = data.getU32();
                     game.energy = data.getU32();
                     game.energyOutput = data.getF64();
                     game.energyDrain = data.getF64();
                     break msg_switch;
-                case ClientMessage.Construction:
+                }
+                case ClientMessage.Construction: {
                     let builder = data.getU16();
                     let buildee = data.getU16();
                     break msg_switch;
-                case ClientMessage.OrderCompleted:
+                }
+                case ClientMessage.OrderCompleted: {
                     let unitID = data.getU16();
                     let orderID = data.getU16();
                     break msg_switch;
-                case ClientMessage.MapInfo:
+                }
+                case ClientMessage.TrainingCompleted: {
+                    let unitID = data.getU16();
+                    let orderID = data.getU16();
+                    break msg_switch;
+                }
+                case ClientMessage.UnitInfo: {
+                    let unit_json = data.getString();
+                    let unit_proto = new Unit();
+                    unit_proto.jsonConfig(unit_json);
+                    game.unitPrototypes.push(unit_proto.clone());
+                    game.commandPanel.addCommand("build_" + unit_proto.name, { src: unit_proto.icon_src, tooltip: unit_proto.tooltip });
+                    break msg_switch;
+                }
+                case ClientMessage.MissileInfo: {
+                    let misl_json = data.getString();
+                    let misl_proto = new Missile();
+                    misl_proto.jsonConfig(misl_json);
+                    game.missilePrototypes.push(misl_proto.clone());
+                    break msg_switch;
+                }
+                case ClientMessage.MapInfo: {
                     let team = data.getU8();
                     let width = data.getU16();
                     let height = data.getU16();
@@ -118,11 +111,11 @@
                     game.mapWidth = width;
                     game.mapHeight = height;
                     let canvas = document.createElement('canvas');
-                    let mmCanvas = document.createElement('canvas'); //minimap
+                    let minimap = document.createElement('canvas');
                     canvas.width = width;
                     canvas.height = height;
-                    mmCanvas.width = width;
-                    mmCanvas.height = height;
+                    minimap.width = width;
+                    minimap.height = height;
                     let ctx = canvas.getContext('2d');
                     let imgData = ctx.getImageData(0, 0, width, height);
                     let quads = imgData.data;
@@ -155,7 +148,6 @@
                         if (n === team) {
                             game.camera.x = x * Game.TILESIZE;
                             game.camera.y = (height - y) * Game.TILESIZE;
-                            console.log("Set Map X & Y: " + x + ":" + y);
                         }
                     }
 
@@ -166,7 +158,6 @@
                         let x = data.getU16();
                         let y = data.getU16();
                         prime_nodes.push({ x: (x + Game.PRIME_NODE_WIDTH / 2) * Game.TILESIZE, y: (height - y - Game.PRIME_NODE_WIDTH / 2) * Game.TILESIZE });
-                        console.log("Node X & Y: " + x + ":" + y);
                     }
 
                     game.primeNodes = prime_nodes;
@@ -184,9 +175,11 @@
                     };
 
                     break msg_switch;
-                default:
+                }
+                default: {
                     console.log("No message of type " + msg_type + " exists.");
                     return;
+                }
             }
         }
     }

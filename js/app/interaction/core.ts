@@ -5,28 +5,34 @@
         AttackMove,
         AttackTarget,
         Build,
+        Train,
         Assist,
+        Stop,
         MapInfoRequest,
+        UnitInfoRequest,
+        MissileInfoRequest,
     }
 
     export enum QueueOrder {
         Prepend,
         Append,
         Replace,
+        Clear,
     }
 
     export interface Control { }
 
     export class DoingNothing implements Control { }
 
-    function getTarget(game: Game): Unit {
+    function getTarget(game: Game): number {
         for (let i = 0; i < game.souls.length; i++) {
             let soul = game.souls[i];
 
-            if (soul && soul.current.isBeingSelected) {
-                return soul.current;
+            if (soul && soul.current.is_being_selected) {
+                return i;
             }
         }
+        return null;
     }
 
     export function interact(game: Game): ((state: UserInput.InputState, event: UserInput.InputEvent) => void) {
@@ -40,30 +46,38 @@
                     game.control = new MovingCamera(state.mouseX(), state.mouseY(), game.camera.x, game.camera.y);
                 }
                 else if (event === UserInput.InputEvent.MouseRightDown) {
-                    let target = getTarget(game);
+                    let targetID = getTarget(game);
 
-                    if (target) {
-                        if (target.team === game.team) {
-                            Interaction.AssistOrder.issue(game, target.unit_ID);
+                    if (targetID) {
+                        if (game.souls[targetID].new.team === game.team) {
+                            Interaction.AssistOrder.issue(game, targetID);
                         }
                         else {
-                            Interaction.AttackTargetOrder.issue(game, target.unit_ID);
+                            Interaction.AttackTargetOrder.issue(game, targetID);
                         }
                     }
                     else {
                         Interaction.MoveOrder.issue(game);
                     }
-
                 }
                 else if (event === UserInput.InputEvent.KeyDown) {
                     const A = 65;
+                    const B = 66;
                     const M = 77;
+                    const S = 83;
 
                     if (state.lastKeyPressed() === A) {
                         game.control = new Interaction.AttackMoveOrder.BeingIssued();
                     }
+                    else if (state.lastKeyPressed() === B) {
+                        game.control = new Interaction.BuildSelection.BeingIssued();
+                        Interaction.BuildSelection.configureCommandCard(game);
+                    }
                     else if (state.lastKeyPressed() === M) {
                         game.control = new Interaction.MoveOrder.BeingIssued();
+                    }
+                    else if (state.lastKeyPressed() === S) {
+                        Interaction.StopOrder.issue(game);
                     }
                 }
                 else if (event === UserInput.InputEvent.MouseWheel) {
@@ -125,10 +139,18 @@
 
                     if (!state.shiftDown()) {
                         game.control = new DoingNothing();
+                        Interaction.SelectingUnits.configureCommandCard(game);
                     }
                 }
                 else if (event === UserInput.InputEvent.MouseRightDown) {
                     game.control = new DoingNothing();
+                    Interaction.SelectingUnits.configureCommandCard(game);
+                }
+            }
+            else if (control instanceof Interaction.BuildSelection.BeingIssued) {
+                if (event === UserInput.InputEvent.MouseLeftDown || event === UserInput.InputEvent.MouseRightDown) {
+                    game.control = new DoingNothing();
+                    Interaction.SelectingUnits.configureCommandCard(game);
                 }
             }
         }
