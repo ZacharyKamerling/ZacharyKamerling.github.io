@@ -89,9 +89,16 @@ class Game {
                 case "stop":
                     Interaction.StopOrder.issue(game);
                     break;
+                case "build":
+                    game.control = new Interaction.BuildSelection.BeingIssued();
+                    Interaction.BuildSelection.configureCommandCard(game);
+                    break;
                 default:
                     if (name.startsWith("build_")) {
                         game.buildOrderHandler(name.slice("build_".length));
+                    }
+                    else if (name.startsWith("train_")) {
+                        game.trainOrderHandler(name.slice("train_".length));
                     }
                     else {
                         console.log('commandPanelHandler couldn\'t handle: ' + name);
@@ -101,20 +108,23 @@ class Game {
             }
         };
     }
+    trainOrderHandler(name) {
+        for (let i = 0; i < this.unitPrototypes.length; i++) {
+            let proto = this.unitPrototypes[i];
+            if (proto.name === name) {
+                Interaction.TrainOrder.issue(this, proto);
+            }
+        }
+    }
     buildOrderHandler(name) {
         for (let i = 0; i < this.unitPrototypes.length; i++) {
             let proto = this.unitPrototypes[i];
             if (proto.name === name) {
-                if (proto.is_structure) {
-                    let imgs = new Array();
-                    for (let img of proto.sprite_graphics) {
-                        imgs.push(img.img_ref);
-                    }
-                    this.control = new Interaction.BuildOrder.BeingIssued(proto.width_and_height.w, proto.width_and_height.h, i, imgs);
+                let imgs = new Array();
+                for (let img of proto.sprite_graphics) {
+                    imgs.push(img.img_ref);
                 }
-                else {
-                    Interaction.TrainOrder.issue(this, proto);
-                }
+                this.control = new Interaction.BuildOrder.BeingIssued(proto.width_and_height.w, proto.width_and_height.h, i, imgs);
             }
         }
     }
