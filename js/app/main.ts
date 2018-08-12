@@ -40,10 +40,10 @@ function main() {
         console.log('Attempting connection...');
 
         if (addrFieldValue === "localhost") {
-            conn = new WebSocket('ws://localhost:' + portFieldValue);
+            conn = new WebSocket('wss://localhost:' + portFieldValue);
         }
         else {
-            conn = new WebSocket('ws://[' + addrFieldValue + ']:' + portFieldValue);
+            conn = new WebSocket('wss://[' + addrFieldValue + ']:' + portFieldValue);
         }
 
         conn.binaryType = "arraybuffer";
