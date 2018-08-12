@@ -35,10 +35,10 @@ function main() {
         var portFieldValue = document.getElementById('portField').value;
         console.log('Attempting connection...');
         if (addrFieldValue === "localhost") {
-            conn = new WebSocket('wss://localhost:' + portFieldValue);
+            conn = new WebSocket('ws://localhost:' + portFieldValue);
         }
         else {
-            conn = new WebSocket('wss://[' + addrFieldValue + ']:' + portFieldValue);
+            conn = new WebSocket('ws://[' + addrFieldValue + ']:' + portFieldValue);
         }
         conn.binaryType = "arraybuffer";
         game.connection = conn;
