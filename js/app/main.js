@@ -1,17 +1,17 @@
 "use strict";
 function main() {
-    let mainMenu = document.getElementById('mainMenu');
-    let content = document.getElementById('content');
-    let chef = new Chef();
-    let connectBtn = document.getElementById('connectBtn');
-    let connected = false;
-    let thingsLoaded = 0;
-    let conn = null;
-    let game = new Game();
-    let fowCanvas = document.getElementById('fowCanvas');
-    let drawCanvas = document.getElementById('drawCanvas');
-    let minimapCanvas = document.getElementById('minimapCanvas');
-    let ctrlDiv = document.getElementById('controlDiv');
+    var mainMenu = document.getElementById('mainMenu');
+    var content = document.getElementById('content');
+    var chef = new Chef();
+    var connectBtn = document.getElementById('connectBtn');
+    var connected = false;
+    var thingsLoaded = 0;
+    var conn = null;
+    var game = new Game();
+    var fowCanvas = document.getElementById('fowCanvas');
+    var drawCanvas = document.getElementById('drawCanvas');
+    var minimapCanvas = document.getElementById('minimapCanvas');
+    var ctrlDiv = document.getElementById('controlDiv');
     game.chef = chef;
     game.inputState = new UserInput.InputState();
     game.tileDrawer = new TileDrawer(drawCanvas, 'img/tileset.png', 'img/lttp-all.png');
@@ -21,7 +21,7 @@ function main() {
     game.minimapBoxDrawer = new MinimapBoxDrawer(minimapCanvas);
     game.statusBarDrawer = new StatusBarDrawer(drawCanvas);
     game.commandPanel = commands(game);
-    let spritemap = new SpriteMap(spriteRefs(game.teamColors));
+    var spritemap = new SpriteMap(spriteRefs(game.teamColors));
     spritemap.onload = function (e) {
         game.unitDrawer = new UnitDrawer(drawCanvas, spritemap);
         game.minimapDrawer = new MinimapDrawer(minimapCanvas, spritemap);
@@ -29,10 +29,10 @@ function main() {
         mainMenu.appendChild(spritemap.spriteSheet);
     };
     connectBtn.onclick = function () {
-        let nameFieldValue = document.getElementById('nameField').value;
-        let passFieldValue = document.getElementById('passField').value;
-        let addrFieldValue = document.getElementById('addrField').value;
-        let portFieldValue = document.getElementById('portField').value;
+        var nameFieldValue = document.getElementById('nameField').value;
+        var passFieldValue = document.getElementById('passField').value;
+        var addrFieldValue = document.getElementById('addrField').value;
+        var portFieldValue = document.getElementById('portField').value;
         console.log('Attempting connection...');
         if (addrFieldValue === "localhost") {
             conn = new WebSocket('ws://localhost:' + portFieldValue);
@@ -92,8 +92,8 @@ function playGame(game) {
     draw();
 }
 function commands(game) {
-    let cmdDiv = document.getElementById('commandDiv');
-    let cmds = new CommandPanel(cmdDiv, game.commandPanelHandler());
+    var cmdDiv = document.getElementById('commandDiv');
+    var cmds = new CommandPanel(cmdDiv, game.commandPanelHandler());
     cmds.addCommand("attack", { src: "img/attack.png", tooltip: "[A] Attack" });
     cmds.addCommand("move", { src: "img/move.png", tooltip: "[M] Move" });
     cmds.addCommand("stop", { src: "img/stop.png", tooltip: "[S] Stop" });
@@ -101,7 +101,7 @@ function commands(game) {
     return cmds;
 }
 function spriteRefs(colors) {
-    let tc_imgs = [
+    var tc_imgs = [
         "img/basic_missile.png",
         "img/platform1.png",
         "img/platform2.png",
@@ -119,12 +119,12 @@ function spriteRefs(colors) {
         "img/bomber1.png",
         "img/minimap_unit.png"
     ];
-    let list = new Array();
-    for (let i = 0; i < colors.length; i++) {
-        let color = colors[i];
-        for (let n = 0; n < tc_imgs.length; n++) {
-            let src = tc_imgs[n];
-            let ref = color.name + '/' + src;
+    var list = new Array();
+    for (var i = 0; i < colors.length; i++) {
+        var color = colors[i];
+        for (var n = 0; n < tc_imgs.length; n++) {
+            var src = tc_imgs[n];
+            var ref = color.name + '/' + src;
             list.push({ src: src, ref: ref, color: color });
         }
     }
