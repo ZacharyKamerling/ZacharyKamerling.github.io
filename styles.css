@@ -1,4 +1,81 @@
-﻿.stat-label {
+﻿body {
+    background: #222;
+    color: #fff;
+}
+
+.character-sheet {
+    color: #fff;
+}
+
+input,
+select,
+textarea,
+button {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+::selection {
+    background: #444;
+    color: #fff;
+}
+
+.dice-result-label {
+    font-weight: 600;
+    margin-bottom: 0.3em;
+    text-align: center;
+}
+
+.dice-result-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    justify-content: center;
+    margin-bottom: 0.3em;
+}
+
+.dice-face {
+    display: inline-block;
+    min-width: 2em;
+    padding: 0.3em 0.5em;
+    border-radius: 0.5em;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    background: #222;
+    border: 2px solid #888;
+    color: #222;
+}
+
+.dice-success {
+    background: #2196f3;
+    color: #fff;
+    border-color: #2196f3;
+}
+
+.dice-fail {
+    background: #ffe066;
+    color: #222;
+    border-color: #ffe066;
+}
+
+.dice-result-summary {
+    text-align: center;
+    font-size: 1em;
+    margin-bottom: 0.2em;
+}
+
+#dice-result-box {
+    background: #333;
+    border-radius: 1em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    padding: 1em 1.2em 0.7em 1.2em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.stat-label {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
@@ -13,13 +90,14 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border 0.15s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     user-select: none;
     text-align: left;
     white-space: nowrap;
 }
 
-.stat-label:active, .stat-label:focus {
+.stat-label:active,
+.stat-label:focus {
     background: #555;
     border-color: #888;
 }
@@ -38,7 +116,10 @@
     display: inline-block;
 }
 
-a, a:visited, a:active, a:hover {
+a,
+a:visited,
+a:active,
+a:hover {
     color: #fff;
     text-decoration: none;
 }
