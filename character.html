@@ -10,14 +10,20 @@
             background: #222;
             color: #fff;
         }
+
         .character-sheet {
             color: #fff;
         }
-        input, select, textarea, button {
+
+        input,
+        select,
+        textarea,
+        button {
             background: #333;
             color: #fff;
             border: 1px solid #444;
         }
+
         ::selection {
             background: #444;
             color: #fff;
@@ -27,9 +33,12 @@
 
 <body>
     <div class="character-sheet">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1em;">
-            <div id="character-name" style="font-size: 1.5em; font-weight: 500; padding-left: 0.5em;"></div>
-            <a href="index.html" title="Return to Character List" style="color: #fff; text-decoration: none; font-size: 1.7em; padding-right: 0.5em;">
+        <div
+            style="position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 1em; min-height: 2.5em;">
+            <div id="character-name" style="font-size: 2em; font-weight: 600; text-align: center; flex: 1 1 auto;">
+            </div>
+            <a href="index.html" title="Return to Character List"
+                style="color: #fff; text-decoration: none; font-size: 1.7em; position: absolute; right: 0; top: 0; padding: 0.2em 0.5em;">
                 <span style="vertical-align: middle;">&#8962;</span>
             </a>
         </div>
@@ -144,26 +153,26 @@
             const statSection = document.getElementById('stat-section');
             if (!statSection) return;
             statSection.innerHTML = `
-                <div style="font-size:1.2em; display: flex; flex-direction: column; gap: 0.3em; max-width: 18em;">
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 9em; min-width: 9em; text-align: left; padding-left: 0.5em; padding-right: 0.5em; white-space: nowrap;"><span id="melee-power-label" title="Melee Power">Melee Power</span></div>
-                        <div style="width: 2.5em; text-align: left;">${character.meleePower || 0}d6</div>
+                <div style="font-size:1.2em; display: flex; flex-direction: column; max-width: 24em;">
+                    <div class="stat-row">
+                        <span id="melee-power-label" class="stat-label" title="Melee Power">Melee Power</span>
+                        <div class="stat-value">${character.meleePower || 0}d6</div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 9em; min-width: 9em; text-align: left; padding-left: 0.5em; padding-right: 0.5em; white-space: nowrap;"><span id="ranged-power-label" title="Ranged Power">Ranged Power</span></div>
-                        <div style="width: 2.5em; text-align: left;">${character.rangedPower || 0}d6</div>
+                    <div class="stat-row">
+                        <span id="ranged-power-label" class="stat-label" title="Ranged Power">Ranged Power</span>
+                        <div class="stat-value">${character.rangedPower || 0}d6</div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 9em; min-width: 9em; text-align: left; padding-left: 0.5em; padding-right: 0.5em; white-space: nowrap;"><span id="might-label" title="Might">Might</span></div>
-                        <div style="width: 2.5em; text-align: left;">${character.might || 0}d6</div>
+                    <div class="stat-row">
+                        <span id="might-label" class="stat-label" title="Might">Might</span>
+                        <div class="stat-value">${character.might || 0}d6</div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 9em; min-width: 9em; text-align: left; padding-left: 0.5em; padding-right: 0.5em; white-space: nowrap;"><span id="awareness-label" title="Awareness">Awareness</span></div>
-                        <div style="width: 2.5em; text-align: left;">${character.awareness || 0}d6</div>
+                    <div class="stat-row">
+                        <span id="awareness-label" class="stat-label" title="Awareness">Awareness</span>
+                        <div class="stat-value">${character.awareness || 0}d6</div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 9em; min-width: 9em; text-align: left; padding-left: 0.5em; padding-right: 0.5em; white-space: nowrap;"><span id="resolve-label" title="Resolve">Resolve</span></div>
-                        <div style="width: 2.5em; text-align: left;">${character.resolve || 0}d6</div>
+                    <div class="stat-row">
+                        <span id="resolve-label" class="stat-label" title="Resolve">Resolve</span>
+                        <div class="stat-value">${character.resolve || 0}d6</div>
                     </div>
                 </div>
             `;
@@ -172,6 +181,112 @@
             addHoldToSetMax('might-label', 'Might', 'might');
             addHoldToSetMax('awareness-label', 'Awareness', 'awareness');
             addHoldToSetMax('resolve-label', 'Resolve', 'resolve');
+
+            // Add dice rolling for PMAR
+            // Dice result box container
+            let diceResultBox = document.getElementById('dice-result-box');
+            if (!diceResultBox) {
+                diceResultBox = document.createElement('div');
+                diceResultBox.id = 'dice-result-box';
+                diceResultBox.style.margin = '1em auto 0 auto';
+                diceResultBox.style.maxWidth = '22em';
+                statSection.parentNode.insertBefore(diceResultBox, statSection.nextSibling);
+            }
+            function rollDiceAndShow(stat, label) {
+                const dice = character[stat] || 0;
+                if (dice < 1) {
+                    diceResultBox.innerHTML = `<div class="dice-result-label">No dice to roll for ${label}.</div>`;
+                    return;
+                }
+                let rolls = [];
+                let successes = 0;
+                for (let i = 0; i < dice; i++) {
+                    const roll = Math.floor(Math.random() * 6) + 1;
+                    rolls.push(roll);
+                    if (roll >= 4) successes++;
+                }
+                // Render dice visually
+                const diceHtml = rolls.map(roll =>
+                    `<span class="dice-face${roll >= 4 ? ' dice-success' : ' dice-fail'}">${roll}</span>`
+                ).join('');
+                diceResultBox.innerHTML = `
+                    <div class="dice-result-label">${label} Roll</div>
+                    <div class="dice-result-row">${diceHtml}</div>
+                    <div class="dice-result-summary">${successes} / ${dice} Successes (4+)</div>
+                `;
+            }
+            [
+                ['melee-power-label', 'meleePower', 'Melee Power'],
+                ['ranged-power-label', 'rangedPower', 'Ranged Power'],
+                ['might-label', 'might', 'Might'],
+                ['awareness-label', 'awareness', 'Awareness'],
+                ['resolve-label', 'resolve', 'Resolve']
+            ].forEach(([id, stat, label]) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', (e) => {
+                        if (e.detail === 1) {
+                            rollDiceAndShow(stat, label);
+                        }
+                    });
+                }
+            });
+            // Dice result styles
+            const diceResultStyleId = 'dice-result-style';
+            if (!document.getElementById(diceResultStyleId)) {
+                const style = document.createElement('style');
+                style.id = diceResultStyleId;
+                style.textContent = `
+                .dice-result-label {
+                    font-weight: 600;
+                    margin-bottom: 0.3em;
+                    text-align: center;
+                }
+                .dice-result-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.4em;
+                    justify-content: center;
+                    margin-bottom: 0.3em;
+                }
+                .dice-face {
+                    display: inline-block;
+                    min-width: 2em;
+                    padding: 0.3em 0.5em;
+                    border-radius: 0.5em;
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    text-align: center;
+                    background: #222;
+                    border: 2px solid #888;
+                    color: #222;
+                }
+                .dice-success {
+                    background: #2196f3;
+                    color: #fff;
+                    border-color: #2196f3;
+                }
+                .dice-fail {
+                    background: #ffe066;
+                    color: #222;
+                    border-color: #ffe066;
+                }
+                .dice-result-summary {
+                    text-align: center;
+                    font-size: 1em;
+                    margin-bottom: 0.2em;
+                }
+                #dice-result-box {
+                    background: #333;
+                    border-radius: 1em;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+                    padding: 1em 1.2em 0.7em 1.2em;
+                    margin-top: 1em;
+                    margin-bottom: 1em;
+                }
+            `;
+                document.head.appendChild(style);
+            }
         }
 
         // Utility: add hold-to-set-MAX-value to a label
