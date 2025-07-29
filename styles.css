@@ -1,0 +1,51 @@
+﻿/* Character list page styles from index.html */
+#character-list {
+  list-style: none;
+  padding: 0;
+}
+#character-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 0;
+  border-bottom: 1px solid #eee;
+}
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.delete-btn.held {
+  color: red;
+}
+
+#create-character {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  font-size: 1em;
+}
+.fade-out {
+  opacity: 0.3;
+  transition: opacity 0.4s;
+}
+/* Modern reset: https://piccalil.li/blog/a-modern-css-reset */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; font-family: sans-serif; }
+button { cursor: pointer; }
+.app { padding: 1rem; max-width: 600px; margin: 0 auto; }
+
+/* Character list */
+#character-list {
+  list-style: none;
+  padding: 0;
+}
+
+#character-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
