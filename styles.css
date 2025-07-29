@@ -1,51 +1,92 @@
-﻿/* Character list page styles from index.html */
+﻿a, a:visited, a:active, a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+body {
+    background: #222;
+    color: #fff;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.character-sheet {
+    color: #fff;
+}
+
+input,
+select,
+textarea,
+button {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+::selection {
+    background: #444;
+    color: #fff;
+}
+
+/* Modern reset */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+}
+
+.app {
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 #character-list {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
+
 #character-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5em 0;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
 }
+
+#character-list li a {
+    flex: 1 1 auto;
+    display: block;
+    padding: 0.5em 0.5em 0.5em 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .delete-btn {
-  background: none;
-  border: none;
-  font-size: 1.2em;
-  cursor: pointer;
-  transition: color 0.2s;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: color 0.2s;
 }
 
 .delete-btn.held {
-  color: red;
+    color: red;
 }
 
 #create-character {
-  margin: 1em 0;
-  padding: 0.5em 1em;
-  font-size: 1em;
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    font-size: 1em;
 }
+
 .fade-out {
-  opacity: 0.3;
-  transition: opacity 0.4s;
-}
-/* Modern reset: https://piccalil.li/blog/a-modern-css-reset */
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; font-family: sans-serif; }
-button { cursor: pointer; }
-.app { padding: 1rem; max-width: 600px; margin: 0 auto; }
-
-/* Character list */
-#character-list {
-  list-style: none;
-  padding: 0;
-}
-
-#character-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+    opacity: 0.3;
+    transition: opacity 0.4s;
 }
