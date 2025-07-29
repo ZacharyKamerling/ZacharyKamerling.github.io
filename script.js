@@ -74,6 +74,7 @@ document.getElementById('create-character').addEventListener('click', () => {
             might: 3,
             awareness: 3,
             resolve: 3,
+            stress: 0,
             equipment: [],
             abilities: []
         });

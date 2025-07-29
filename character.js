@@ -180,26 +180,24 @@ function renderStats() {
     const statSection = document.getElementById('stat-section');
     if (!statSection) return;
     statSection.innerHTML = `
-                <div style="font-size:1.2em; display: flex; flex-direction: column; max-width: 24em;">
+                <div style="font-size:1em; display: flex; flex-direction: column;">
                     <div class="stat-row">
-                        <span id="melee-power-label" class="stat-label" title="Melee Power">Melee Power</span>
-                        <div class="stat-value">${character.meleePower || 0}d6</div>
+                        <span id="melee-power-label" class="stat-label" title="Melee Power">Melee ⚔️</span>
+                        <div class="stat-value">${character.meleePower || 0}</div>
+                        <span id="ranged-power-label" class="stat-label" title="Ranged Power">Ranged 🏹</span>
+                        <div class="stat-value">${character.rangedPower || 0}</div>
                     </div>
                     <div class="stat-row">
-                        <span id="ranged-power-label" class="stat-label" title="Ranged Power">Ranged Power</span>
-                        <div class="stat-value">${character.rangedPower || 0}d6</div>
+                        <span id="might-label" class="stat-label" title="Might">Might 💪</span>
+                        <div class="stat-value">${character.might || 0}</div>
+                        <span id="awareness-label" class="stat-label" title="Awareness">Awareness 👁️</span>
+                        <div class="stat-value">${character.awareness || 0}</div>
                     </div>
                     <div class="stat-row">
-                        <span id="might-label" class="stat-label" title="Might">Might</span>
-                        <div class="stat-value">${character.might || 0}d6</div>
-                    </div>
-                    <div class="stat-row">
-                        <span id="awareness-label" class="stat-label" title="Awareness">Awareness</span>
-                        <div class="stat-value">${character.awareness || 0}d6</div>
-                    </div>
-                    <div class="stat-row">
-                        <span id="resolve-label" class="stat-label" title="Resolve">Resolve</span>
-                        <div class="stat-value">${character.resolve || 0}d6</div>
+                        <span id="resolve-label" class="stat-label" title="Resolve">Resolve ✊</span>
+                        <div class="stat-value">${character.resolve || 0}</div>
+                        <span id="stress-label" class="stat-label" title="Resolve">Stress 💦</span>
+                        <div class="stat-value">${character.stress || 0}</div>
                     </div>
                 </div>
             `;
@@ -209,7 +207,8 @@ function renderStats() {
         ['ranged-power-label', 'Ranged Power', 'rangedPower'],
         ['might-label', 'Might', 'might'],
         ['awareness-label', 'Awareness', 'awareness'],
-        ['resolve-label', 'Resolve', 'resolve']
+        ['resolve-label', 'Resolve', 'resolve'],
+        ['stress-label', 'Stress', 'stress'],
     ].forEach(([id, label, prop]) => {
         const el = document.getElementById(id);
         if (el) {
@@ -310,6 +309,24 @@ function renderStats() {
                     <div class="dice-result-row">${diceHtml}</div>
                     <div class="dice-result-summary">${successes} Successes (4+)</div>
                 `;
+        // Animate dice jitter
+        const faces = diceResultBox.querySelectorAll('.dice-face');
+        if (rerollIdx !== null) {
+            // Only jitter the rerolled die
+            const face = diceResultBox.querySelector(`.dice-face[data-idx="${rerollIdx}"]`);
+            if (face) {
+                face.classList.remove('jitter');
+                void face.offsetWidth;
+                face.classList.add('jitter');
+            }
+        } else {
+            // Jitter all dice on fresh roll
+            faces.forEach(face => {
+                face.classList.remove('jitter');
+                void face.offsetWidth;
+                face.classList.add('jitter');
+            });
+        }
         // Add click and touch event to each die for rerolling
         diceResultBox.querySelectorAll('.dice-face').forEach(face => {
             const reroll = (e) => {
@@ -326,7 +343,7 @@ function renderStats() {
         ['ranged-power-label', 'rangedPower', 'Ranged Power'],
         ['might-label', 'might', 'Might'],
         ['awareness-label', 'awareness', 'Awareness'],
-        ['resolve-label', 'resolve', 'Resolve']
+        ['resolve-label', 'resolve', 'Resolve'],
     ].forEach(([id, stat, label]) => {
         const el = document.getElementById(id);
         if (el) {
@@ -337,7 +354,123 @@ function renderStats() {
             });
         }
     });
-    // Dice result styles
+
+    // Stress: click/tap to roll 2d6 + Stress and show Panic result
+    const stressLabel = document.getElementById('stress-label');
+    if (stressLabel) {
+        stressLabel.addEventListener('click', (e) => {
+            if (e.detail !== 1) return;
+            rollStressPanic();
+        });
+        stressLabel.addEventListener('touchend', (e) => {
+            rollStressPanic();
+        });
+    }
+
+    // Store last stress dice for rerolling
+    let lastStressDice = null;
+    function rollStressPanic(rerollIdx = null) {
+        const stress = character.stress || 0;
+        const resolve = character.resolve || 0;
+        let diceArr;
+        if (lastStressDice && rerollIdx !== null) {
+            diceArr = lastStressDice.slice();
+            diceArr[rerollIdx] = Math.floor(Math.random() * 6) + 1;
+        } else {
+            diceArr = [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
+        }
+        lastStressDice = diceArr;
+        const d1 = diceArr[0];
+        const d2 = diceArr[1];
+        const total = d1 + d2 + stress - resolve;
+        let resultText = '';
+        if (total <= 5) {
+            resultText = 'Steady Nerves - No effect as you steel yourself and press on.';
+        } else if (total <= 7) {
+            resultText = 'Shaken - Ignore the next Positive card result you take.';
+        } else if (total <= 9) {
+            resultText = 'Jittery - Lose 1 Stamina Token.';
+        } else if (total <= 11) {
+            resultText = 'Hesitation - You can’t use abilities in your next round of combat.';
+        } else if (total <= 13) {
+            resultText = 'Lash Out - You bleed or wound an ally.';
+        } else if (total <= 15) {
+            resultText = 'Despair - You cannot reduce your Stress for 24 hours.';
+        } else if (total <= 17) {
+            resultText = 'Faint - Collapse. You can do nothing until one round passes.';
+        } else if (total <= 19) {
+            resultText = 'Heart Attack - Your heart stops and you collapse. You die in 2 rounds unless revived.';
+        } else {
+            resultText = 'Retirement - You’ve seen enough. Your adventuring days are done.';
+        }
+        let diceResultBox = document.getElementById('dice-result-box');
+        if (!diceResultBox) {
+            diceResultBox = document.createElement('div');
+            diceResultBox.id = 'dice-result-box';
+            diceResultBox.style.margin = '1em auto 0 auto';
+            diceResultBox.style.maxWidth = '22em';
+            const statSection = document.getElementById('stat-section');
+            if (statSection && statSection.parentNode)
+                statSection.parentNode.insertBefore(diceResultBox, statSection.nextSibling);
+        }
+        diceResultBox.innerHTML = `
+            <div class="dice-result-label">Stress Panic Roll</div>
+            <div class="dice-result-row">
+                <span class="dice-face" data-idx="0" style="margin-right:0.5em; color:#fff; background:none; font-weight:bold; text-shadow:none; cursor:pointer;" title="Click to reroll">${d1}</span>
+                <span class="dice-face" data-idx="1" style="margin-right:0.5em; color:#fff; background:none; font-weight:bold; text-shadow:none; cursor:pointer;" title="Click to reroll">${d2}</span>
+                <span style="font-weight:bold;">+ Stress (${stress}) - Resolve (${resolve}) = <span style="color:#ffb300;">${total}</span></span>
+            </div>
+            <div class="dice-result-summary">${resultText}</div>
+        `;
+        // Animate dice jitter
+        const faces = diceResultBox.querySelectorAll('.dice-face');
+        if (rerollIdx !== null) {
+            // Only jitter the rerolled die
+            const face = diceResultBox.querySelector(`.dice-face[data-idx="${rerollIdx}"]`);
+            if (face) {
+                face.classList.remove('jitter');
+                void face.offsetWidth;
+                face.classList.add('jitter');
+            }
+        } else {
+            // Jitter all dice on fresh roll
+            faces.forEach(face => {
+                face.classList.remove('jitter');
+                void face.offsetWidth;
+                face.classList.add('jitter');
+            });
+        }
+        // Add click/tap to reroll each die
+        diceResultBox.querySelectorAll('.dice-face').forEach(face => {
+            const reroll = (e) => {
+                e.preventDefault();
+                const idx = parseInt(face.getAttribute('data-idx'));
+                rollStressPanic(idx);
+            };
+            face.addEventListener('click', reroll);
+            face.addEventListener('touchstart', reroll);
+        });
+// Add dice jitter animation CSS
+(function addJitterStyle() {
+    if (document.getElementById('dice-jitter-style')) return;
+    const style = document.createElement('style');
+    style.id = 'dice-jitter-style';
+    style.textContent = `
+    @keyframes dice-jitter {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        20% { transform: translate(-2px, 1px) rotate(-5deg); }
+        40% { transform: translate(2px, -1px) rotate(4deg); }
+        60% { transform: translate(-1px, 2px) rotate(-3deg); }
+        80% { transform: translate(1px, -2px) rotate(3deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+    .jitter {
+        animation: dice-jitter 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    `;
+    document.head.appendChild(style);
+})();
+    }
 }
 
 // Utility: add hold-to-set-MAX-value to a label
