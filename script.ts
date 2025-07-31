@@ -1,40 +1,45 @@
-var _a;
+
 import { db } from './db.js';
 function renderCharacterList() {
-    var list = document.getElementById('character-list');
-    if (!list)
-        return;
-    var characters = db.getCharacters();
-    console.log("Saved characters:", characters);
+    const list = document.getElementById('character-list');
+    if (!list) return;
+    const characters = db.getCharacters();
+
+    console.log("Saved characters:", characters)
+
     // Clear existing list
     list.innerHTML = '';
+
     // Populate list
-    characters.forEach(function (character) {
-        var li = document.createElement('li');
+    characters.forEach(character => {
+        const li = document.createElement('li');
+
         // Character link
-        var link = document.createElement('a');
-        link.href = "character.html?id=".concat(character.id);
+        const link = document.createElement('a');
+        link.href = `character.html?id=${character.id}`;
         link.textContent = character.name;
+
         // Delete button
-        var deleteBtn = document.createElement('button');
+        const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.dataset.id = character.id;
+
         // Delete character: click prompts, hold for 1s deletes immediately
-        var holdTimer;
-        deleteBtn.addEventListener('mousedown', function (e) {
+        let holdTimer: number | undefined;
+        deleteBtn.addEventListener('mousedown', (e) => {
             if (confirm('Delete this character?')) {
                 db.deleteCharacter(character.id);
                 renderCharacterList();
             }
         });
-        deleteBtn.addEventListener('touchstart', function (e) {
-            holdTimer = setTimeout(function () {
+        deleteBtn.addEventListener('touchstart', (e) => {
+            holdTimer = setTimeout(() => {
                 db.deleteCharacter(character.id);
                 renderCharacterList();
             }, 1000);
         });
-        deleteBtn.addEventListener('touchend', function (e) {
+        deleteBtn.addEventListener('touchend', (e) => {
             clearTimeout(holdTimer);
             if (e.detail === 1) {
                 if (confirm('Delete this character?')) {
@@ -42,24 +47,27 @@ function renderCharacterList() {
                 }
             }
         });
-        deleteBtn.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+        deleteBtn.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+
         // Assemble
         li.appendChild(link);
         li.appendChild(deleteBtn);
         list.appendChild(li);
     });
+
     // Show empty state if no characters
     if (characters.length === 0) {
         list.innerHTML = '<li>No characters yet. Create one!</li>';
     }
 }
+
 // Init
-(_a = document.getElementById('create-character')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', function () {
-    var name = prompt("Character name:");
+document.getElementById('create-character')?.addEventListener('click', () => {
+    const name = prompt("Character name:");
     if (name) {
         db.saveCharacter({
             id: Date.now().toString(),
-            name: name,
+            name,
             bloodTokens: 3,
             bloodMax: 3,
             staminaTokens: 3,
@@ -76,4 +84,5 @@ function renderCharacterList() {
         renderCharacterList();
     }
 });
+
 renderCharacterList();

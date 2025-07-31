@@ -1,4 +1,15 @@
-﻿body {
+﻿@keyframes dice-jitter {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(-2px, 1px) rotate(-5deg); }
+    40% { transform: translate(2px, -1px) rotate(4deg); }
+    60% { transform: translate(-1px, 2px) rotate(-3deg); }
+    80% { transform: translate(1px, -2px) rotate(3deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+.jitter {
+    animation: dice-jitter 0.35s cubic-bezier(.36,.07,.19,.97) both;
+}
+body {
     background: #222;
     color: #fff;
 }
@@ -85,6 +96,8 @@ button {
     border-radius: 0.4em;
     padding: 0.5em 0.5em;
     width: 8em;
+    max-width: 8em;
+    min-width: 8em;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.15s, border 0.15s;
@@ -211,4 +224,11 @@ button {
 .fade-out {
     opacity: 0.3;
     transition: opacity 0.4s;
+}
+
+.token-btn {
+    width: 1.8em;
+    min-width: 1.8em;
+    max-width: 1.8em;
+    height: 1.8em;
 }
