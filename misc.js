@@ -100,7 +100,6 @@ export function numberPrompt(message, defaultValue, min, max) {
         cancelBtn.style.border = 'none';
         cancelBtn.style.borderRadius = '0.4em';
         cancelBtn.addEventListener('click', function () {
-            console.log("Cancel button clicked");
             document.body.removeChild(modal);
             resolve(null);
         });

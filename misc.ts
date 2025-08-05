@@ -121,7 +121,6 @@ export function numberPrompt(
         cancelBtn.style.border = 'none';
         cancelBtn.style.borderRadius = '0.4em';
         cancelBtn.addEventListener('click', () => {
-            console.log("Cancel button clicked");
             document.body.removeChild(modal);
             resolve(null);
         });
