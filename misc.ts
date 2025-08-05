@@ -1,4 +1,4 @@
-import { Character, CharacterData } from './Character.js';
+import { Character, CharacterData } from './character.js';
 import { db } from './db.js';
 
 // Utility: add hold-to-set-MAX-value to a label

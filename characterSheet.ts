@@ -1,5 +1,5 @@
 import { db } from './db.js';
-import { Character } from './Character.js';
+import { Character } from './character.js';
 import { DiceRoller } from './diceRollers.js';
 import { numberPrompt, showEditNameModal } from './misc.js';
 
