@@ -1,5 +1,5 @@
 import { db } from './db.js';
-function addHoldToSetMax(id, label, maxProp, character, db, renderTokens, renderStats, numberPrompt) {
+export function addHoldToSetMax(id, label, maxProp, character, db, renderTokens, renderStats, numberPrompt) {
     var el = document.getElementById(id);
     if (!el)
         return;
@@ -32,8 +32,9 @@ function addHoldToSetMax(id, label, maxProp, character, db, renderTokens, render
         el.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
     }
 }
-function numberPrompt(message, defaultValue, min, max) {
+export function numberPrompt(message, defaultValue, min, max) {
     return new Promise(function (resolve) {
+        var length = defaultValue.toString().length;
         var modal = document.createElement('div');
         modal.style.position = 'fixed';
         modal.style.top = '0';
@@ -68,6 +69,7 @@ function numberPrompt(message, defaultValue, min, max) {
         input.style.border = '1px solid #888';
         input.style.borderRadius = '0.4em';
         input.style.textAlign = 'center';
+        input.select();
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter')
                 okBtn.click();
@@ -98,6 +100,7 @@ function numberPrompt(message, defaultValue, min, max) {
         cancelBtn.style.border = 'none';
         cancelBtn.style.borderRadius = '0.4em';
         cancelBtn.addEventListener('click', function () {
+            console.log("Cancel button clicked");
             document.body.removeChild(modal);
             resolve(null);
         });
@@ -111,7 +114,7 @@ function numberPrompt(message, defaultValue, min, max) {
         input.focus();
     });
 }
-function showEditNameModal() {
+export function showEditNameModal() {
     // Modal for editing character name
     var modal = document.createElement('div');
     modal.style.position = 'fixed';

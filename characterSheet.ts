@@ -1,9 +1,7 @@
 import { db } from './db.js';
-import { Character, CharacterData } from './Character.js';
+import { Character } from './Character.js';
 import { DiceRoller } from './diceRollers.js';
-
-declare function numberPrompt(msg: string, val: number, min: number, max: number): Promise<number|null>;
-declare function showEditNameModal(): void;
+import { numberPrompt, showEditNameModal } from './misc.js';
 
 const characterId = new URLSearchParams(window.location.search).get('id')!;
 const rawCharacter = db.getCharacter(characterId);

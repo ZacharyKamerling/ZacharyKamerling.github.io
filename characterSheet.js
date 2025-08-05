@@ -1,6 +1,7 @@
 import { db } from './db.js';
 import { Character } from './Character.js';
 import { DiceRoller } from './diceRollers.js';
+import { numberPrompt, showEditNameModal } from './misc.js';
 var characterId = new URLSearchParams(window.location.search).get('id');
 var rawCharacter = db.getCharacter(characterId);
 if (!rawCharacter) {

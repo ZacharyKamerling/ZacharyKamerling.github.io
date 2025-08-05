@@ -9,7 +9,7 @@ interface CharacterLike {
 interface DBLike {
     saveCharacter: (character: CharacterLike) => void;
 }
-function addHoldToSetMax(
+export function addHoldToSetMax(
     id: string,
     label: string,
     maxProp: MaxProp,
@@ -50,13 +50,14 @@ function addHoldToSetMax(
         el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
     }
 }
-function numberPrompt(
+export function numberPrompt(
     message: string,
     defaultValue: number,
     min: number,
     max: number
 ): Promise<number|null> {
     return new Promise<number|null>((resolve: (value: number|null) => void) => {
+        let length = defaultValue.toString().length;
         const modal = document.createElement('div');
         modal.style.position = 'fixed';
         modal.style.top = '0';
@@ -91,6 +92,7 @@ function numberPrompt(
         input.style.border = '1px solid #888';
         input.style.borderRadius = '0.4em';
         input.style.textAlign = 'center';
+        input.select();
         input.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'Enter') okBtn.click();
         });
@@ -119,6 +121,7 @@ function numberPrompt(
         cancelBtn.style.border = 'none';
         cancelBtn.style.borderRadius = '0.4em';
         cancelBtn.addEventListener('click', () => {
+            console.log("Cancel button clicked");
             document.body.removeChild(modal);
             resolve(null);
         });
@@ -136,7 +139,7 @@ function numberPrompt(
 declare const character: Character;
 // db is assumed to be declared elsewhere
 declare const nameDiv: HTMLElement;
-function showEditNameModal(): void {
+export function showEditNameModal(): void {
     // Modal for editing character name
     const modal = document.createElement('div');
     modal.style.position = 'fixed';
