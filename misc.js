@@ -113,7 +113,8 @@ export function numberPrompt(message, defaultValue, min, max) {
         input.focus();
     });
 }
-export function showEditNameModal() {
+// db is assumed to be declared elsewhere
+export function showEditNameModal(character, nameDiv) {
     // Modal for editing character name
     var modal = document.createElement('div');
     modal.style.position = 'fixed';
@@ -138,7 +139,7 @@ export function showEditNameModal() {
     label.style.color = '#fff';
     var input = document.createElement('input');
     input.type = 'text';
-    input.value = typeof character.name === 'string' ? character.name : '';
+    input.value = character.name;
     input.maxLength = 40;
     input.style.fontSize = '1.2em';
     input.style.width = '14em';

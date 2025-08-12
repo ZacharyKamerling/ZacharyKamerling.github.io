@@ -1,5 +1,6 @@
 
 import { db } from './db.js';
+import { Character } from './character.js';
 function renderCharacterList() {
     const list = document.getElementById('character-list');
     if (!list) return;
@@ -65,22 +66,7 @@ function renderCharacterList() {
 document.getElementById('create-character')?.addEventListener('click', () => {
     const name = prompt("Character name:");
     if (name) {
-        db.saveCharacter({
-            id: Date.now().toString(),
-            name,
-            bloodTokens: 3,
-            bloodMax: 3,
-            staminaTokens: 3,
-            staminaMax: 3,
-            meleePower: 3,
-            rangedPower: 3,
-            might: 3,
-            awareness: 3,
-            resolve: 3,
-            stress: 0,
-            equipment: [],
-            abilities: []
-        });
+        db.saveCharacter(Character.default());
         renderCharacterList();
     }
 });

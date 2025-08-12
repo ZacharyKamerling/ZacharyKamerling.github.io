@@ -11,6 +11,7 @@ export interface CharacterData {
     bloodTokens: number;
     staminaMax: number;
     staminaTokens: number;
+    customRoll: number;
     equipment: EquipmentData[];
     abilities: AbilityData[];
 }
@@ -40,6 +41,7 @@ export class Character {
     bloodTokens: number;
     staminaMax: number;
     staminaTokens: number;
+    customRoll: number;
     equipment: EquipmentData[];
     abilities: AbilityData[];
     [key: string]: any;
@@ -57,8 +59,29 @@ export class Character {
         this.bloodTokens = data.bloodTokens ?? 0;
         this.staminaMax = data.staminaMax ?? 1;
         this.staminaTokens = data.staminaTokens ?? 0;
+        this.customRoll = data.customRoll ?? 1;
         this.equipment = data.equipment || [];
         this.abilities = data.abilities || [];
+    }
+
+    static default(): CharacterData {
+        return {
+            id: Date.now().toString(),
+            name: 'Unnamed Character',
+            bloodTokens: 3,
+            bloodMax: 3,
+            staminaTokens: 3,
+            staminaMax: 3,
+            meleePower: 3,
+            rangedPower: 3,
+            might: 3,
+            awareness: 3,
+            resolve: 3,
+            stress: 0,
+            customRoll: 1,
+            equipment: [],
+            abilities: []
+        };
     }
 
     static fromRaw(raw: CharacterData): Character {
@@ -79,6 +102,7 @@ export class Character {
             bloodTokens: this.bloodTokens,
             staminaMax: this.staminaMax,
             staminaTokens: this.staminaTokens,
+            customRoll: this.customRoll,
             equipment: this.equipment || [],
             abilities: this.abilities || []
         };

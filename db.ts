@@ -5,7 +5,7 @@ export const db = {
         return JSON.parse(localStorage.getItem('characters') || '[]');
     },
 
-    getCharacter(id: string) {
+    getCharacter(id: string): CharacterData | undefined {
         return this.getCharacters().find(c => c.id === id);
     },
 

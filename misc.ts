@@ -50,6 +50,7 @@ export function addHoldToSetMax(
         el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
     }
 }
+
 export function numberPrompt(
     message: string,
     defaultValue: number,
@@ -135,10 +136,8 @@ export function numberPrompt(
     });
 }
 
-declare const character: Character;
 // db is assumed to be declared elsewhere
-declare const nameDiv: HTMLElement;
-export function showEditNameModal(): void {
+export function showEditNameModal(character: CharacterData, nameDiv: HTMLElement): void {
     // Modal for editing character name
     const modal = document.createElement('div');
     modal.style.position = 'fixed';
@@ -163,7 +162,7 @@ export function showEditNameModal(): void {
     label.style.color = '#fff';
     const input = document.createElement('input');
     input.type = 'text';
-    input.value = typeof character.name === 'string' ? character.name : '';
+    input.value = character.name;
     input.maxLength = 40;
     input.style.fontSize = '1.2em';
     input.style.width = '14em';
@@ -188,7 +187,7 @@ export function showEditNameModal(): void {
     okBtn.addEventListener('click', () => {
         const newName = input.value.trim() || 'Unnamed Character';
         character.name = newName;
-        db.saveCharacter(character as CharacterData);
+        db.saveCharacter(character);
         nameDiv.textContent = newName;
         document.body.removeChild(modal);
     });
