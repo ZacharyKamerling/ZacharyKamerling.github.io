@@ -145,7 +145,7 @@ body {
 .character-sheet {
     display: flex;
     flex-flow: column;
-    height: 100vh;
+    min-height: 100dvh;
     color: #fff;
     padding-left: 0.5em;
     padding-right: 0.5em;

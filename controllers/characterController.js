@@ -176,7 +176,7 @@ var CharacterController = /** @class */ (function () {
                     held_1 = false;
                     holdTimer_2 = setTimeout(function () {
                         held_1 = true;
-                        numberPrompt("Set ".concat(label, " (0-20):"), _this.character[prop] || 0, 0, 20).then(function (val) {
+                        numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
                                 _this.saveAndRender();
@@ -200,7 +200,7 @@ var CharacterController = /** @class */ (function () {
                     held_1 = false;
                     holdTimer_2 = setTimeout(function () {
                         held_1 = true;
-                        numberPrompt("Set ".concat(label, " (0-20):"), _this.character[prop] || 0, 0, 20).then(function (val) {
+                        numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
                                 _this.saveAndRender();
@@ -244,13 +244,13 @@ var CharacterController = /** @class */ (function () {
         });
         // Handle +1 button
         plusBtn.addEventListener('click', function () {
-            _this.character.customRoll = Math.min(20, _this.character.customRoll + 1);
+            _this.character.customRoll = Math.min(100, _this.character.customRoll + 1);
             updateInput();
         });
         // Handle direct input changes
         customRollInput.addEventListener('change', function () {
             var value = parseInt(customRollInput.value) || 1;
-            _this.character.customRoll = Math.max(1, Math.min(20, value));
+            _this.character.customRoll = Math.max(1, Math.min(100, value));
             _this.saveAndRender();
         });
         // Handle roll button

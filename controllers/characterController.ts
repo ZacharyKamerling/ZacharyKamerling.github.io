@@ -175,7 +175,7 @@ export class CharacterController {
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
-                        numberPrompt(`Set ${label} (0-20):`, this.character[prop] || 0, 0, 20).then(val => {
+                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
                                 this.character[prop] = val;
                                 this.saveAndRender();
@@ -198,7 +198,7 @@ export class CharacterController {
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
-                        numberPrompt(`Set ${label} (0-20):`, this.character[prop] || 0, 0, 20).then(val => {
+                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
                                 this.character[prop] = val;
                                 this.saveAndRender();
@@ -245,14 +245,14 @@ export class CharacterController {
 
         // Handle +1 button
         plusBtn.addEventListener('click', () => {
-            this.character.customRoll = Math.min(20, this.character.customRoll + 1);
+            this.character.customRoll = Math.min(100, this.character.customRoll + 1);
             updateInput();
         });
 
         // Handle direct input changes
         customRollInput.addEventListener('change', () => {
             const value = parseInt(customRollInput.value) || 1;
-            this.character.customRoll = Math.max(1, Math.min(20, value));
+            this.character.customRoll = Math.max(1, Math.min(100, value));
             this.saveAndRender();
         });
 
