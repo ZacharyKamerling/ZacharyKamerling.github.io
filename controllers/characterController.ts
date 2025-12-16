@@ -13,6 +13,8 @@ export class CharacterController {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
+        document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.view.render(this.character);
         this.attachNameEditListener();
         this.attachStatRollListeners();

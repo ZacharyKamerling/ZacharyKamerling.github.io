@@ -3,9 +3,12 @@ import { DiceRoller } from '../utils/diceRollers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
+        var _a, _b;
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
+        (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+        (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.view.render(this.character);
         this.attachNameEditListener();
         this.attachStatRollListeners();
