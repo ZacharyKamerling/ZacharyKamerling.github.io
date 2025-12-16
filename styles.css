@@ -143,12 +143,16 @@ body {
 }
 
 .character-sheet {
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
     color: #fff;
     padding-left: 0.5em;
     padding-right: 0.5em;
-    max-width: 600px; 
+    max-width: 600px;
     margin: 0 auto;
-    border: 1px solid #444;
+    border-left: 1px solid #444;
+    border-right: 1px solid #444;
 }
 
 .app {
