@@ -1,4 +1,4 @@
-import { CharacterData } from './character.js';
+import { CharacterData } from '../models/character.js';
 
 export const db = {
     getCharacters(): CharacterData[] {

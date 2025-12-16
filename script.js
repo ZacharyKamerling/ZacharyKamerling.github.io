@@ -1,6 +1,6 @@
 var _a;
-import { db } from './db.js';
-import { Character } from './character.js';
+import { db } from './data/db.js';
+import { Character } from './models/character.js';
 function renderCharacterList() {
     var list = document.getElementById('character-list');
     if (!list)
@@ -58,7 +58,9 @@ function renderCharacterList() {
 (_a = document.getElementById('create-character')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', function () {
     var name = prompt("Character name:");
     if (name) {
-        db.saveCharacter(Character.default());
+        var character = Character.default();
+        character.name = name;
+        db.saveCharacter(character);
         renderCharacterList();
     }
 });

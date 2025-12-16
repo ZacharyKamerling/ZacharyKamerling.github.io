@@ -1,5 +1,5 @@
-import { Character, CharacterData } from './character.js';
-import { db } from './db.js';
+import { Character, CharacterData } from '../models/character.js';
+import { db } from '../data/db.js';
 
 // Utility: add hold-to-set-MAX-value to a label
 type MaxProp = 'bloodMax' | 'staminaMax';
@@ -46,7 +46,7 @@ export function addHoldToSetMax(
                 handleSetMax(label, maxProp);
             }, 600);
         });
-        el.addEventListener('touchend', () => clearTimeout(holdTimer));
+        el.addEventListener('touchend', (e) => clearTimeout(holdTimer));
         el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
     }
 }
@@ -136,7 +136,6 @@ export function numberPrompt(
     });
 }
 
-// db is assumed to be declared elsewhere
 export function showEditNameModal(character: CharacterData, nameDiv: HTMLElement): void {
     // Modal for editing character name
     const modal = document.createElement('div');

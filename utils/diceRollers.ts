@@ -1,4 +1,4 @@
-import { Character } from "./character.js";
+import { Character } from "../models/character.js";
 
 // DiceRoller class encapsulates dice logic and state
 export class DiceRoller {

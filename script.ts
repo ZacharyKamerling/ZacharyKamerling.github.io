@@ -1,6 +1,6 @@
 
-import { db } from './db.js';
-import { Character } from './character.js';
+import { db } from './data/db.js';
+import { Character } from './models/character.js';
 function renderCharacterList() {
     const list = document.getElementById('character-list');
     if (!list) return;
@@ -66,7 +66,9 @@ function renderCharacterList() {
 document.getElementById('create-character')?.addEventListener('click', () => {
     const name = prompt("Character name:");
     if (name) {
-        db.saveCharacter(Character.default());
+        let character = Character.default();
+        character.name = name;
+        db.saveCharacter(character);
         renderCharacterList();
     }
 });

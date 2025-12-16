@@ -1,4 +1,4 @@
-import { db } from './db.js';
+import { db } from '../data/db.js';
 export function addHoldToSetMax(id, label, maxProp, character, db, renderTokens, renderStats, numberPrompt) {
     var el = document.getElementById(id);
     if (!el)
@@ -28,7 +28,7 @@ export function addHoldToSetMax(id, label, maxProp, character, db, renderTokens,
                 handleSetMax(label, maxProp);
             }, 600);
         });
-        el.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
+        el.addEventListener('touchend', function (e) { return clearTimeout(holdTimer); });
         el.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
     }
 }
@@ -113,7 +113,6 @@ export function numberPrompt(message, defaultValue, min, max) {
         input.focus();
     });
 }
-// db is assumed to be declared elsewhere
 export function showEditNameModal(character, nameDiv) {
     // Modal for editing character name
     var modal = document.createElement('div');

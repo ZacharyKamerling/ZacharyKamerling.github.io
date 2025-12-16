@@ -5,7 +5,6 @@
     <title>Character Sheet</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
-    <!-- Styles moved to styles.css -->
 </head>
 
 <body>
@@ -21,14 +20,14 @@
         </div>
         <div id="token-section"></div>
         <div id="stat-section"></div>
-        <!-- Dice Rollers (to be expanded) -->
+        <div id="dice-results" style="margin: 1em auto 0 auto; max-width: 22em;"></div>
     </div>
 
-    <script type="module" src="misc.js"></script>
-    <script type="module" src="db.js"></script>
-    <script type="module" src="diceRollers.js"></script>
-    <script type="module" src="script.js"></script>
-    <script type="module" src="characterSheet.js"></script>
+    <script type="module" src="./utils/ui.js"></script>
+    <script type="module" src="./data/db.js"></script>
+    <script type="module" src="./utils/diceRollers.js"></script>
+    <script type="module" src="./script.js"></script>
+    <script type="module" src="./characterSheet.js"></script>
 </body>
 
 </html>
