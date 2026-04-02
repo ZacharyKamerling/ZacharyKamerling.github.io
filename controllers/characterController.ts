@@ -3,33 +3,19 @@ import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
-import { attachHoldPress, toggleDescription } from '../utils/eventHelpers.js';
-import { HOLD_PRESS_DURATION_MS, TOKEN_MIN, TOKEN_MAX, STAT_MIN, STAT_MAX, CUSTOM_ROLL_MIN, CUSTOM_ROLL_MAX } from '../utils/constants.js';
 
 export class CharacterController {
     private character: Character;
     private view: CharacterView;
     private diceRoller: DiceRoller;
-    private itemAbilityListenersAttached = false;
-    private newButtonListenersAttached = false;
 
     constructor(character: Character, view: CharacterView) {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
-
-        // Prevent context menu on main sections
-        this.safeQuery('#token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
-        this.safeQuery('#stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
-
+        document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.view.render(this.character);
-        this.initializeListeners();
-    }
-
-    /**
-     * Initialize all event listeners (only called once)
-     */
-    private initializeListeners(): void {
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
@@ -37,102 +23,109 @@ export class CharacterController {
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
         this.attachItemAbilityListeners();
-        this.attachNewItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     }
 
-    /**
-     * Save character to DB and re-render only what changed
-     */
-    private saveAndRender(): void {
-        try {
-            db.saveCharacter(this.character);
-            this.view.render(this.character);
-            // Re-attach listeners that depend on DOM (item/ability entries)
-            this.attachItemAbilityListeners();
-            this.attachNewItemAbilityListeners();
-        } catch (error) {
-            console.error('Error saving character:', error);
-        }
+    private saveAndRender() {
+        db.saveCharacter(this.character);
+        this.view.render(this.character);
+        this.attachStatRollListeners();
+        this.attachStatMaxSetListeners();
+        this.attachTokenListeners();
+        this.attachTokenMaxSetListeners();
+        this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     }
 
-    /**
-     * Safe DOM query with optional chaining
-     */
-    private safeQuery(selector: string): HTMLElement | null {
-        try {
-            return document.querySelector(selector);
-        } catch {
-            console.warn(`Failed to query selector: ${selector}`);
-            return null;
-        }
-    }
-
-    // ==================== TOKEN LISTENERS ====================
-
-    private attachTokenListeners(): void {
+    private attachTokenMaxSetListeners() {
         document.querySelectorAll('.token-btn').forEach(btn => {
             const button = btn as HTMLButtonElement;
-            button.onclick = () => {
+            let holdTimer: ReturnType<typeof setTimeout> | undefined;
+            const timeoutFunction = (btn: HTMLButtonElement) => {
+                return () => {
+                    const type = btn.dataset.type as 'blood' | 'stamina';
+                    let label = type === 'blood' ? 'Blood' : 'Stamina';
+                    if (type === 'blood') {
+                        numberPrompt(`Set max ${label} (1-20):`, this.character.bloodMax || 5, 1, 20).then(val => {
+                            if (val !== null && !isNaN(val)) {
+                                this.character.bloodMax = val;
+                                if (this.character.bloodTokens > val) this.character.bloodTokens = val;
+                                this.saveAndRender();
+                            }
+                        });
+                    } else {
+                        numberPrompt(`Set max ${label} (1-20):`, this.character.staminaMax || 5, 1, 20).then(val => {
+                            if (val !== null && !isNaN(val)) {
+                                this.character.staminaMax = val;
+                                if (this.character.staminaTokens > val) this.character.staminaTokens = val;
+                                this.saveAndRender();
+                            }
+                        });
+                    }
+                }
+            };
+
+            button.addEventListener('mousedown', (e: MouseEvent) => {
+                holdTimer = setTimeout(timeoutFunction(button), 600);
+            });
+            button.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            button.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+            button.addEventListener('touchstart', (e: TouchEvent) => {
+                holdTimer = setTimeout(timeoutFunction(button), 600);
+            });
+            button.addEventListener('touchend', () => {
+                clearTimeout(holdTimer);
+            });
+            button.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            button.addEventListener('contextmenu', (e) => e.preventDefault());
+        });
+    }
+
+    private attachTokenListeners() {
+        document.querySelectorAll('.token-btn').forEach(btn => {
+            const button = btn as HTMLButtonElement;
+            button.onclick = (e: MouseEvent) => {
                 const type = button.dataset.type as 'blood' | 'stamina';
-                const idx = parseInt(button.dataset.idx ?? '0');
-                this.toggleToken(type, idx);
+                const idx = parseInt(button.dataset.idx!);
+                if (type === 'blood') {
+                    if (this.character.bloodTokens === (idx + 1)) {
+                        this.character.bloodTokens -= 1;
+                    } else {
+                        this.character.bloodTokens = idx + 1;
+                    }
+                }
+                if (type === 'stamina') {
+                    if (this.character.staminaTokens === (idx + 1)) {
+                        this.character.staminaTokens -= 1;
+                    } else {
+                        this.character.staminaTokens = idx + 1;
+                    }
+                }
+                this.saveAndRender();
             };
         });
     }
 
-    private attachTokenMaxSetListeners(): void {
-        document.querySelectorAll('.token-btn').forEach(btn => {
-            const button = btn as HTMLButtonElement;
-            const type = button.dataset.type as 'blood' | 'stamina';
-            attachHoldPress(button, () => this.setTokenMax(type));
-        });
-    }
-
-    private toggleToken(type: 'blood' | 'stamina', idx: number): void {
-        const field = type === 'blood' ? 'bloodTokens' : 'staminaTokens';
-        const newValue = this.character[field] === idx + 1 ? idx : idx + 1;
-        this.character[field] = newValue;
-        this.saveAndRender();
-    }
-
-    private setTokenMax(type: 'blood' | 'stamina'): void {
-        const label = type === 'blood' ? 'Blood' : 'Stamina';
-        const maxField = type === 'blood' ? 'bloodMax' : 'staminaMax';
-        const currentField = type === 'blood' ? 'bloodTokens' : 'staminaTokens';
-        const currentMax = this.character[maxField] as number;
-
-        numberPrompt(`Set max ${label} (${TOKEN_MIN}-${TOKEN_MAX}):`, currentMax || 5, TOKEN_MIN, TOKEN_MAX).then(val => {
-            if (val !== null && !isNaN(val)) {
-                this.character[maxField] = val;
-                if ((this.character[currentField] as number) > val) {
-                    this.character[currentField] = val;
-                }
-                this.saveAndRender();
-            }
-        });
-    }
-
-    // ==================== STAT LISTENERS ====================
-
-    private attachStatRollListeners(): void {
-        const statConfigs = [
-            { id: 'melee-power-label', prop: 'meleePower', label: 'Melee Power' },
-            { id: 'ranged-power-label', prop: 'rangedPower', label: 'Ranged Power' },
-            { id: 'might-label', prop: 'might', label: 'Might' },
-            { id: 'awareness-label', prop: 'awareness', label: 'Awareness' },
-            { id: 'resolve-label', prop: 'resolve', label: 'Resolve' },
-            { id: 'stress-label', prop: 'stress', label: 'Stress' },
-        ];
-
-        statConfigs.forEach(({ id, prop, label }) => {
-            const el = this.safeQuery(`#${id}`);
+    private attachStatRollListeners() {
+        [
+            ['melee-power-label', 'meleePower', 'Melee Power'],
+            ['ranged-power-label', 'rangedPower', 'Ranged Power'],
+            ['might-label', 'might', 'Might'],
+            ['awareness-label', 'awareness', 'Awareness'],
+            ['resolve-label', 'resolve', 'Resolve'],
+            ['stress-label', 'stress', 'Stress'],
+        ].forEach(([id, stat, label]) => {
+            const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('click', (e) => {
                     if (e.detail === 1) {
-                        if (prop === 'stress') {
+                        if (stat === 'stress') {
                             this.diceRoller.rollStress();
                         } else {
-                            this.diceRoller.rollPMAR(prop as any, label);
+                            this.diceRoller.rollPMAR(stat, label);
                         }
                     }
                 });
@@ -140,164 +133,199 @@ export class CharacterController {
         });
     }
 
-    private attachStatMaxSetListeners(): void {
-        const statConfigs = [
-            { id: 'melee-power-label', prop: 'meleePower', label: 'Melee Power' },
-            { id: 'ranged-power-label', prop: 'rangedPower', label: 'Ranged Power' },
-            { id: 'might-label', prop: 'might', label: 'Might' },
-            { id: 'awareness-label', prop: 'awareness', label: 'Awareness' },
-            { id: 'resolve-label', prop: 'resolve', label: 'Resolve' },
-            { id: 'stress-label', prop: 'stress', label: 'Stress' },
-        ];
+    private attachNameEditListener() {
+        const nameDiv = document.getElementById('character-name');
+        if (nameDiv) {
+            nameDiv.textContent = this.character.name;
+            let holdTimer: ReturnType<typeof setTimeout> | undefined;
+            nameDiv.style.cursor = 'pointer';
+            nameDiv.title = 'Hold to edit name';
+            nameDiv.addEventListener('mousedown', (e: MouseEvent) => {
+                if (e.button === 2) return;
+                holdTimer = setTimeout(() => {
+                    showEditNameModal(this.character, nameDiv);
+                }, 600);
+            });
+            nameDiv.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            nameDiv.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+            nameDiv.addEventListener('touchstart', (e: TouchEvent) => {
+                holdTimer = setTimeout(() => {
+                    showEditNameModal(this.character, nameDiv);
+                }, 600);
+            });
+            nameDiv.addEventListener('touchend', () => { clearTimeout(holdTimer); });
+            nameDiv.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            nameDiv.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+    }
 
-        statConfigs.forEach(({ id, prop, label }) => {
-            const el = this.safeQuery(`#${id}`) as HTMLElement;
+    private attachStatMaxSetListeners() {
+        type StatProp = 'meleePower' | 'rangedPower' | 'might' | 'awareness' | 'resolve' | 'stress';
+        const statDefs: [string, string, StatProp][] = [
+            ['melee-power-label', 'Melee Power', 'meleePower'],
+            ['ranged-power-label', 'Ranged Power', 'rangedPower'],
+            ['might-label', 'Might', 'might'],
+            ['awareness-label', 'Awareness', 'awareness'],
+            ['resolve-label', 'Resolve', 'resolve'],
+            ['stress-label', 'Stress', 'stress'],
+        ];
+        statDefs.forEach(([id, label, prop]) => {
+            const el = document.getElementById(id);
             if (el) {
                 el.style.cursor = 'pointer';
-                el.title = `Click to roll, hold to set`;
+                el.title = `Hold to set ${label}`;
+                let holdTimer: ReturnType<typeof setTimeout> | undefined;
                 let held = false;
-
-                attachHoldPress(el, () => {
-                    held = true;
-                    const currentValue = (this.character as any)[prop] as number;
-                    numberPrompt(`Set ${label} (${STAT_MIN}-${STAT_MAX}):`, currentValue || 0, STAT_MIN, STAT_MAX).then(val => {
-                        if (val !== null && !isNaN(val)) {
-                            (this.character as any)[prop] = val;
-                            this.saveAndRender();
-                        }
-                    });
+                el.addEventListener('mousedown', (e: MouseEvent) => {
+                    if (e.button === 2) return; // ignore right click
+                    held = false;
+                    holdTimer = setTimeout(() => {
+                        held = true;
+                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
+                            if (val !== null && !isNaN(val)) {
+                                this.character[prop] = val;
+                                this.saveAndRender();
+                            }
+                        });
+                    }, 600);
                 });
-
-                // Also allow clicking to roll
-                el.addEventListener('click', () => {
+                el.addEventListener('mouseup', (e: MouseEvent) => {
+                    clearTimeout(holdTimer);
+                    if (!held && e.button === 0) {
+                        if (prop === 'stress') {
+                            this.diceRoller.rollStress();
+                        } else {
+                            this.diceRoller.rollPMAR(prop, label);
+                        }
+                    }
+                });
+                el.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                el.addEventListener('touchstart', () => {
+                    held = false;
+                    holdTimer = setTimeout(() => {
+                        held = true;
+                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
+                            if (val !== null && !isNaN(val)) {
+                                this.character[prop] = val;
+                                this.saveAndRender();
+                            }
+                        });
+                    }, 600);
+                });
+                el.addEventListener('touchend', () => {
+                    clearTimeout(holdTimer);
                     if (!held) {
                         if (prop === 'stress') {
                             this.diceRoller.rollStress();
                         } else {
-                            this.diceRoller.rollPMAR(prop as any, label);
+                            this.diceRoller.rollPMAR(prop, label);
                         }
                     }
-                    held = false;
                 });
+                el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+                el.addEventListener('contextmenu', (e) => e.preventDefault());
             }
         });
     }
 
-    // ==================== CUSTOM ROLL LISTENERS ====================
+    private attachCustomRollListeners() {
+        const customRollInput = document.getElementById('custom-roll-input') as HTMLInputElement;
+        const minusBtn = document.getElementById('custom-neg-btn') as HTMLButtonElement;
+        const plusBtn = document.getElementById('custom-pos-btn') as HTMLButtonElement;
+        const rollBtn = document.getElementById('custom-roll-btn') as HTMLButtonElement;
 
-    private attachCustomRollListeners(): void {
-        const input = this.safeQuery('#custom-roll-input') as HTMLInputElement;
-        const minusBtn = this.safeQuery('#custom-neg-btn') as HTMLButtonElement;
-        const plusBtn = this.safeQuery('#custom-pos-btn') as HTMLButtonElement;
-        const rollBtn = this.safeQuery('#custom-roll-btn') as HTMLButtonElement;
-
-        if (!input || !minusBtn || !plusBtn || !rollBtn) return;
-
+        // Update the input field with current value and save
         const updateInput = () => {
-            input.value = this.character.customRoll.toString();
-            db.saveCharacter(this.character);
+            customRollInput.value = this.character.customRoll.toString();
+            db.saveCharacter(this.character.toJSON());
         };
 
+        // Set initial value
         updateInput();
 
+        // Handle -1 button
         minusBtn.addEventListener('click', () => {
-            this.character.customRoll = Math.max(CUSTOM_ROLL_MIN, this.character.customRoll - 1);
+            this.character.customRoll = Math.max(1, this.character.customRoll - 1);
             updateInput();
         });
 
+        // Handle +1 button
         plusBtn.addEventListener('click', () => {
-            this.character.customRoll = Math.min(CUSTOM_ROLL_MAX, this.character.customRoll + 1);
+            this.character.customRoll = Math.min(100, this.character.customRoll + 1);
             updateInput();
         });
 
-        input.addEventListener('change', () => {
-            const value = parseInt(input.value) || 1;
-            this.character.customRoll = Math.max(CUSTOM_ROLL_MIN, Math.min(CUSTOM_ROLL_MAX, value));
+        // Handle direct input changes
+        customRollInput.addEventListener('change', () => {
+            const value = parseInt(customRollInput.value) || 1;
+            this.character.customRoll = Math.max(1, Math.min(100, value));
             this.saveAndRender();
         });
 
+        // Handle roll button
         rollBtn.addEventListener('click', () => {
             this.diceRoller.rollPMAR('customRoll', 'Custom');
         });
 
-        input.addEventListener('keydown', (e) => {
+        // Handle Enter key to trigger roll
+        customRollInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.diceRoller.rollPMAR('customRoll', 'Custom');
             }
         });
     }
 
-    // ==================== NAME LISTENERS ====================
-
-    private attachNameEditListener(): void {
-        const nameDiv = this.safeQuery('#character-name');
-        if (nameDiv) {
-            nameDiv.textContent = this.character.name;
-            nameDiv.style.cursor = 'pointer';
-            nameDiv.title = 'Hold to edit name';
-            attachHoldPress(nameDiv, () => {
-                showEditNameModal(this.character, nameDiv);
-            });
-        }
-    }
-
-    // ==================== ITEM & ABILITY LISTENERS ====================
-
-    private attachItemAbilityListeners(): void {
+    private attachItemAbilityListeners() {
         document.querySelectorAll('.item-ability-entry').forEach(entry => {
             const element = entry as HTMLElement;
-            const id = element.dataset.id;
+            const id = element.dataset.id!;
             const type = element.dataset.type as 'item' | 'ability';
-
-            if (!id || !type) return;
-
+            const description = element.querySelector('.item-ability-description') as HTMLElement;
             const checkbox = element.querySelector('.item-checkbox') as HTMLInputElement;
+            let holdTimer: ReturnType<typeof setTimeout> | undefined;
 
-            // Checkbox toggle for items
+            // Checkbox change handler
             if (checkbox && type === 'item') {
-                checkbox.addEventListener('change', (e) => {
+                checkbox.addEventListener('change', (e: Event) => {
                     e.stopPropagation();
                     const item = this.character.items.find(i => i.id === id);
                     if (item) {
                         item.equipped = checkbox.checked;
-                        this.character.invalidateEffectiveStatsCache();
                         this.saveAndRender();
                     }
                 });
             }
 
-            // Click to toggle description
-            element.addEventListener('click', (e) => {
-                if (e.target !== checkbox) {
-                    toggleDescription(element);
+            // Tap to toggle description
+            element.addEventListener('click', () => {
+                if (description.style.display === 'none') {
+                    description.style.display = 'block';
+                } else {
+                    description.style.display = 'none';
                 }
             });
 
             // Long press to edit/delete
-            attachHoldPress(element, () => {
-                this.showItemAbilityMenu(id, type);
+            element.addEventListener('mousedown', (e: MouseEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, 600);
             });
+            element.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            element.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+
+            element.addEventListener('touchstart', (e: TouchEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, 600);
+            });
+            element.addEventListener('touchend', () => clearTimeout(holdTimer));
+            element.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            element.addEventListener('contextmenu', (e) => e.preventDefault());
         });
-
-        this.itemAbilityListenersAttached = true;
     }
 
-    private attachNewItemAbilityListeners(): void {
-        const newItemBtn = this.safeQuery('.new-item-btn') as HTMLButtonElement;
-        const newAbilityBtn = this.safeQuery('.new-ability-btn') as HTMLButtonElement;
-
-        if (newItemBtn && !this.newButtonListenersAttached) {
-            newItemBtn.addEventListener('click', () => this.createNewItem());
-        }
-
-        if (newAbilityBtn && !this.newButtonListenersAttached) {
-            newAbilityBtn.addEventListener('click', () => this.createNewAbility());
-        }
-
-        this.newButtonListenersAttached = true;
-    }
-
-    private showItemAbilityMenu(id: string, type: 'item' | 'ability'): void {
+    private showItemAbilityMenu(id: string, type: 'item' | 'ability') {
         const options = ['Edit', 'Delete', 'Cancel'];
         const choice = prompt(`${type === 'item' ? 'Item' : 'Ability'} options:\n${options.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nEnter number or cancel`);
 
@@ -308,7 +336,7 @@ export class CharacterController {
         }
     }
 
-    private editItemOrAbility(id: string, type: 'item' | 'ability'): void {
+    private editItemOrAbility(id: string, type: 'item' | 'ability') {
         if (type === 'item') {
             const item = this.character.items.find(i => i.id === id);
             if (!item) return;
@@ -319,14 +347,12 @@ export class CharacterController {
             const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
             if (location === null) return;
 
-            const description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):', item.description);
+            const description = prompt('Description:', item.description);
             if (description === null) return;
 
             item.name = name;
             item.location = location;
             item.description = description;
-            this.character.invalidateEffectiveStatsCache();
-            this.saveAndRender();
         } else {
             const ability = this.character.abilities.find(a => a.id === id);
             if (!ability) return;
@@ -339,23 +365,43 @@ export class CharacterController {
 
             ability.name = name;
             ability.description = description;
-            this.saveAndRender();
+        }
+
+        this.saveAndRender();
+    }
+
+    private deleteItemOrAbility(id: string, type: 'item' | 'ability') {
+        const confirm = window.confirm(`Delete this ${type}?`);
+        if (!confirm) return;
+
+        if (type === 'item') {
+            this.character.items = this.character.items.filter(i => i.id !== id);
+        } else {
+            this.character.abilities = this.character.abilities.filter(a => a.id !== id);
+        }
+
+        this.saveAndRender();
+    }
+
+    private attachNewItemListener() {
+        const newItemBtn = document.querySelector('.new-item-btn') as HTMLButtonElement;
+        if (newItemBtn) {
+            newItemBtn.addEventListener('click', () => {
+                this.createNewItem();
+            });
         }
     }
 
-    private deleteItemOrAbility(id: string, type: 'item' | 'ability'): void {
-        if (window.confirm(`Delete this ${type}?`)) {
-            if (type === 'item') {
-                this.character.items = this.character.items.filter(i => i.id !== id);
-                this.character.invalidateEffectiveStatsCache();
-            } else {
-                this.character.abilities = this.character.abilities.filter(a => a.id !== id);
-            }
-            this.saveAndRender();
+    private attachNewAbilityListener() {
+        const newAbilityBtn = document.querySelector('.new-ability-btn') as HTMLButtonElement;
+        if (newAbilityBtn) {
+            newAbilityBtn.addEventListener('click', () => {
+                this.createNewAbility();
+            });
         }
     }
 
-    private createNewItem(): void {
+    private createNewItem() {
         const name = prompt('Item name:');
         if (!name) return;
 
@@ -370,13 +416,13 @@ export class CharacterController {
             name,
             location,
             description,
-            equipped: false,
+            equipped: false
         });
-        this.character.invalidateEffectiveStatsCache();
+
         this.saveAndRender();
     }
 
-    private createNewAbility(): void {
+    private createNewAbility() {
         const name = prompt('Ability name:');
         if (!name) return;
 
@@ -386,8 +432,9 @@ export class CharacterController {
         this.character.abilities.push({
             id: Date.now().toString(),
             name,
-            description,
+            description
         });
+
         this.saveAndRender();
     }
 }
