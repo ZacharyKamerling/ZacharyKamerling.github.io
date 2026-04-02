@@ -120,6 +120,8 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5em;
+    width: 100%;
+    justify-content: space-between;
 }
 
 .stat-value {
