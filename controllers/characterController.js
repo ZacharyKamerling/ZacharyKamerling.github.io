@@ -2,7 +2,6 @@ import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { attachHoldPress, toggleDescription } from '../utils/eventHelpers.js';
-import { editPopover } from '../utils/editPopover.js';
 import { TOKEN_MIN, TOKEN_MAX, STAT_MIN, STAT_MAX, CUSTOM_ROLL_MIN, CUSTOM_ROLL_MAX } from '../utils/constants.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
@@ -278,28 +277,38 @@ var CharacterController = /** @class */ (function () {
         }
     };
     CharacterController.prototype.editItemOrAbility = function (id, type) {
-        var _this = this;
         if (type === 'item') {
-            var item_1 = this.character.items.find(function (i) { return i.id === id; });
-            if (!item_1)
+            var item = this.character.items.find(function (i) { return i.id === id; });
+            if (!item)
                 return;
-            editPopover.show(type, item_1, function (data) {
-                item_1.name = data.name;
-                item_1.location = data.location;
-                item_1.description = data.description;
-                _this.character.invalidateEffectiveStatsCache();
-                _this.saveAndRender();
-            });
+            var name_1 = prompt('Item name:', item.name);
+            if (name_1 === null)
+                return;
+            var location_1 = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
+            if (location_1 === null)
+                return;
+            var description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):', item.description);
+            if (description === null)
+                return;
+            item.name = name_1;
+            item.location = location_1;
+            item.description = description;
+            this.character.invalidateEffectiveStatsCache();
+            this.saveAndRender();
         }
         else {
-            var ability_1 = this.character.abilities.find(function (a) { return a.id === id; });
-            if (!ability_1)
+            var ability = this.character.abilities.find(function (a) { return a.id === id; });
+            if (!ability)
                 return;
-            editPopover.show(type, ability_1, function (data) {
-                ability_1.name = data.name;
-                ability_1.description = data.description;
-                _this.saveAndRender();
-            });
+            var name_2 = prompt('Ability name:', ability.name);
+            if (name_2 === null)
+                return;
+            var description = prompt('Description:', ability.description);
+            if (description === null)
+                return;
+            ability.name = name_2;
+            ability.description = description;
+            this.saveAndRender();
         }
     };
     CharacterController.prototype.deleteItemOrAbility = function (id, type) {
@@ -315,33 +324,38 @@ var CharacterController = /** @class */ (function () {
         }
     };
     CharacterController.prototype.createNewItem = function () {
-        var _this = this;
-        editPopover.show('item', { name: '', location: 'melee weapon', description: '' }, function (data) {
-            if (!data.name)
-                return;
-            _this.character.items.push({
-                id: Date.now().toString(),
-                name: data.name,
-                location: data.location || 'melee weapon',
-                description: data.description,
-                equipped: false,
-            });
-            _this.character.invalidateEffectiveStatsCache();
-            _this.saveAndRender();
+        var name = prompt('Item name:');
+        if (!name)
+            return;
+        var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
+        if (location === null)
+            return;
+        var description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
+        if (description === null)
+            return;
+        this.character.items.push({
+            id: Date.now().toString(),
+            name: name,
+            location: location,
+            description: description,
+            equipped: false,
         });
+        this.character.invalidateEffectiveStatsCache();
+        this.saveAndRender();
     };
     CharacterController.prototype.createNewAbility = function () {
-        var _this = this;
-        editPopover.show('ability', { name: '', description: '' }, function (data) {
-            if (!data.name)
-                return;
-            _this.character.abilities.push({
-                id: Date.now().toString(),
-                name: data.name,
-                description: data.description,
-            });
-            _this.saveAndRender();
+        var name = prompt('Ability name:');
+        if (!name)
+            return;
+        var description = prompt('Description:');
+        if (description === null)
+            return;
+        this.character.abilities.push({
+            id: Date.now().toString(),
+            name: name,
+            description: description,
         });
+        this.saveAndRender();
     };
     return CharacterController;
 }());

@@ -4,7 +4,6 @@ import { DiceRoller } from '../utils/diceRollers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { attachHoldPress, toggleDescription } from '../utils/eventHelpers.js';
-import { editPopover } from '../utils/editPopover.js';
 import { HOLD_PRESS_DURATION_MS, TOKEN_MIN, TOKEN_MAX, STAT_MIN, STAT_MAX, CUSTOM_ROLL_MIN, CUSTOM_ROLL_MAX } from '../utils/constants.js';
 
 export class CharacterController {
@@ -314,22 +313,33 @@ export class CharacterController {
             const item = this.character.items.find(i => i.id === id);
             if (!item) return;
 
-            editPopover.show(type, item, (data) => {
-                item.name = data.name;
-                item.location = data.location;
-                item.description = data.description;
-                this.character.invalidateEffectiveStatsCache();
-                this.saveAndRender();
-            });
+            const name = prompt('Item name:', item.name);
+            if (name === null) return;
+
+            const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
+            if (location === null) return;
+
+            const description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):', item.description);
+            if (description === null) return;
+
+            item.name = name;
+            item.location = location;
+            item.description = description;
+            this.character.invalidateEffectiveStatsCache();
+            this.saveAndRender();
         } else {
             const ability = this.character.abilities.find(a => a.id === id);
             if (!ability) return;
 
-            editPopover.show(type, ability, (data) => {
-                ability.name = data.name;
-                ability.description = data.description;
-                this.saveAndRender();
-            });
+            const name = prompt('Ability name:', ability.name);
+            if (name === null) return;
+
+            const description = prompt('Description:', ability.description);
+            if (description === null) return;
+
+            ability.name = name;
+            ability.description = description;
+            this.saveAndRender();
         }
     }
 
@@ -346,37 +356,38 @@ export class CharacterController {
     }
 
     private createNewItem(): void {
-        editPopover.show(
-            'item',
-            { name: '', location: 'melee weapon', description: '' },
-            (data) => {
-                if (!data.name) return;
-                this.character.items.push({
-                    id: Date.now().toString(),
-                    name: data.name,
-                    location: data.location || 'melee weapon',
-                    description: data.description,
-                    equipped: false,
-                });
-                this.character.invalidateEffectiveStatsCache();
-                this.saveAndRender();
-            }
-        );
+        const name = prompt('Item name:');
+        if (!name) return;
+
+        const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
+        if (location === null) return;
+
+        const description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
+        if (description === null) return;
+
+        this.character.items.push({
+            id: Date.now().toString(),
+            name,
+            location,
+            description,
+            equipped: false,
+        });
+        this.character.invalidateEffectiveStatsCache();
+        this.saveAndRender();
     }
 
     private createNewAbility(): void {
-        editPopover.show(
-            'ability',
-            { name: '', description: '' },
-            (data) => {
-                if (!data.name) return;
-                this.character.abilities.push({
-                    id: Date.now().toString(),
-                    name: data.name,
-                    description: data.description,
-                });
-                this.saveAndRender();
-            }
-        );
+        const name = prompt('Ability name:');
+        if (!name) return;
+
+        const description = prompt('Description:');
+        if (description === null) return;
+
+        this.character.abilities.push({
+            id: Date.now().toString(),
+            name,
+            description,
+        });
+        this.saveAndRender();
     }
 }
