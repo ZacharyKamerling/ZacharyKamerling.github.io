@@ -277,7 +277,19 @@ var CharacterController = /** @class */ (function () {
             var id = element.dataset.id;
             var type = element.dataset.type;
             var description = element.querySelector('.item-ability-description');
+            var checkbox = element.querySelector('.item-checkbox');
             var holdTimer;
+            // Checkbox change handler
+            if (checkbox && type === 'item') {
+                checkbox.addEventListener('change', function (e) {
+                    e.stopPropagation();
+                    var item = _this.character.items.find(function (i) { return i.id === id; });
+                    if (item) {
+                        item.equipped = checkbox.checked;
+                        _this.saveAndRender();
+                    }
+                });
+            }
             // Tap to toggle description
             element.addEventListener('click', function () {
                 if (description.style.display === 'none') {
@@ -385,14 +397,15 @@ var CharacterController = /** @class */ (function () {
         var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null)
             return;
-        var description = prompt('Description:');
+        var description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
         if (description === null)
             return;
         this.character.items.push({
             id: Date.now().toString(),
             name: name,
             location: location,
-            description: description
+            description: description,
+            equipped: false
         });
         this.saveAndRender();
     };

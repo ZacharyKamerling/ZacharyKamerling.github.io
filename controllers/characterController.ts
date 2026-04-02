@@ -281,7 +281,20 @@ export class CharacterController {
             const id = element.dataset.id!;
             const type = element.dataset.type as 'item' | 'ability';
             const description = element.querySelector('.item-ability-description') as HTMLElement;
+            const checkbox = element.querySelector('.item-checkbox') as HTMLInputElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
+
+            // Checkbox change handler
+            if (checkbox && type === 'item') {
+                checkbox.addEventListener('change', (e: Event) => {
+                    e.stopPropagation();
+                    const item = this.character.items.find(i => i.id === id);
+                    if (item) {
+                        item.equipped = checkbox.checked;
+                        this.saveAndRender();
+                    }
+                });
+            }
 
             // Tap to toggle description
             element.addEventListener('click', () => {
@@ -395,14 +408,15 @@ export class CharacterController {
         const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null) return;
 
-        const description = prompt('Description:');
+        const description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
         if (description === null) return;
 
         this.character.items.push({
             id: Date.now().toString(),
             name,
             location,
-            description
+            description,
+            equipped: false
         });
 
         this.saveAndRender();

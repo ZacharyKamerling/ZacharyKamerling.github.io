@@ -47,25 +47,33 @@ export class CharacterView {
     public renderStats(character: Character) {
         const statSection = document.getElementById('stat-section');
         if (!statSection) return;
+
+        const effective = character.getEffectiveStats();
+        const statValueStyle = (stat: string): string => {
+            const baseVal = character[stat as keyof Character] as number;
+            const effVal = effective[stat];
+            return effVal !== baseVal ? 'color: #4ade80;' : '';
+        };
+
         statSection.innerHTML = `
                 <div style="font-size:1em; display: flex; flex-direction: column;">
                     <div class="stat-row">
                         <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
-                        <div class="stat-value">${character.meleePower}</div>
+                        <div class="stat-value" style="${statValueStyle('meleePower')}">${effective.meleePower}</div>
                         <span id="ranged-power-label" class="stat-label round-style" title="Ranged Power">Ranged 🏹</span>
-                        <div class="stat-value">${character.rangedPower}</div>
+                        <div class="stat-value" style="${statValueStyle('rangedPower')}">${effective.rangedPower}</div>
                     </div>
                     <div class="stat-row">
                         <span id="might-label" class="stat-label round-style" title="Might">Might 💪</span>
-                        <div class="stat-value">${character.might}</div>
+                        <div class="stat-value" style="${statValueStyle('might')}">${effective.might}</div>
                         <span id="awareness-label" class="stat-label round-style" title="Awareness">Awareness 👁️</span>
-                        <div class="stat-value">${character.awareness}</div>
+                        <div class="stat-value" style="${statValueStyle('awareness')}">${effective.awareness}</div>
                     </div>
                     <div class="stat-row"">
                         <span id="resolve-label" class="stat-label round-style" title="Resolve">Resolve ✊</span>
-                        <div class="stat-value">${character.resolve}</div>
+                        <div class="stat-value" style="${statValueStyle('resolve')}">${effective.resolve}</div>
                         <span id="stress-label" class="stat-label round-style" title="Stress">Stress 💦</span>
-                        <div class="stat-value">${character.stress}</div>
+                        <div class="stat-value" style="${statValueStyle('stress')}">${effective.stress}</div>
                     </div>
                     <div style="display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;">
                         <button id="custom-neg-btn" class="custom-roll-btn round-style">-1</button>
@@ -85,6 +93,7 @@ export class CharacterView {
         let itemsHtml = character.items.map((item, idx) => `
             <div class="item-ability-entry" data-id="${item.id}" data-type="item">
                 <div class="item-ability-header">
+                    <input type="checkbox" class="item-checkbox" data-id="${item.id}" ${item.equipped ? 'checked' : ''} style="cursor: pointer;">
                     <span class="item-ability-name">${item.name}</span>
                     <span class="item-location">${item.location}</span>
                 </div>

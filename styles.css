@@ -275,6 +275,14 @@ button {
     gap: 0.5em;
 }
 
+.item-checkbox {
+    cursor: pointer;
+    width: 1.2em;
+    height: 1.2em;
+    margin: 0;
+    flex-shrink: 0;
+}
+
 .item-ability-name {
     font-weight: 500;
     flex: 1;

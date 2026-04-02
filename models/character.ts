@@ -22,6 +22,7 @@ export interface ItemData {
     name: string;
     description: string;
     location: string;
+    equipped: boolean;
 }
 
 export interface EquipmentData {
@@ -117,6 +118,37 @@ export class Character {
             equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []
+        };
+    }
+
+    getEffectiveStats(): { [key: string]: number } {
+        // Parse all equipped items for stat buffs
+        const buffs: { [key: string]: number } = {};
+
+        this.items
+            .filter(item => item.equipped)
+            .forEach(item => {
+                // Parse $$stat_name:value patterns
+                const buffPattern = /\$\$(\w+):([-+]?\d+)/g;
+                let match;
+                while ((match = buffPattern.exec(item.description)) !== null) {
+                    const statName = match[1];
+                    const value = parseInt(match[2], 10);
+                    buffs[statName] = (buffs[statName] || 0) + value;
+                }
+            });
+
+        // Return base stats + buffs
+        return {
+            meleePower: this.meleePower + (buffs['melee_power'] || 0),
+            rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
+            might: this.might + (buffs['might'] || 0),
+            awareness: this.awareness + (buffs['awareness'] || 0),
+            resolve: this.resolve + (buffs['resolve'] || 0),
+            stress: this.stress + (buffs['stress'] || 0),
+            bloodMax: this.bloodMax + (buffs['blood_max'] || 0),
+            staminaMax: this.staminaMax + (buffs['stamina_max'] || 0),
+            customRoll: this.customRoll + (buffs['custom_roll'] || 0),
         };
     }
 }
