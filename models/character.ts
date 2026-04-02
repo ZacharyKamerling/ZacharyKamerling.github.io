@@ -54,6 +54,7 @@ export class Character {
     equipment: EquipmentData[];
     items: ItemData[];
     abilities: AbilityData[];
+    private cachedEffectiveStats: { [key: string]: number } | null = null;
     [key: string]: any;
 
     constructor(data: CharacterData) {
@@ -122,6 +123,11 @@ export class Character {
     }
 
     getEffectiveStats(): { [key: string]: number } {
+        // Return cached result if available
+        if (this.cachedEffectiveStats) {
+            return this.cachedEffectiveStats;
+        }
+
         // Parse all equipped items for stat buffs
         const buffs: { [key: string]: number } = {};
 
@@ -138,8 +144,8 @@ export class Character {
                 }
             });
 
-        // Return base stats + buffs
-        return {
+        // Calculate and cache result
+        this.cachedEffectiveStats = {
             meleePower: this.meleePower + (buffs['melee_power'] || 0),
             rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
             might: this.might + (buffs['might'] || 0),
@@ -150,5 +156,11 @@ export class Character {
             staminaMax: this.staminaMax + (buffs['stamina_max'] || 0),
             customRoll: this.customRoll + (buffs['custom_roll'] || 0),
         };
+
+        return this.cachedEffectiveStats;
+    }
+
+    invalidateEffectiveStatsCache(): void {
+        this.cachedEffectiveStats = null;
     }
 }

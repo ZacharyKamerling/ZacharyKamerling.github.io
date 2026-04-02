@@ -1,6 +1,7 @@
 var Character = /** @class */ (function () {
     function Character(data) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        this.cachedEffectiveStats = null;
         this.id = data.id;
         this.name = data.name || 'Unnamed Character';
         this.meleePower = (_a = data.meleePower) !== null && _a !== void 0 ? _a : 0;
@@ -62,6 +63,10 @@ var Character = /** @class */ (function () {
         };
     };
     Character.prototype.getEffectiveStats = function () {
+        // Return cached result if available
+        if (this.cachedEffectiveStats) {
+            return this.cachedEffectiveStats;
+        }
         // Parse all equipped items for stat buffs
         var buffs = {};
         this.items
@@ -76,8 +81,8 @@ var Character = /** @class */ (function () {
                 buffs[statName] = (buffs[statName] || 0) + value;
             }
         });
-        // Return base stats + buffs
-        return {
+        // Calculate and cache result
+        this.cachedEffectiveStats = {
             meleePower: this.meleePower + (buffs['melee_power'] || 0),
             rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
             might: this.might + (buffs['might'] || 0),
@@ -88,6 +93,10 @@ var Character = /** @class */ (function () {
             staminaMax: this.staminaMax + (buffs['stamina_max'] || 0),
             customRoll: this.customRoll + (buffs['custom_roll'] || 0),
         };
+        return this.cachedEffectiveStats;
+    };
+    Character.prototype.invalidateEffectiveStatsCache = function () {
+        this.cachedEffectiveStats = null;
     };
     return Character;
 }());

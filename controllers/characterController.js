@@ -1,15 +1,27 @@
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
+import { attachHoldPress, toggleDescription } from '../utils/eventHelpers.js';
+import { editPopover } from '../utils/editPopover.js';
+import { TOKEN_MIN, TOKEN_MAX, STAT_MIN, STAT_MAX, CUSTOM_ROLL_MIN, CUSTOM_ROLL_MAX } from '../utils/constants.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
         var _a, _b;
+        this.itemAbilityListenersAttached = false;
+        this.newButtonListenersAttached = false;
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
-        (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
-        (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+        // Prevent context menu on main sections
+        (_a = this.safeQuery('#token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+        (_b = this.safeQuery('#stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.view.render(this.character);
+        this.initializeListeners();
+    }
+    /**
+     * Initialize all event listeners (only called once)
+     */
+    CharacterController.prototype.initializeListeners = function () {
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
@@ -17,182 +29,95 @@ var CharacterController = /** @class */ (function () {
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
         this.attachItemAbilityListeners();
-        this.attachNewItemListener();
-        this.attachNewAbilityListener();
-    }
+        this.attachNewItemAbilityListeners();
+    };
+    /**
+     * Save character to DB and re-render only what changed
+     */
     CharacterController.prototype.saveAndRender = function () {
-        db.saveCharacter(this.character);
-        this.view.render(this.character);
-        this.attachStatRollListeners();
-        this.attachStatMaxSetListeners();
-        this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
-        this.attachCustomRollListeners();
-        this.attachItemAbilityListeners();
-        this.attachNewItemListener();
-        this.attachNewAbilityListener();
+        try {
+            db.saveCharacter(this.character);
+            this.view.render(this.character);
+            // Re-attach listeners that depend on DOM (item/ability entries)
+            this.attachItemAbilityListeners();
+            this.attachNewItemAbilityListeners();
+        }
+        catch (error) {
+            console.error('Error saving character:', error);
+        }
+    };
+    /**
+     * Safe DOM query with optional chaining
+     */
+    CharacterController.prototype.safeQuery = function (selector) {
+        try {
+            return document.querySelector(selector);
+        }
+        catch (_a) {
+            console.warn("Failed to query selector: ".concat(selector));
+            return null;
+        }
+    };
+    // ==================== TOKEN LISTENERS ====================
+    CharacterController.prototype.attachTokenListeners = function () {
+        var _this = this;
+        document.querySelectorAll('.token-btn').forEach(function (btn) {
+            var button = btn;
+            button.onclick = function () {
+                var _a;
+                var type = button.dataset.type;
+                var idx = parseInt((_a = button.dataset.idx) !== null && _a !== void 0 ? _a : '0');
+                _this.toggleToken(type, idx);
+            };
+        });
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;
         document.querySelectorAll('.token-btn').forEach(function (btn) {
             var button = btn;
-            var holdTimer;
-            var timeoutFunction = function (btn) {
-                return function () {
-                    var type = btn.dataset.type;
-                    var label = type === 'blood' ? 'Blood' : 'Stamina';
-                    if (type === 'blood') {
-                        numberPrompt("Set max ".concat(label, " (1-20):"), _this.character.bloodMax || 5, 1, 20).then(function (val) {
-                            if (val !== null && !isNaN(val)) {
-                                _this.character.bloodMax = val;
-                                if (_this.character.bloodTokens > val)
-                                    _this.character.bloodTokens = val;
-                                _this.saveAndRender();
-                            }
-                        });
-                    }
-                    else {
-                        numberPrompt("Set max ".concat(label, " (1-20):"), _this.character.staminaMax || 5, 1, 20).then(function (val) {
-                            if (val !== null && !isNaN(val)) {
-                                _this.character.staminaMax = val;
-                                if (_this.character.staminaTokens > val)
-                                    _this.character.staminaTokens = val;
-                                _this.saveAndRender();
-                            }
-                        });
-                    }
-                };
-            };
-            button.addEventListener('mousedown', function (e) {
-                holdTimer = setTimeout(timeoutFunction(button), 600);
-            });
-            button.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-            button.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-            button.addEventListener('touchstart', function (e) {
-                holdTimer = setTimeout(timeoutFunction(button), 600);
-            });
-            button.addEventListener('touchend', function () {
-                clearTimeout(holdTimer);
-            });
-            button.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
-            button.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+            var type = button.dataset.type;
+            attachHoldPress(button, function () { return _this.setTokenMax(type); });
         });
     };
-    CharacterController.prototype.attachTokenListeners = function () {
+    CharacterController.prototype.toggleToken = function (type, idx) {
+        var field = type === 'blood' ? 'bloodTokens' : 'staminaTokens';
+        var newValue = this.character[field] === idx + 1 ? idx : idx + 1;
+        this.character[field] = newValue;
+        this.saveAndRender();
+    };
+    CharacterController.prototype.setTokenMax = function (type) {
         var _this = this;
-        document.querySelectorAll('.token-btn').forEach(function (btn) {
-            var button = btn;
-            button.onclick = function (e) {
-                var type = button.dataset.type;
-                var idx = parseInt(button.dataset.idx);
-                if (type === 'blood') {
-                    if (_this.character.bloodTokens === (idx + 1)) {
-                        _this.character.bloodTokens -= 1;
-                    }
-                    else {
-                        _this.character.bloodTokens = idx + 1;
-                    }
-                }
-                if (type === 'stamina') {
-                    if (_this.character.staminaTokens === (idx + 1)) {
-                        _this.character.staminaTokens -= 1;
-                    }
-                    else {
-                        _this.character.staminaTokens = idx + 1;
-                    }
+        var label = type === 'blood' ? 'Blood' : 'Stamina';
+        var maxField = type === 'blood' ? 'bloodMax' : 'staminaMax';
+        var currentField = type === 'blood' ? 'bloodTokens' : 'staminaTokens';
+        var currentMax = this.character[maxField];
+        numberPrompt("Set max ".concat(label, " (").concat(TOKEN_MIN, "-").concat(TOKEN_MAX, "):"), currentMax || 5, TOKEN_MIN, TOKEN_MAX).then(function (val) {
+            if (val !== null && !isNaN(val)) {
+                _this.character[maxField] = val;
+                if (_this.character[currentField] > val) {
+                    _this.character[currentField] = val;
                 }
                 _this.saveAndRender();
-            };
-        });
-    };
-    CharacterController.prototype.attachStatRollListeners = function () {
-        var _this = this;
-        [
-            ['melee-power-label', 'meleePower', 'Melee Power'],
-            ['ranged-power-label', 'rangedPower', 'Ranged Power'],
-            ['might-label', 'might', 'Might'],
-            ['awareness-label', 'awareness', 'Awareness'],
-            ['resolve-label', 'resolve', 'Resolve'],
-            ['stress-label', 'stress', 'Stress'],
-        ].forEach(function (_a) {
-            var id = _a[0], stat = _a[1], label = _a[2];
-            var el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('click', function (e) {
-                    if (e.detail === 1) {
-                        if (stat === 'stress') {
-                            _this.diceRoller.rollStress();
-                        }
-                        else {
-                            _this.diceRoller.rollPMAR(stat, label);
-                        }
-                    }
-                });
             }
         });
     };
-    CharacterController.prototype.attachNameEditListener = function () {
+    // ==================== STAT LISTENERS ====================
+    CharacterController.prototype.attachStatRollListeners = function () {
         var _this = this;
-        var nameDiv = document.getElementById('character-name');
-        if (nameDiv) {
-            nameDiv.textContent = this.character.name;
-            var holdTimer_1;
-            nameDiv.style.cursor = 'pointer';
-            nameDiv.title = 'Hold to edit name';
-            nameDiv.addEventListener('mousedown', function (e) {
-                if (e.button === 2)
-                    return;
-                holdTimer_1 = setTimeout(function () {
-                    showEditNameModal(_this.character, nameDiv);
-                }, 600);
-            });
-            nameDiv.addEventListener('mouseup', function () { return clearTimeout(holdTimer_1); });
-            nameDiv.addEventListener('mouseleave', function () { return clearTimeout(holdTimer_1); });
-            nameDiv.addEventListener('touchstart', function (e) {
-                holdTimer_1 = setTimeout(function () {
-                    showEditNameModal(_this.character, nameDiv);
-                }, 600);
-            });
-            nameDiv.addEventListener('touchend', function () { clearTimeout(holdTimer_1); });
-            nameDiv.addEventListener('touchcancel', function () { return clearTimeout(holdTimer_1); });
-            nameDiv.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
-        }
-    };
-    CharacterController.prototype.attachStatMaxSetListeners = function () {
-        var _this = this;
-        var statDefs = [
-            ['melee-power-label', 'Melee Power', 'meleePower'],
-            ['ranged-power-label', 'Ranged Power', 'rangedPower'],
-            ['might-label', 'Might', 'might'],
-            ['awareness-label', 'Awareness', 'awareness'],
-            ['resolve-label', 'Resolve', 'resolve'],
-            ['stress-label', 'Stress', 'stress'],
+        var statConfigs = [
+            { id: 'melee-power-label', prop: 'meleePower', label: 'Melee Power' },
+            { id: 'ranged-power-label', prop: 'rangedPower', label: 'Ranged Power' },
+            { id: 'might-label', prop: 'might', label: 'Might' },
+            { id: 'awareness-label', prop: 'awareness', label: 'Awareness' },
+            { id: 'resolve-label', prop: 'resolve', label: 'Resolve' },
+            { id: 'stress-label', prop: 'stress', label: 'Stress' },
         ];
-        statDefs.forEach(function (_a) {
-            var id = _a[0], label = _a[1], prop = _a[2];
-            var el = document.getElementById(id);
+        statConfigs.forEach(function (_a) {
+            var id = _a.id, prop = _a.prop, label = _a.label;
+            var el = _this.safeQuery("#".concat(id));
             if (el) {
-                el.style.cursor = 'pointer';
-                el.title = "Hold to set ".concat(label);
-                var holdTimer_2;
-                var held_1 = false;
-                el.addEventListener('mousedown', function (e) {
-                    if (e.button === 2)
-                        return; // ignore right click
-                    held_1 = false;
-                    holdTimer_2 = setTimeout(function () {
-                        held_1 = true;
-                        numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
-                            if (val !== null && !isNaN(val)) {
-                                _this.character[prop] = val;
-                                _this.saveAndRender();
-                            }
-                        });
-                    }, 600);
-                });
-                el.addEventListener('mouseup', function (e) {
-                    clearTimeout(holdTimer_2);
-                    if (!held_1 && e.button === 0) {
+                el.addEventListener('click', function (e) {
+                    if (e.detail === 1) {
                         if (prop === 'stress') {
                             _this.diceRoller.rollStress();
                         }
@@ -201,21 +126,38 @@ var CharacterController = /** @class */ (function () {
                         }
                     }
                 });
-                el.addEventListener('mouseleave', function () { return clearTimeout(holdTimer_2); });
-                el.addEventListener('touchstart', function () {
-                    held_1 = false;
-                    holdTimer_2 = setTimeout(function () {
-                        held_1 = true;
-                        numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
-                            if (val !== null && !isNaN(val)) {
-                                _this.character[prop] = val;
-                                _this.saveAndRender();
-                            }
-                        });
-                    }, 600);
+            }
+        });
+    };
+    CharacterController.prototype.attachStatMaxSetListeners = function () {
+        var _this = this;
+        var statConfigs = [
+            { id: 'melee-power-label', prop: 'meleePower', label: 'Melee Power' },
+            { id: 'ranged-power-label', prop: 'rangedPower', label: 'Ranged Power' },
+            { id: 'might-label', prop: 'might', label: 'Might' },
+            { id: 'awareness-label', prop: 'awareness', label: 'Awareness' },
+            { id: 'resolve-label', prop: 'resolve', label: 'Resolve' },
+            { id: 'stress-label', prop: 'stress', label: 'Stress' },
+        ];
+        statConfigs.forEach(function (_a) {
+            var id = _a.id, prop = _a.prop, label = _a.label;
+            var el = _this.safeQuery("#".concat(id));
+            if (el) {
+                el.style.cursor = 'pointer';
+                el.title = "Click to roll, hold to set";
+                var held_1 = false;
+                attachHoldPress(el, function () {
+                    held_1 = true;
+                    var currentValue = _this.character[prop];
+                    numberPrompt("Set ".concat(label, " (").concat(STAT_MIN, "-").concat(STAT_MAX, "):"), currentValue || 0, STAT_MIN, STAT_MAX).then(function (val) {
+                        if (val !== null && !isNaN(val)) {
+                            _this.character[prop] = val;
+                            _this.saveAndRender();
+                        }
+                    });
                 });
-                el.addEventListener('touchend', function () {
-                    clearTimeout(holdTimer_2);
+                // Also allow clicking to roll
+                el.addEventListener('click', function () {
                     if (!held_1) {
                         if (prop === 'stress') {
                             _this.diceRoller.rollStress();
@@ -224,98 +166,106 @@ var CharacterController = /** @class */ (function () {
                             _this.diceRoller.rollPMAR(prop, label);
                         }
                     }
+                    held_1 = false;
                 });
-                el.addEventListener('touchcancel', function () { return clearTimeout(holdTimer_2); });
-                el.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
             }
         });
     };
+    // ==================== CUSTOM ROLL LISTENERS ====================
     CharacterController.prototype.attachCustomRollListeners = function () {
         var _this = this;
-        var customRollInput = document.getElementById('custom-roll-input');
-        var minusBtn = document.getElementById('custom-neg-btn');
-        var plusBtn = document.getElementById('custom-pos-btn');
-        var rollBtn = document.getElementById('custom-roll-btn');
-        // Update the input field with current value and save
+        var input = this.safeQuery('#custom-roll-input');
+        var minusBtn = this.safeQuery('#custom-neg-btn');
+        var plusBtn = this.safeQuery('#custom-pos-btn');
+        var rollBtn = this.safeQuery('#custom-roll-btn');
+        if (!input || !minusBtn || !plusBtn || !rollBtn)
+            return;
         var updateInput = function () {
-            customRollInput.value = _this.character.customRoll.toString();
-            db.saveCharacter(_this.character.toJSON());
+            input.value = _this.character.customRoll.toString();
+            db.saveCharacter(_this.character);
         };
-        // Set initial value
         updateInput();
-        // Handle -1 button
         minusBtn.addEventListener('click', function () {
-            _this.character.customRoll = Math.max(1, _this.character.customRoll - 1);
+            _this.character.customRoll = Math.max(CUSTOM_ROLL_MIN, _this.character.customRoll - 1);
             updateInput();
         });
-        // Handle +1 button
         plusBtn.addEventListener('click', function () {
-            _this.character.customRoll = Math.min(100, _this.character.customRoll + 1);
+            _this.character.customRoll = Math.min(CUSTOM_ROLL_MAX, _this.character.customRoll + 1);
             updateInput();
         });
-        // Handle direct input changes
-        customRollInput.addEventListener('change', function () {
-            var value = parseInt(customRollInput.value) || 1;
-            _this.character.customRoll = Math.max(1, Math.min(100, value));
+        input.addEventListener('change', function () {
+            var value = parseInt(input.value) || 1;
+            _this.character.customRoll = Math.max(CUSTOM_ROLL_MIN, Math.min(CUSTOM_ROLL_MAX, value));
             _this.saveAndRender();
         });
-        // Handle roll button
         rollBtn.addEventListener('click', function () {
             _this.diceRoller.rollPMAR('customRoll', 'Custom');
         });
-        // Handle Enter key to trigger roll
-        customRollInput.addEventListener('keydown', function (e) {
+        input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 _this.diceRoller.rollPMAR('customRoll', 'Custom');
             }
         });
     };
+    // ==================== NAME LISTENERS ====================
+    CharacterController.prototype.attachNameEditListener = function () {
+        var _this = this;
+        var nameDiv = this.safeQuery('#character-name');
+        if (nameDiv) {
+            nameDiv.textContent = this.character.name;
+            nameDiv.style.cursor = 'pointer';
+            nameDiv.title = 'Hold to edit name';
+            attachHoldPress(nameDiv, function () {
+                showEditNameModal(_this.character, nameDiv);
+            });
+        }
+    };
+    // ==================== ITEM & ABILITY LISTENERS ====================
     CharacterController.prototype.attachItemAbilityListeners = function () {
         var _this = this;
         document.querySelectorAll('.item-ability-entry').forEach(function (entry) {
             var element = entry;
             var id = element.dataset.id;
             var type = element.dataset.type;
-            var description = element.querySelector('.item-ability-description');
+            if (!id || !type)
+                return;
             var checkbox = element.querySelector('.item-checkbox');
-            var holdTimer;
-            // Checkbox change handler
+            // Checkbox toggle for items
             if (checkbox && type === 'item') {
                 checkbox.addEventListener('change', function (e) {
                     e.stopPropagation();
                     var item = _this.character.items.find(function (i) { return i.id === id; });
                     if (item) {
                         item.equipped = checkbox.checked;
+                        _this.character.invalidateEffectiveStatsCache();
                         _this.saveAndRender();
                     }
                 });
             }
-            // Tap to toggle description
-            element.addEventListener('click', function () {
-                if (description.style.display === 'none') {
-                    description.style.display = 'block';
-                }
-                else {
-                    description.style.display = 'none';
+            // Click to toggle description
+            element.addEventListener('click', function (e) {
+                if (e.target !== checkbox) {
+                    toggleDescription(element);
                 }
             });
             // Long press to edit/delete
-            element.addEventListener('mousedown', function (e) {
-                holdTimer = setTimeout(function () {
-                    _this.showItemAbilityMenu(id, type);
-                }, 600);
+            attachHoldPress(element, function () {
+                _this.showItemAbilityMenu(id, type);
             });
-            element.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('touchstart', function (e) {
-                holdTimer = setTimeout(function () {
-                    _this.showItemAbilityMenu(id, type);
-                }, 600);
-            });
-            element.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         });
+        this.itemAbilityListenersAttached = true;
+    };
+    CharacterController.prototype.attachNewItemAbilityListeners = function () {
+        var _this = this;
+        var newItemBtn = this.safeQuery('.new-item-btn');
+        var newAbilityBtn = this.safeQuery('.new-ability-btn');
+        if (newItemBtn && !this.newButtonListenersAttached) {
+            newItemBtn.addEventListener('click', function () { return _this.createNewItem(); });
+        }
+        if (newAbilityBtn && !this.newButtonListenersAttached) {
+            newAbilityBtn.addEventListener('click', function () { return _this.createNewAbility(); });
+        }
+        this.newButtonListenersAttached = true;
     };
     CharacterController.prototype.showItemAbilityMenu = function (id, type) {
         var options = ['Edit', 'Delete', 'Cancel'];
@@ -328,100 +278,70 @@ var CharacterController = /** @class */ (function () {
         }
     };
     CharacterController.prototype.editItemOrAbility = function (id, type) {
+        var _this = this;
         if (type === 'item') {
-            var item = this.character.items.find(function (i) { return i.id === id; });
-            if (!item)
+            var item_1 = this.character.items.find(function (i) { return i.id === id; });
+            if (!item_1)
                 return;
-            var name_1 = prompt('Item name:', item.name);
-            if (name_1 === null)
-                return;
-            var location_1 = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
-            if (location_1 === null)
-                return;
-            var description = prompt('Description:', item.description);
-            if (description === null)
-                return;
-            item.name = name_1;
-            item.location = location_1;
-            item.description = description;
+            editPopover.show(type, item_1, function (data) {
+                item_1.name = data.name;
+                item_1.location = data.location;
+                item_1.description = data.description;
+                _this.character.invalidateEffectiveStatsCache();
+                _this.saveAndRender();
+            });
         }
         else {
-            var ability = this.character.abilities.find(function (a) { return a.id === id; });
-            if (!ability)
+            var ability_1 = this.character.abilities.find(function (a) { return a.id === id; });
+            if (!ability_1)
                 return;
-            var name_2 = prompt('Ability name:', ability.name);
-            if (name_2 === null)
-                return;
-            var description = prompt('Description:', ability.description);
-            if (description === null)
-                return;
-            ability.name = name_2;
-            ability.description = description;
+            editPopover.show(type, ability_1, function (data) {
+                ability_1.name = data.name;
+                ability_1.description = data.description;
+                _this.saveAndRender();
+            });
         }
-        this.saveAndRender();
     };
     CharacterController.prototype.deleteItemOrAbility = function (id, type) {
-        var confirm = window.confirm("Delete this ".concat(type, "?"));
-        if (!confirm)
-            return;
-        if (type === 'item') {
-            this.character.items = this.character.items.filter(function (i) { return i.id !== id; });
-        }
-        else {
-            this.character.abilities = this.character.abilities.filter(function (a) { return a.id !== id; });
-        }
-        this.saveAndRender();
-    };
-    CharacterController.prototype.attachNewItemListener = function () {
-        var _this = this;
-        var newItemBtn = document.querySelector('.new-item-btn');
-        if (newItemBtn) {
-            newItemBtn.addEventListener('click', function () {
-                _this.createNewItem();
-            });
-        }
-    };
-    CharacterController.prototype.attachNewAbilityListener = function () {
-        var _this = this;
-        var newAbilityBtn = document.querySelector('.new-ability-btn');
-        if (newAbilityBtn) {
-            newAbilityBtn.addEventListener('click', function () {
-                _this.createNewAbility();
-            });
+        if (window.confirm("Delete this ".concat(type, "?"))) {
+            if (type === 'item') {
+                this.character.items = this.character.items.filter(function (i) { return i.id !== id; });
+                this.character.invalidateEffectiveStatsCache();
+            }
+            else {
+                this.character.abilities = this.character.abilities.filter(function (a) { return a.id !== id; });
+            }
+            this.saveAndRender();
         }
     };
     CharacterController.prototype.createNewItem = function () {
-        var name = prompt('Item name:');
-        if (!name)
-            return;
-        var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
-        if (location === null)
-            return;
-        var description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
-        if (description === null)
-            return;
-        this.character.items.push({
-            id: Date.now().toString(),
-            name: name,
-            location: location,
-            description: description,
-            equipped: false
+        var _this = this;
+        editPopover.show('item', { name: '', location: 'melee weapon', description: '' }, function (data) {
+            if (!data.name)
+                return;
+            _this.character.items.push({
+                id: Date.now().toString(),
+                name: data.name,
+                location: data.location || 'melee weapon',
+                description: data.description,
+                equipped: false,
+            });
+            _this.character.invalidateEffectiveStatsCache();
+            _this.saveAndRender();
         });
-        this.saveAndRender();
     };
     CharacterController.prototype.createNewAbility = function () {
-        var name = prompt('Ability name:');
-        if (!name)
-            return;
-        var description = prompt('Description:');
-        if (description === null)
-            return;
-        this.character.abilities.push({
-            id: Date.now().toString(),
-            name: name,
-            description: description
+        var _this = this;
+        editPopover.show('ability', { name: '', description: '' }, function (data) {
+            if (!data.name)
+                return;
+            _this.character.abilities.push({
+                id: Date.now().toString(),
+                name: data.name,
+                description: data.description,
+            });
+            _this.saveAndRender();
         });
-        this.saveAndRender();
     };
     return CharacterController;
 }());
