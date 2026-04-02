@@ -1,12 +1,19 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
+        this.VERSION = '1.0.0';
     }
     CharacterView.prototype.render = function (character) {
+        this.renderVersion();
         this.renderName(character.name);
         this.renderTokens(character);
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
+    };
+    CharacterView.prototype.renderVersion = function () {
+        var versionDiv = document.getElementById('version');
+        if (versionDiv)
+            versionDiv.textContent = "v".concat(this.VERSION);
     };
     CharacterView.prototype.renderName = function (name) {
         var nameDiv = document.getElementById('character-name');

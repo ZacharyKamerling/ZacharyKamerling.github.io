@@ -1,12 +1,20 @@
 import { Character } from '../models/character.js';
 
 export class CharacterView {
+    private VERSION = '1.0.0';
+
     render(character: Character) {
+        this.renderVersion();
         this.renderName(character.name);
         this.renderTokens(character);
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
+    }
+
+    private renderVersion() {
+        const versionDiv = document.getElementById('version');
+        if (versionDiv) versionDiv.textContent = `v${this.VERSION}`;
     }
 
     private renderName(name: string) {
