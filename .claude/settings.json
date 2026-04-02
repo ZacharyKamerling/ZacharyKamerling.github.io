@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tsc && git add -A && git diff --cached --quiet || (git commit -m 'Compile TypeScript changes' && git push origin claude/connect-code-to-project-fvwIA)",
+            "timeout": 60,
+            "statusMessage": "Compiling TypeScript and syncing changes..."
+          }
+        ]
+      }
+    ]
+  }
+}
