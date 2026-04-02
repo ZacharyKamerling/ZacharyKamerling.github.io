@@ -5,6 +5,8 @@ export class CharacterView {
         this.renderName(character.name);
         this.renderTokens(character);
         this.renderStats(character);
+        this.renderItems(character);
+        this.renderAbilities(character);
     }
 
     private renderName(name: string) {
@@ -73,5 +75,79 @@ export class CharacterView {
                     </div>
                 </div>
             `;
+    }
+
+    public renderItems(character: Character) {
+        const maxSlots = character.might + 5;
+        const itemsUsed = character.items.length;
+        const exceedsSlots = itemsUsed > maxSlots;
+
+        let itemsHtml = character.items.map((item, idx) => `
+            <div class="item-ability-entry" data-id="${item.id}" data-type="item">
+                <div class="item-ability-header">
+                    <span class="item-ability-name">${item.name}</span>
+                    <span class="item-location">${item.location}</span>
+                </div>
+                <div class="item-ability-description" style="display: none;">
+                    ${item.description}
+                </div>
+            </div>
+        `).join('');
+
+        const container = document.getElementById('items-abilities-container');
+        if (!container) return;
+
+        let itemsSection = document.getElementById('items-section');
+        if (!itemsSection) {
+            itemsSection = document.createElement('div');
+            itemsSection.id = 'items-section';
+            container.appendChild(itemsSection);
+        }
+
+        itemsSection.className = 'items-abilities-section';
+        itemsSection.innerHTML = `
+            <div style="margin-top: 1.5em;">
+                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
+                <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
+                    ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
+                </div>
+                ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
+                <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
+            </div>
+        `;
+    }
+
+    public renderAbilities(character: Character) {
+        let abilitiesHtml = character.abilities.map((ability) => `
+            <div class="item-ability-entry" data-id="${ability.id}" data-type="ability">
+                <div class="item-ability-header">
+                    <span class="item-ability-name">${ability.name}</span>
+                </div>
+                <div class="item-ability-description" style="display: none;">
+                    ${ability.description}
+                </div>
+            </div>
+        `).join('');
+
+        const container = document.getElementById('items-abilities-container');
+        if (!container) return;
+
+        let abilitiesSection = document.getElementById('abilities-section');
+        if (!abilitiesSection) {
+            abilitiesSection = document.createElement('div');
+            abilitiesSection.id = 'abilities-section';
+            container.appendChild(abilitiesSection);
+        }
+
+        abilitiesSection.className = 'items-abilities-section';
+        abilitiesSection.innerHTML = `
+            <div style="margin-top: 1.5em;">
+                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.5em;">
+                    ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
+                </div>
+                <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
+            </div>
+        `;
     }
 }

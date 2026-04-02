@@ -22,6 +22,9 @@ export class CharacterController {
         this.attachTokenListeners();
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     }
 
     private saveAndRender() {
@@ -32,6 +35,9 @@ export class CharacterController {
         this.attachTokenListeners();
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     }
 
     private attachTokenMaxSetListeners() {
@@ -267,5 +273,154 @@ export class CharacterController {
                 this.diceRoller.rollPMAR('customRoll', 'Custom');
             }
         });
+    }
+
+    private attachItemAbilityListeners() {
+        document.querySelectorAll('.item-ability-entry').forEach(entry => {
+            const element = entry as HTMLElement;
+            const id = element.dataset.id!;
+            const type = element.dataset.type as 'item' | 'ability';
+            const description = element.querySelector('.item-ability-description') as HTMLElement;
+            let holdTimer: ReturnType<typeof setTimeout> | undefined;
+
+            // Tap to toggle description
+            element.addEventListener('click', () => {
+                if (description.style.display === 'none') {
+                    description.style.display = 'block';
+                } else {
+                    description.style.display = 'none';
+                }
+            });
+
+            // Long press to edit/delete
+            element.addEventListener('mousedown', (e: MouseEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, 600);
+            });
+            element.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            element.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+
+            element.addEventListener('touchstart', (e: TouchEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, 600);
+            });
+            element.addEventListener('touchend', () => clearTimeout(holdTimer));
+            element.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            element.addEventListener('contextmenu', (e) => e.preventDefault());
+        });
+    }
+
+    private showItemAbilityMenu(id: string, type: 'item' | 'ability') {
+        const options = ['Edit', 'Delete', 'Cancel'];
+        const choice = prompt(`${type === 'item' ? 'Item' : 'Ability'} options:\n${options.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nEnter number or cancel`);
+
+        if (choice === '1' || choice?.toLowerCase() === 'edit') {
+            this.editItemOrAbility(id, type);
+        } else if (choice === '2' || choice?.toLowerCase() === 'delete') {
+            this.deleteItemOrAbility(id, type);
+        }
+    }
+
+    private editItemOrAbility(id: string, type: 'item' | 'ability') {
+        if (type === 'item') {
+            const item = this.character.items.find(i => i.id === id);
+            if (!item) return;
+
+            const name = prompt('Item name:', item.name);
+            if (name === null) return;
+
+            const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
+            if (location === null) return;
+
+            const description = prompt('Description:', item.description);
+            if (description === null) return;
+
+            item.name = name;
+            item.location = location;
+            item.description = description;
+        } else {
+            const ability = this.character.abilities.find(a => a.id === id);
+            if (!ability) return;
+
+            const name = prompt('Ability name:', ability.name);
+            if (name === null) return;
+
+            const description = prompt('Description:', ability.description);
+            if (description === null) return;
+
+            ability.name = name;
+            ability.description = description;
+        }
+
+        this.saveAndRender();
+    }
+
+    private deleteItemOrAbility(id: string, type: 'item' | 'ability') {
+        const confirm = window.confirm(`Delete this ${type}?`);
+        if (!confirm) return;
+
+        if (type === 'item') {
+            this.character.items = this.character.items.filter(i => i.id !== id);
+        } else {
+            this.character.abilities = this.character.abilities.filter(a => a.id !== id);
+        }
+
+        this.saveAndRender();
+    }
+
+    private attachNewItemListener() {
+        const newItemBtn = document.querySelector('.new-item-btn') as HTMLButtonElement;
+        if (newItemBtn) {
+            newItemBtn.addEventListener('click', () => {
+                this.createNewItem();
+            });
+        }
+    }
+
+    private attachNewAbilityListener() {
+        const newAbilityBtn = document.querySelector('.new-ability-btn') as HTMLButtonElement;
+        if (newAbilityBtn) {
+            newAbilityBtn.addEventListener('click', () => {
+                this.createNewAbility();
+            });
+        }
+    }
+
+    private createNewItem() {
+        const name = prompt('Item name:');
+        if (!name) return;
+
+        const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
+        if (location === null) return;
+
+        const description = prompt('Description:');
+        if (description === null) return;
+
+        this.character.items.push({
+            id: Date.now().toString(),
+            name,
+            location,
+            description
+        });
+
+        this.saveAndRender();
+    }
+
+    private createNewAbility() {
+        const name = prompt('Ability name:');
+        if (!name) return;
+
+        const description = prompt('Description:');
+        if (description === null) return;
+
+        this.character.abilities.push({
+            id: Date.now().toString(),
+            name,
+            description
+        });
+
+        this.saveAndRender();
     }
 }

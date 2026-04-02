@@ -5,6 +5,8 @@ var CharacterView = /** @class */ (function () {
         this.renderName(character.name);
         this.renderTokens(character);
         this.renderStats(character);
+        this.renderItems(character);
+        this.renderAbilities(character);
     };
     CharacterView.prototype.renderName = function (name) {
         var nameDiv = document.getElementById('character-name');
@@ -35,6 +37,37 @@ var CharacterView = /** @class */ (function () {
         if (!statSection)
             return;
         statSection.innerHTML = "\n                <div style=\"font-size:1em; display: flex; flex-direction: column;\">\n                    <div class=\"stat-row\">\n                        <span id=\"melee-power-label\" class=\"stat-label round-style\" title=\"Melee Power\">Melee \u2694\uFE0F</span>\n                        <div class=\"stat-value\">".concat(character.meleePower, "</div>\n                        <span id=\"ranged-power-label\" class=\"stat-label round-style\" title=\"Ranged Power\">Ranged \uD83C\uDFF9</span>\n                        <div class=\"stat-value\">").concat(character.rangedPower, "</div>\n                    </div>\n                    <div class=\"stat-row\">\n                        <span id=\"might-label\" class=\"stat-label round-style\" title=\"Might\">Might \uD83D\uDCAA</span>\n                        <div class=\"stat-value\">").concat(character.might, "</div>\n                        <span id=\"awareness-label\" class=\"stat-label round-style\" title=\"Awareness\">Awareness \uD83D\uDC41\uFE0F</span>\n                        <div class=\"stat-value\">").concat(character.awareness, "</div>\n                    </div>\n                    <div class=\"stat-row\"\">\n                        <span id=\"resolve-label\" class=\"stat-label round-style\" title=\"Resolve\">Resolve \u270A</span>\n                        <div class=\"stat-value\">").concat(character.resolve, "</div>\n                        <span id=\"stress-label\" class=\"stat-label round-style\" title=\"Stress\">Stress \uD83D\uDCA6</span>\n                        <div class=\"stat-value\">").concat(character.stress, "</div>\n                    </div>\n                    <div style=\"display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;\">\n                        <button id=\"custom-neg-btn\" class=\"custom-roll-btn round-style\">-1</button>\n                        <input id=\"custom-roll-input\" class=\"custom-roll-input round-style\" type=\"number\" value=\"0\">\n                        <button id=\"custom-pos-btn\" class=\"custom-roll-btn round-style\">+1</button>\n                        <button id=\"custom-roll-btn\" class=\"custom-roll-btn round-style\" style=\"min-width: 5em; justify-content: center;\">Roll</button>\n                    </div>\n                </div>\n            ");
+    };
+    CharacterView.prototype.renderItems = function (character) {
+        var maxSlots = character.might + 5;
+        var itemsUsed = character.items.length;
+        var exceedsSlots = itemsUsed > maxSlots;
+        var itemsHtml = character.items.map(function (item, idx) { return "\n            <div class=\"item-ability-entry\" data-id=\"".concat(item.id, "\" data-type=\"item\">\n                <div class=\"item-ability-header\">\n                    <span class=\"item-ability-name\">").concat(item.name, "</span>\n                    <span class=\"item-location\">").concat(item.location, "</span>\n                </div>\n                <div class=\"item-ability-description\" style=\"display: none;\">\n                    ").concat(item.description, "\n                </div>\n            </div>\n        "); }).join('');
+        var container = document.getElementById('items-abilities-container');
+        if (!container)
+            return;
+        var itemsSection = document.getElementById('items-section');
+        if (!itemsSection) {
+            itemsSection = document.createElement('div');
+            itemsSection.id = 'items-section';
+            container.appendChild(itemsSection);
+        }
+        itemsSection.className = 'items-abilities-section';
+        itemsSection.innerHTML = "\n            <div style=\"margin-top: 1.5em;\">\n                <h3 style=\"margin: 0.5em 0; font-size: 1.2em;\">Items <span style=\"font-size: 0.9em; font-weight: normal;\">(".concat(itemsUsed, "/").concat(maxSlots, ")</span></h3>\n                <div style=\"display: flex; flex-direction: column; gap: 0.5em; ").concat(exceedsSlots ? 'margin-bottom: 0.5em;' : '', "\">\n                    ").concat(itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>', "\n                </div>\n                ").concat(exceedsSlots ? "<div style=\"color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;\">\u26A0\uFE0F Item slots exceeded</div>" : '', "\n                <button class=\"new-item-btn round-style\" style=\"width: 100%; padding: 0.5em; margin-top: 0.5em;\">+ New Item</button>\n            </div>\n        ");
+    };
+    CharacterView.prototype.renderAbilities = function (character) {
+        var abilitiesHtml = character.abilities.map(function (ability) { return "\n            <div class=\"item-ability-entry\" data-id=\"".concat(ability.id, "\" data-type=\"ability\">\n                <div class=\"item-ability-header\">\n                    <span class=\"item-ability-name\">").concat(ability.name, "</span>\n                </div>\n                <div class=\"item-ability-description\" style=\"display: none;\">\n                    ").concat(ability.description, "\n                </div>\n            </div>\n        "); }).join('');
+        var container = document.getElementById('items-abilities-container');
+        if (!container)
+            return;
+        var abilitiesSection = document.getElementById('abilities-section');
+        if (!abilitiesSection) {
+            abilitiesSection = document.createElement('div');
+            abilitiesSection.id = 'abilities-section';
+            container.appendChild(abilitiesSection);
+        }
+        abilitiesSection.className = 'items-abilities-section';
+        abilitiesSection.innerHTML = "\n            <div style=\"margin-top: 1.5em;\">\n                <h3 style=\"margin: 0.5em 0; font-size: 1.2em;\">Abilities</h3>\n                <div style=\"display: flex; flex-direction: column; gap: 0.5em;\">\n                    ".concat(abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>', "\n                </div>\n                <button class=\"new-ability-btn round-style\" style=\"width: 100%; padding: 0.5em; margin-top: 0.5em;\">+ New Ability</button>\n            </div>\n        ");
     };
     return CharacterView;
 }());

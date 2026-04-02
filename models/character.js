@@ -15,6 +15,7 @@ var Character = /** @class */ (function () {
         this.staminaTokens = (_k = data.staminaTokens) !== null && _k !== void 0 ? _k : 0;
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
         this.equipment = data.equipment || [];
+        this.items = data.items || [];
         this.abilities = data.abilities || [];
     }
     Character.default = function () {
@@ -33,6 +34,7 @@ var Character = /** @class */ (function () {
             stress: 0,
             customRoll: 1,
             equipment: [],
+            items: [],
             abilities: []
         };
     };
@@ -55,6 +57,7 @@ var Character = /** @class */ (function () {
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
             equipment: this.equipment || [],
+            items: this.items || [],
             abilities: this.abilities || []
         };
     };

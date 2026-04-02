@@ -16,6 +16,9 @@ var CharacterController = /** @class */ (function () {
         this.attachTokenListeners();
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     }
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character);
@@ -25,6 +28,9 @@ var CharacterController = /** @class */ (function () {
         this.attachTokenListeners();
         this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;
@@ -263,6 +269,146 @@ var CharacterController = /** @class */ (function () {
                 _this.diceRoller.rollPMAR('customRoll', 'Custom');
             }
         });
+    };
+    CharacterController.prototype.attachItemAbilityListeners = function () {
+        var _this = this;
+        document.querySelectorAll('.item-ability-entry').forEach(function (entry) {
+            var element = entry;
+            var id = element.dataset.id;
+            var type = element.dataset.type;
+            var description = element.querySelector('.item-ability-description');
+            var holdTimer;
+            // Tap to toggle description
+            element.addEventListener('click', function () {
+                if (description.style.display === 'none') {
+                    description.style.display = 'block';
+                }
+                else {
+                    description.style.display = 'none';
+                }
+            });
+            // Long press to edit/delete
+            element.addEventListener('mousedown', function (e) {
+                holdTimer = setTimeout(function () {
+                    _this.showItemAbilityMenu(id, type);
+                }, 600);
+            });
+            element.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('touchstart', function (e) {
+                holdTimer = setTimeout(function () {
+                    _this.showItemAbilityMenu(id, type);
+                }, 600);
+            });
+            element.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+        });
+    };
+    CharacterController.prototype.showItemAbilityMenu = function (id, type) {
+        var options = ['Edit', 'Delete', 'Cancel'];
+        var choice = prompt("".concat(type === 'item' ? 'Item' : 'Ability', " options:\n").concat(options.map(function (o, i) { return "".concat(i + 1, ". ").concat(o); }).join('\n'), "\n\nEnter number or cancel"));
+        if (choice === '1' || (choice === null || choice === void 0 ? void 0 : choice.toLowerCase()) === 'edit') {
+            this.editItemOrAbility(id, type);
+        }
+        else if (choice === '2' || (choice === null || choice === void 0 ? void 0 : choice.toLowerCase()) === 'delete') {
+            this.deleteItemOrAbility(id, type);
+        }
+    };
+    CharacterController.prototype.editItemOrAbility = function (id, type) {
+        if (type === 'item') {
+            var item = this.character.items.find(function (i) { return i.id === id; });
+            if (!item)
+                return;
+            var name_1 = prompt('Item name:', item.name);
+            if (name_1 === null)
+                return;
+            var location_1 = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
+            if (location_1 === null)
+                return;
+            var description = prompt('Description:', item.description);
+            if (description === null)
+                return;
+            item.name = name_1;
+            item.location = location_1;
+            item.description = description;
+        }
+        else {
+            var ability = this.character.abilities.find(function (a) { return a.id === id; });
+            if (!ability)
+                return;
+            var name_2 = prompt('Ability name:', ability.name);
+            if (name_2 === null)
+                return;
+            var description = prompt('Description:', ability.description);
+            if (description === null)
+                return;
+            ability.name = name_2;
+            ability.description = description;
+        }
+        this.saveAndRender();
+    };
+    CharacterController.prototype.deleteItemOrAbility = function (id, type) {
+        var confirm = window.confirm("Delete this ".concat(type, "?"));
+        if (!confirm)
+            return;
+        if (type === 'item') {
+            this.character.items = this.character.items.filter(function (i) { return i.id !== id; });
+        }
+        else {
+            this.character.abilities = this.character.abilities.filter(function (a) { return a.id !== id; });
+        }
+        this.saveAndRender();
+    };
+    CharacterController.prototype.attachNewItemListener = function () {
+        var _this = this;
+        var newItemBtn = document.querySelector('.new-item-btn');
+        if (newItemBtn) {
+            newItemBtn.addEventListener('click', function () {
+                _this.createNewItem();
+            });
+        }
+    };
+    CharacterController.prototype.attachNewAbilityListener = function () {
+        var _this = this;
+        var newAbilityBtn = document.querySelector('.new-ability-btn');
+        if (newAbilityBtn) {
+            newAbilityBtn.addEventListener('click', function () {
+                _this.createNewAbility();
+            });
+        }
+    };
+    CharacterController.prototype.createNewItem = function () {
+        var name = prompt('Item name:');
+        if (!name)
+            return;
+        var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
+        if (location === null)
+            return;
+        var description = prompt('Description:');
+        if (description === null)
+            return;
+        this.character.items.push({
+            id: Date.now().toString(),
+            name: name,
+            location: location,
+            description: description
+        });
+        this.saveAndRender();
+    };
+    CharacterController.prototype.createNewAbility = function () {
+        var name = prompt('Ability name:');
+        if (!name)
+            return;
+        var description = prompt('Description:');
+        if (description === null)
+            return;
+        this.character.abilities.push({
+            id: Date.now().toString(),
+            name: name,
+            description: description
+        });
+        this.saveAndRender();
     };
     return CharacterController;
 }());

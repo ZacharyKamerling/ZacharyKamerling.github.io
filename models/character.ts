@@ -13,7 +13,15 @@ export interface CharacterData {
     staminaTokens: number;
     customRoll: number;
     equipment: EquipmentData[];
+    items: ItemData[];
     abilities: AbilityData[];
+}
+
+export interface ItemData {
+    id: string;
+    name: string;
+    description: string;
+    location: string;
 }
 
 export interface EquipmentData {
@@ -43,6 +51,7 @@ export class Character {
     staminaTokens: number;
     customRoll: number;
     equipment: EquipmentData[];
+    items: ItemData[];
     abilities: AbilityData[];
     [key: string]: any;
 
@@ -61,6 +70,7 @@ export class Character {
         this.staminaTokens = data.staminaTokens ?? 0;
         this.customRoll = data.customRoll ?? 1;
         this.equipment = data.equipment || [];
+        this.items = data.items || [];
         this.abilities = data.abilities || [];
     }
 
@@ -80,6 +90,7 @@ export class Character {
             stress: 0,
             customRoll: 1,
             equipment: [],
+            items: [],
             abilities: []
         };
     }
@@ -104,6 +115,7 @@ export class Character {
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
             equipment: this.equipment || [],
+            items: this.items || [],
             abilities: this.abilities || []
         };
     }

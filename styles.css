@@ -245,3 +245,75 @@ button {
     max-width: 1.8em;
     height: 1.8em;
 }
+
+.items-abilities-section {
+    margin-top: 1em;
+    padding: 0.5em;
+    background: #2a2a2a;
+    border-radius: 0.4em;
+}
+
+.item-ability-entry {
+    padding: 0.5em;
+    background: #333;
+    border-radius: 0.3em;
+    border: 1px solid #444;
+    cursor: pointer;
+    transition: background 0.15s, border 0.15s;
+    user-select: none;
+}
+
+.item-ability-entry:active {
+    background: #3a3a3a;
+    border-color: #555;
+}
+
+.item-ability-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.item-ability-name {
+    font-weight: 500;
+    flex: 1;
+}
+
+.item-location {
+    font-size: 0.85em;
+    opacity: 0.7;
+    padding: 0.2em 0.4em;
+    background: #444;
+    border-radius: 0.2em;
+    white-space: nowrap;
+}
+
+.item-ability-description {
+    margin-top: 0.5em;
+    padding: 0.4em;
+    background: #2a2a2a;
+    border-left: 2px solid #666;
+    font-size: 0.9em;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.new-item-btn,
+.new-ability-btn {
+    background: #444;
+    border: 1px solid #666;
+    border-radius: 0.4em;
+    padding: 0.5em;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, border 0.15s;
+    font-weight: 500;
+}
+
+.new-item-btn:active,
+.new-ability-btn:active {
+    background: #555;
+    border-color: #888;
+}
