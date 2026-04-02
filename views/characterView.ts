@@ -57,19 +57,31 @@ export class CharacterView {
         if (!statSection) return;
 
         const effective = character.getEffectiveStats();
+
+        // Check if a stat is affected by any equipped item
+        const isStatBoosted = (statName: string): boolean => {
+            return character.items.some(item => {
+                if (!item.equipped) return false;
+                const buffPattern = /\$\$(\w+):([-+]?\d+)/g;
+                let match;
+                while ((match = buffPattern.exec(item.description)) !== null) {
+                    if (match[1] === statName) return true;
+                }
+                return false;
+            });
+        };
+
         const statValueStyle = (stat: string): string => {
-            const baseVal = character[stat as keyof Character] as number;
-            const effVal = effective[stat];
-            return effVal !== baseVal ? 'color: #4ade80;' : '';
+            return isStatBoosted(stat) ? 'color: #4ade80;' : '';
         };
 
         statSection.innerHTML = `
                 <div style="font-size:1em; display: flex; flex-direction: column;">
                     <div class="stat-row">
                         <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
-                        <div class="stat-value" style="${statValueStyle('meleePower')}">${effective.meleePower}</div>
+                        <div class="stat-value" style="${statValueStyle('melee_power')}">${effective.meleePower}</div>
                         <span id="ranged-power-label" class="stat-label round-style" title="Ranged Power">Ranged 🏹</span>
-                        <div class="stat-value" style="${statValueStyle('rangedPower')}">${effective.rangedPower}</div>
+                        <div class="stat-value" style="${statValueStyle('ranged_power')}">${effective.rangedPower}</div>
                     </div>
                     <div class="stat-row">
                         <span id="might-label" class="stat-label round-style" title="Might">Might 💪</span>

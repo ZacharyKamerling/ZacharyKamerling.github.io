@@ -291,6 +291,7 @@ export class CharacterController {
                     const item = this.character.items.find(i => i.id === id);
                     if (item) {
                         item.equipped = checkbox.checked;
+                        this.character.invalidateEffectiveStatsCache();
                         this.saveAndRender();
                     }
                 });
@@ -353,6 +354,7 @@ export class CharacterController {
             item.name = name;
             item.location = location;
             item.description = description;
+            this.character.invalidateEffectiveStatsCache();
         } else {
             const ability = this.character.abilities.find(a => a.id === id);
             if (!ability) return;
@@ -376,6 +378,7 @@ export class CharacterController {
 
         if (type === 'item') {
             this.character.items = this.character.items.filter(i => i.id !== id);
+            this.character.invalidateEffectiveStatsCache();
         } else {
             this.character.abilities = this.character.abilities.filter(a => a.id !== id);
         }
@@ -419,6 +422,7 @@ export class CharacterController {
             equipped: false
         });
 
+        this.character.invalidateEffectiveStatsCache();
         this.saveAndRender();
     }
 

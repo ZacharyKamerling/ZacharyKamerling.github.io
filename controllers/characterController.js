@@ -286,6 +286,7 @@ var CharacterController = /** @class */ (function () {
                     var item = _this.character.items.find(function (i) { return i.id === id; });
                     if (item) {
                         item.equipped = checkbox.checked;
+                        _this.character.invalidateEffectiveStatsCache();
                         _this.saveAndRender();
                     }
                 });
@@ -344,6 +345,7 @@ var CharacterController = /** @class */ (function () {
             item.name = name_1;
             item.location = location_1;
             item.description = description;
+            this.character.invalidateEffectiveStatsCache();
         }
         else {
             var ability = this.character.abilities.find(function (a) { return a.id === id; });
@@ -366,6 +368,7 @@ var CharacterController = /** @class */ (function () {
             return;
         if (type === 'item') {
             this.character.items = this.character.items.filter(function (i) { return i.id !== id; });
+            this.character.invalidateEffectiveStatsCache();
         }
         else {
             this.character.abilities = this.character.abilities.filter(function (a) { return a.id !== id; });
@@ -407,6 +410,7 @@ var CharacterController = /** @class */ (function () {
             description: description,
             equipped: false
         });
+        this.character.invalidateEffectiveStatsCache();
         this.saveAndRender();
     };
     CharacterController.prototype.createNewAbility = function () {
