@@ -39,23 +39,17 @@ export class CharacterView {
         const container = document.getElementById('page-container');
         if (!container) return;
 
+        // Render tabs in the fixed header
+        const tabsBar = document.getElementById('tabs-bar');
+        if (tabsBar) {
+            tabsBar.innerHTML = this.pages.map((name, idx) => `
+                <button class="page-btn round-style" data-page="${idx}" style="padding: 0.4em 0.8em; font-size: 0.9em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
+                    ${name}
+                </button>
+            `).join('');
+        }
+
         container.innerHTML = `
-            <div style="position: sticky; top: 0; z-index: 100; background: rgba(0, 0, 0, 0.9);">
-                <div style="display: flex; align-items: center; justify-content: center; padding: 0.5em 0; border-bottom: 1px solid #444;">
-                    <div id="version" style="font-size: 0.7em; opacity: 0.5; position: absolute; left: 0; padding: 0.3em;"></div>
-                    <div id="character-name" style="font-size: 1.5em; font-weight: 600; text-align: center; flex: 1 1 auto;"></div>
-                    <a href="index.html" title="Return to Character List" style="color: #fff; text-decoration: none; font-size: 1.4em; position: absolute; right: 0; padding: 0.2em 0.3em;">
-                        <span style="vertical-align: middle;">&#8962;</span>
-                    </a>
-                </div>
-                <div id="tabs-bar" style="display: flex; justify-content: center; gap: 0.4em; padding: 0.5em 0; flex-wrap: wrap; border-bottom: 1px solid #444;">
-                    ${this.pages.map((name, idx) => `
-                        <button class="page-btn round-style" data-page="${idx}" style="padding: 0.4em 0.8em; font-size: 0.9em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
-                            ${name}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
             <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%; min-height: 0;">
                 <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
                     ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; touch-action: manipulation;"></div>`).join('')}
