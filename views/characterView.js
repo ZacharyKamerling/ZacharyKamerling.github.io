@@ -1,6 +1,6 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
-        this.VERSION = '1.0.0';
+        this.VERSION = '1.0.1';
     }
     CharacterView.prototype.render = function (character) {
         this.renderVersion();

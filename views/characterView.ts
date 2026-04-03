@@ -1,7 +1,7 @@
 import { Character } from '../models/character.js';
 
 export class CharacterView {
-    private VERSION = '1.0.0';
+    private VERSION = '1.0.1';
 
     render(character: Character) {
         this.renderVersion();
