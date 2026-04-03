@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.4';
+    private VERSION = '1.0.5';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
 
@@ -10,7 +10,10 @@ export class CharacterView {
         this.renderVersion();
         this.renderName(character.name);
         this.renderPageContainer();
-        this.renderPage(character, this.currentPage);
+        // Render all pages
+        for (let i = 0; i < this.pages.length; i++) {
+            this.renderPage(character, i);
+        }
         this.setupPageNavigation();
     }
 
@@ -29,15 +32,15 @@ export class CharacterView {
         if (!container) return;
 
         container.innerHTML = `
-            <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #444; position: sticky; top: 0; z-index: 10; background: rgba(0, 0, 0, 0.5);">
-                ${this.pages.map((name, idx) => `
-                    <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
-                        ${name}
-                    </button>
-                `).join('')}
-            </div>
-            <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%; position: relative;">
-                <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
+            <div id="pages-wrapper" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+                <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #444; background: rgba(0, 0, 0, 0.7);">
+                    ${this.pages.map((name, idx) => `
+                        <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
+                            ${name}
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="pages-content" style="display: flex; flex: 1; overflow: hidden; width: 100%; height: 100%;">
                     ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
                 </div>
             </div>
@@ -81,7 +84,7 @@ export class CharacterView {
         }
 
         return `
-            <div style="display: flex; flex-direction: column; padding: 1em;">
+            <div style="display: flex; flex-direction: column; gap: 1em; padding: 1em;">
                 <div id="token-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
                     <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
                         <div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -122,7 +125,7 @@ export class CharacterView {
                         </div>
                     </div>
                 </div>
-                <div id="dice-results" style="margin: 1em auto 0 auto; max-width: 22em;"></div>
+                <div id="dice-results" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
                 <div id="card-section-container" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
             </div>
         `;
@@ -188,12 +191,11 @@ export class CharacterView {
     private renderNotesPage(character: Character): string {
         return `
             <div style="padding: 1em; display: flex; flex-direction: column;">
-                <div style="max-width: 22em; margin: 0 auto; width: 100%;">
-                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
+                <div style="max-width: 22em; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column;">
+                    <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                     <textarea id="notes-input" style="
                         width: 100%;
                         flex: 1;
-                        min-height: 250px;
                         padding: 0.75em;
                         border: 1px solid #666;
                         border-radius: 4px;
@@ -211,8 +213,8 @@ export class CharacterView {
     }
 
     private setupPageNavigation() {
-        const pagesWrapper = document.getElementById('pages-wrapper');
         const pagesContent = document.getElementById('pages-content');
+        const pagesWrapper = document.getElementById('pages-wrapper');
         const pageButtons = document.querySelectorAll('.page-btn');
 
         pageButtons.forEach(btn => {
@@ -226,11 +228,11 @@ export class CharacterView {
         let touchStartX = 0;
         let touchEndX = 0;
 
-        pagesWrapper?.addEventListener('touchstart', (e) => {
+        pagesContent?.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         }, false);
 
-        pagesWrapper?.addEventListener('touchend', (e) => {
+        pagesContent?.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             this.handleSwipe(touchStartX, touchEndX, pagesContent);
         }, false);
