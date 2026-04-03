@@ -27,25 +27,25 @@ var CharacterController = /** @class */ (function () {
         this.attachNotesListener();
     }
     CharacterController.prototype.saveAndRender = function () {
-        var _this = this;
         db.saveCharacter(this.character);
         this.view.render(this.character);
-        // Re-initialize cardDrawer after render since DOM elements are recreated
-        setTimeout(function () {
-            _this.cardDrawer = new CardDrawer(_this.character, document.getElementById('card-result-box'));
-            // Re-attach listeners after render
-            _this.attachStatRollListeners();
-            _this.attachStatMaxSetListeners();
-            _this.attachTokenListeners();
-            _this.attachTokenMaxSetListeners();
-            _this.attachCustomRollListeners();
-            _this.attachItemAbilityListeners();
-            _this.attachNewItemListener();
-            _this.attachNewAbilityListener();
-            _this.attachCardDrawingListeners();
-            _this.attachItemCheckboxListeners();
-            _this.attachNotesListener();
-        }, 0);
+        // Initialize cardDrawer after DOM is ready
+        var cardResultBox = document.getElementById('card-result-box');
+        if (cardResultBox) {
+            this.cardDrawer = new CardDrawer(this.character, cardResultBox);
+        }
+        // Re-attach all listeners
+        this.attachStatRollListeners();
+        this.attachStatMaxSetListeners();
+        this.attachTokenListeners();
+        this.attachTokenMaxSetListeners();
+        this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
+        this.attachItemCheckboxListeners();
+        this.attachNotesListener();
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;

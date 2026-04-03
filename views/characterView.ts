@@ -2,9 +2,10 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.5';
+    private VERSION = '1.0.6';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
+    private TAB_HEIGHT = '70px'; // Approximate height of tab bar
 
     render(character: Character) {
         this.renderVersion();
@@ -32,15 +33,15 @@ export class CharacterView {
         if (!container) return;
 
         container.innerHTML = `
-            <div id="pages-wrapper" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #444; background: rgba(0, 0, 0, 0.7);">
-                    ${this.pages.map((name, idx) => `
-                        <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
-                            ${name}
-                        </button>
-                    `).join('')}
-                </div>
-                <div id="pages-content" style="display: flex; flex: 1; overflow: hidden; width: 100%; height: 100%;">
+            <div id="tabs-bar" style="position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; z-index: 100; width: 100%; box-sizing: border-box;">
+                ${this.pages.map((name, idx) => `
+                    <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
+                        ${name}
+                    </button>
+                `).join('')}
+            </div>
+            <div id="pages-wrapper" style="margin-top: ${this.TAB_HEIGHT}; display: flex; flex: 1; overflow: hidden; width: 100%; height: calc(100vh - 120px);">
+                <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
                     ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
                 </div>
             </div>
@@ -84,8 +85,8 @@ export class CharacterView {
         }
 
         return `
-            <div style="display: flex; flex-direction: column; gap: 1em; padding: 1em;">
-                <div id="token-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 1em; padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
+                <div id="token-section" style="width: 100%;">
                     <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
                         <div style="display: flex; flex-direction: column; align-items: flex-start;">
                             <span id="blood-label" style="padding-left: 0.5em; font-size: 1em;">Blood (${currentBlood} / ${maxBlood})</span>
@@ -97,7 +98,7 @@ export class CharacterView {
                         </div>
                     </div>
                 </div>
-                <div id="stat-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
+                <div id="stat-section" style="width: 100%;">
                     <div style="font-size:1em; display: flex; flex-direction: column;">
                         <div class="stat-row">
                             <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
@@ -125,8 +126,8 @@ export class CharacterView {
                         </div>
                     </div>
                 </div>
-                <div id="dice-results" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
-                <div id="card-section-container" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
+                <div id="dice-results" style="width: 100%;"></div>
+                <div id="card-section-container" style="width: 100%;"></div>
             </div>
         `;
     }
@@ -150,15 +151,13 @@ export class CharacterView {
         `).join('');
 
         return `
-            <div style="padding: 1em;">
-                <div style="max-width: 22em; margin: 0 auto;">
-                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
-                        ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
-                    </div>
-                    ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
-                    <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
+                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
+                <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
+                    ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
                 </div>
+                ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
+                <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
             </div>
         `;
     }
@@ -176,45 +175,40 @@ export class CharacterView {
         `).join('');
 
         return `
-            <div style="padding: 1em;">
-                <div style="max-width: 22em; margin: 0 auto;">
-                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.5em;">
-                        ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
-                    </div>
-                    <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
+                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.5em;">
+                    ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
                 </div>
+                <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
             </div>
         `;
     }
 
     private renderNotesPage(character: Character): string {
         return `
-            <div style="padding: 1em; display: flex; flex-direction: column;">
-                <div style="max-width: 22em; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column;">
-                    <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
-                    <textarea id="notes-input" style="
-                        width: 100%;
-                        flex: 1;
-                        padding: 0.75em;
-                        border: 1px solid #666;
-                        border-radius: 4px;
-                        background: rgba(0, 0, 0, 0.3);
-                        color: #fff;
-                        font-family: monospace;
-                        font-size: 0.9em;
-                        resize: none;
-                        box-sizing: border-box;
-                    ">${character.notes}</textarea>
-                    <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">Save Notes</button>
-                </div>
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+                <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
+                <textarea id="notes-input" style="
+                    width: 100%;
+                    flex: 1;
+                    padding: 0.75em;
+                    border: 1px solid #666;
+                    border-radius: 4px;
+                    background: rgba(0, 0, 0, 0.3);
+                    color: #fff;
+                    font-family: monospace;
+                    font-size: 0.9em;
+                    resize: none;
+                    box-sizing: border-box;
+                ">${character.notes}</textarea>
+                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">Save Notes</button>
             </div>
         `;
     }
 
     private setupPageNavigation() {
         const pagesContent = document.getElementById('pages-content');
-        const pagesWrapper = document.getElementById('pages-wrapper');
         const pageButtons = document.querySelectorAll('.page-btn');
 
         pageButtons.forEach(btn => {
@@ -277,11 +271,5 @@ export class CharacterView {
                 btnEl.style.fontWeight = '';
             }
         });
-    }
-
-    // For controller to re-render a specific page
-    public renderCurrentPage(character: Character) {
-        this.renderPage(character, this.currentPage);
-        this.setupPageNavigation();
     }
 }

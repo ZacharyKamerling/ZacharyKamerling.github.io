@@ -37,22 +37,25 @@ export class CharacterController {
     private saveAndRender() {
         db.saveCharacter(this.character);
         this.view.render(this.character);
-        // Re-initialize cardDrawer after render since DOM elements are recreated
-        setTimeout(() => {
-            this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box')!);
-            // Re-attach listeners after render
-            this.attachStatRollListeners();
-            this.attachStatMaxSetListeners();
-            this.attachTokenListeners();
-            this.attachTokenMaxSetListeners();
-            this.attachCustomRollListeners();
-            this.attachItemAbilityListeners();
-            this.attachNewItemListener();
-            this.attachNewAbilityListener();
-            this.attachCardDrawingListeners();
-            this.attachItemCheckboxListeners();
-            this.attachNotesListener();
-        }, 0);
+
+        // Initialize cardDrawer after DOM is ready
+        const cardResultBox = document.getElementById('card-result-box');
+        if (cardResultBox) {
+            this.cardDrawer = new CardDrawer(this.character, cardResultBox);
+        }
+
+        // Re-attach all listeners
+        this.attachStatRollListeners();
+        this.attachStatMaxSetListeners();
+        this.attachTokenListeners();
+        this.attachTokenMaxSetListeners();
+        this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
+        this.attachItemCheckboxListeners();
+        this.attachNotesListener();
     }
 
     private attachTokenMaxSetListeners() {
