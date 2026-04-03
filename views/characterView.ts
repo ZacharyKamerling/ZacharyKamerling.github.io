@@ -208,11 +208,11 @@ export class CharacterView {
 
     private renderNotesPage(character: Character): string {
         return `
-            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; height: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
                 <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                 <textarea id="notes-input" style="
                     width: 100%;
-                    min-height: 12em;
+                    flex: 1;
                     padding: 0.75em;
                     border: 1px solid #666;
                     border-radius: 4px;
