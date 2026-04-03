@@ -291,6 +291,8 @@ var CardDrawer = /** @class */ (function () {
             return "\n                <div class=\"card\" style=\"\n                    border: 2px solid ".concat(borderColor, ";\n                    border-radius: 8px;\n                    padding: 1em;\n                    margin: 0.5em 0;\n                    background: rgba(0, 0, 0, 0.3);\n                    flex: 1;\n                    min-width: 200px;\n                \">\n                    <div style=\"font-weight: bold; margin-bottom: 0.5em;\">").concat(card.title, "</div>\n                    <div style=\"font-size: 0.95em; line-height: 1.4;\">").concat(card.description, "</div>\n                </div>\n            ");
         }).join('');
         this.resultBox.innerHTML = "\n            <div style=\"display: flex; flex-direction: column; gap: 0.5em;\">\n                ".concat(cardsHtml, "\n            </div>\n            <div style=\"font-style: italic; color: #999; font-size: 0.85em; margin-top: 1em;\">\n                Press and hold to dismiss\n            </div>\n        ");
+        // Scroll to cards
+        this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         this.attachDismissListener();
     };
     CardDrawer.prototype.attachDismissListener = function () {

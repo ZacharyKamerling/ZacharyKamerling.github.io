@@ -50,9 +50,9 @@ export class CharacterView {
                     </button>
                 `).join('')}
             </div>
-            <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%;">
+            <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%; min-height: 0;">
                 <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
-                    ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
+                    ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
                 </div>
             </div>
         `;

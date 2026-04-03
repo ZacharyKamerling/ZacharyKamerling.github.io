@@ -322,6 +322,9 @@ export class CardDrawer {
             </div>
         `;
 
+        // Scroll to cards
+        this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
         this.attachDismissListener();
     }
 
