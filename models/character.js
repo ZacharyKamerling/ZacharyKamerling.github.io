@@ -1,7 +1,6 @@
 var Character = /** @class */ (function () {
     function Character(data) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-        this.cachedEffectiveStats = null;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         this.id = data.id;
         this.name = data.name || 'Unnamed Character';
         this.meleePower = (_a = data.meleePower) !== null && _a !== void 0 ? _a : 0;
@@ -15,6 +14,7 @@ var Character = /** @class */ (function () {
         this.staminaMax = (_j = data.staminaMax) !== null && _j !== void 0 ? _j : 1;
         this.staminaTokens = (_k = data.staminaTokens) !== null && _k !== void 0 ? _k : 0;
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
+        this.unarmored = (_m = data.unarmored) !== null && _m !== void 0 ? _m : false;
         this.equipment = data.equipment || [];
         this.items = data.items || [];
         this.abilities = data.abilities || [];
@@ -34,6 +34,7 @@ var Character = /** @class */ (function () {
             resolve: 3,
             stress: 0,
             customRoll: 1,
+            unarmored: false,
             equipment: [],
             items: [],
             abilities: []
@@ -57,46 +58,11 @@ var Character = /** @class */ (function () {
             staminaMax: this.staminaMax,
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
+            unarmored: this.unarmored,
             equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []
         };
-    };
-    Character.prototype.getEffectiveStats = function () {
-        // Return cached result if available
-        if (this.cachedEffectiveStats) {
-            return this.cachedEffectiveStats;
-        }
-        // Parse all equipped items for stat buffs
-        var buffs = {};
-        this.items
-            .filter(function (item) { return item.equipped; })
-            .forEach(function (item) {
-            // Parse $$stat_name:value patterns
-            var buffPattern = /\$\$(\w+):([-+]?\d+)/g;
-            var match;
-            while ((match = buffPattern.exec(item.description)) !== null) {
-                var statName = match[1];
-                var value = parseInt(match[2], 10);
-                buffs[statName] = (buffs[statName] || 0) + value;
-            }
-        });
-        // Calculate and cache result
-        this.cachedEffectiveStats = {
-            meleePower: this.meleePower + (buffs['melee_power'] || 0),
-            rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
-            might: this.might + (buffs['might'] || 0),
-            awareness: this.awareness + (buffs['awareness'] || 0),
-            resolve: this.resolve + (buffs['resolve'] || 0),
-            stress: this.stress + (buffs['stress'] || 0),
-            bloodMax: this.bloodMax + (buffs['blood_max'] || 0),
-            staminaMax: this.staminaMax + (buffs['stamina_max'] || 0),
-            customRoll: this.customRoll + (buffs['custom_roll'] || 0),
-        };
-        return this.cachedEffectiveStats;
-    };
-    Character.prototype.invalidateEffectiveStatsCache = function () {
-        this.cachedEffectiveStats = null;
     };
     return Character;
 }());

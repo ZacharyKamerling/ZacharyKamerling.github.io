@@ -1,6 +1,7 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
-        this.VERSION = '1.0.1';
+        // REMEMBER: Increment VERSION when making UI changes
+        this.VERSION = '1.0.3';
     }
     CharacterView.prototype.render = function (character) {
         this.renderVersion();
@@ -9,6 +10,7 @@ var CharacterView = /** @class */ (function () {
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
+        this.renderCardSection(character);
     };
     CharacterView.prototype.renderVersion = function () {
         var versionDiv = document.getElementById('version');
@@ -41,29 +43,9 @@ var CharacterView = /** @class */ (function () {
     };
     CharacterView.prototype.renderStats = function (character) {
         var statSection = document.getElementById('stat-section');
-        if (!statSection) {
-            console.warn('stat-section not found');
+        if (!statSection)
             return;
-        }
-        var effective = character.getEffectiveStats();
-        // Check if a stat is affected by any equipped item
-        var isStatBoosted = function (statName) {
-            return character.items.some(function (item) {
-                if (!item.equipped)
-                    return false;
-                var buffPattern = /\$\$(\w+):([-+]?\d+)/g;
-                var match;
-                while ((match = buffPattern.exec(item.description)) !== null) {
-                    if (match[1] === statName)
-                        return true;
-                }
-                return false;
-            });
-        };
-        var statValueStyle = function (stat) {
-            return isStatBoosted(stat) ? 'color: #4ade80;' : '';
-        };
-        statSection.innerHTML = "\n                <div style=\"font-size:1em; display: flex; flex-direction: column;\">\n                    <div class=\"stat-row\">\n                        <span id=\"melee-power-label\" class=\"stat-label round-style\" title=\"Melee Power\">Melee \u2694\uFE0F</span>\n                        <div class=\"stat-value\" style=\"".concat(statValueStyle('melee_power'), "\">").concat(effective.meleePower, "</div>\n                        <span id=\"ranged-power-label\" class=\"stat-label round-style\" title=\"Ranged Power\">Ranged \uD83C\uDFF9</span>\n                        <div class=\"stat-value\" style=\"").concat(statValueStyle('ranged_power'), "\">").concat(effective.rangedPower, "</div>\n                    </div>\n                    <div class=\"stat-row\">\n                        <span id=\"might-label\" class=\"stat-label round-style\" title=\"Might\">Might \uD83D\uDCAA</span>\n                        <div class=\"stat-value\" style=\"").concat(statValueStyle('might'), "\">").concat(effective.might, "</div>\n                        <span id=\"awareness-label\" class=\"stat-label round-style\" title=\"Awareness\">Awareness \uD83D\uDC41\uFE0F</span>\n                        <div class=\"stat-value\" style=\"").concat(statValueStyle('awareness'), "\">").concat(effective.awareness, "</div>\n                    </div>\n                    <div class=\"stat-row\"\">\n                        <span id=\"resolve-label\" class=\"stat-label round-style\" title=\"Resolve\">Resolve \u270A</span>\n                        <div class=\"stat-value\" style=\"").concat(statValueStyle('resolve'), "\">").concat(effective.resolve, "</div>\n                        <span id=\"stress-label\" class=\"stat-label round-style\" title=\"Stress\">Stress \uD83D\uDCA6</span>\n                        <div class=\"stat-value\" style=\"").concat(statValueStyle('stress'), "\">").concat(effective.stress, "</div>\n                    </div>\n                    <div style=\"display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;\">\n                        <button id=\"custom-neg-btn\" class=\"custom-roll-btn round-style\">-1</button>\n                        <input id=\"custom-roll-input\" class=\"custom-roll-input round-style\" type=\"number\" value=\"0\">\n                        <button id=\"custom-pos-btn\" class=\"custom-roll-btn round-style\">+1</button>\n                        <button id=\"custom-roll-btn\" class=\"custom-roll-btn round-style\" style=\"min-width: 5em; justify-content: center;\">Roll</button>\n                    </div>\n                </div>\n            ");
+        statSection.innerHTML = "\n                <div style=\"font-size:1em; display: flex; flex-direction: column;\">\n                    <div class=\"stat-row\">\n                        <span id=\"melee-power-label\" class=\"stat-label round-style\" title=\"Melee Power\">Melee \u2694\uFE0F</span>\n                        <div class=\"stat-value\">".concat(character.meleePower, "</div>\n                        <span id=\"ranged-power-label\" class=\"stat-label round-style\" title=\"Ranged Power\">Ranged \uD83C\uDFF9</span>\n                        <div class=\"stat-value\">").concat(character.rangedPower, "</div>\n                    </div>\n                    <div class=\"stat-row\">\n                        <span id=\"might-label\" class=\"stat-label round-style\" title=\"Might\">Might \uD83D\uDCAA</span>\n                        <div class=\"stat-value\">").concat(character.might, "</div>\n                        <span id=\"awareness-label\" class=\"stat-label round-style\" title=\"Awareness\">Awareness \uD83D\uDC41\uFE0F</span>\n                        <div class=\"stat-value\">").concat(character.awareness, "</div>\n                    </div>\n                    <div class=\"stat-row\"\">\n                        <span id=\"resolve-label\" class=\"stat-label round-style\" title=\"Resolve\">Resolve \u270A</span>\n                        <div class=\"stat-value\">").concat(character.resolve, "</div>\n                        <span id=\"stress-label\" class=\"stat-label round-style\" title=\"Stress\">Stress \uD83D\uDCA6</span>\n                        <div class=\"stat-value\">").concat(character.stress, "</div>\n                    </div>\n                    <div style=\"display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;\">\n                        <button id=\"custom-neg-btn\" class=\"custom-roll-btn round-style\">-1</button>\n                        <input id=\"custom-roll-input\" class=\"custom-roll-input round-style\" type=\"number\" value=\"").concat(character.customRoll, "\">\n                        <button id=\"custom-pos-btn\" class=\"custom-roll-btn round-style\">+1</button>\n                        <button id=\"custom-roll-btn\" class=\"custom-roll-btn round-style\" style=\"min-width: 5em; justify-content: center;\">Roll</button>\n                    </div>\n                </div>\n            ");
     };
     CharacterView.prototype.renderItems = function (character) {
         var maxSlots = character.might + 5;
@@ -95,6 +77,18 @@ var CharacterView = /** @class */ (function () {
         }
         abilitiesSection.className = 'items-abilities-section';
         abilitiesSection.innerHTML = "\n            <div style=\"margin-top: 1.5em;\">\n                <h3 style=\"margin: 0.5em 0; font-size: 1.2em;\">Abilities</h3>\n                <div style=\"display: flex; flex-direction: column; gap: 0.5em;\">\n                    ".concat(abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>', "\n                </div>\n                <button class=\"new-ability-btn round-style\" style=\"width: 100%; padding: 0.5em; margin-top: 0.5em;\">+ New Ability</button>\n            </div>\n        ");
+    };
+    CharacterView.prototype.renderCardSection = function (character) {
+        var container = document.getElementById('card-section-container');
+        if (!container)
+            return;
+        var cardSection = document.getElementById('card-section');
+        if (!cardSection) {
+            cardSection = document.createElement('div');
+            cardSection.id = 'card-section';
+            container.appendChild(cardSection);
+        }
+        cardSection.innerHTML = "\n            <div style=\"margin-top: 1.5em;\">\n                <div style=\"display: flex; align-items: center; gap: 1em; margin-bottom: 1em;\">\n                    <button id=\"draw-cards-btn\" class=\"round-style\" style=\"padding: 0.5em 1em; flex: 1;\">Draw Cards</button>\n                    <label style=\"display: flex; align-items: center; gap: 0.5em; cursor: pointer;\">\n                        <input type=\"checkbox\" id=\"unarmored-toggle\" ".concat(character.unarmored ? 'checked' : '', " style=\"cursor: pointer;\">\n                        <span>Unarmored</span>\n                    </label>\n                </div>\n                <div id=\"card-result-box\"></div>\n            </div>\n        ");
     };
     return CharacterView;
 }());

@@ -12,6 +12,7 @@ export interface CharacterData {
     staminaMax: number;
     staminaTokens: number;
     customRoll: number;
+    unarmored: boolean;
     equipment: EquipmentData[];
     items: ItemData[];
     abilities: AbilityData[];
@@ -51,6 +52,7 @@ export class Character {
     staminaMax: number;
     staminaTokens: number;
     customRoll: number;
+    unarmored: boolean;
     equipment: EquipmentData[];
     items: ItemData[];
     abilities: AbilityData[];
@@ -71,6 +73,7 @@ export class Character {
         this.staminaMax = data.staminaMax ?? 1;
         this.staminaTokens = data.staminaTokens ?? 0;
         this.customRoll = data.customRoll ?? 1;
+        this.unarmored = data.unarmored ?? false;
         this.equipment = data.equipment || [];
         this.items = data.items || [];
         this.abilities = data.abilities || [];
@@ -91,6 +94,7 @@ export class Character {
             resolve: 3,
             stress: 0,
             customRoll: 1,
+            unarmored: false,
             equipment: [],
             items: [],
             abilities: []
@@ -116,6 +120,7 @@ export class Character {
             staminaMax: this.staminaMax,
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
+            unarmored: this.unarmored,
             equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []

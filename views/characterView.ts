@@ -1,7 +1,8 @@
 import { Character } from '../models/character.js';
 
 export class CharacterView {
-    private VERSION = '1.0.1';
+    // REMEMBER: Increment VERSION when making UI changes
+    private VERSION = '1.0.3';
 
     render(character: Character) {
         this.renderVersion();
@@ -10,6 +11,7 @@ export class CharacterView {
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
+        this.renderCardSection(character);
     }
 
     private renderVersion() {
@@ -54,53 +56,30 @@ export class CharacterView {
 
     public renderStats(character: Character) {
         const statSection = document.getElementById('stat-section');
-        if (!statSection) {
-            console.warn('stat-section not found');
-            return;
-        }
-
-        const effective = character.getEffectiveStats();
-
-        // Check if a stat is affected by any equipped item
-        const isStatBoosted = (statName: string): boolean => {
-            return character.items.some(item => {
-                if (!item.equipped) return false;
-                const buffPattern = /\$\$(\w+):([-+]?\d+)/g;
-                let match;
-                while ((match = buffPattern.exec(item.description)) !== null) {
-                    if (match[1] === statName) return true;
-                }
-                return false;
-            });
-        };
-
-        const statValueStyle = (stat: string): string => {
-            return isStatBoosted(stat) ? 'color: #4ade80;' : '';
-        };
-
+        if (!statSection) return;
         statSection.innerHTML = `
                 <div style="font-size:1em; display: flex; flex-direction: column;">
                     <div class="stat-row">
                         <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
-                        <div class="stat-value" style="${statValueStyle('melee_power')}">${effective.meleePower}</div>
+                        <div class="stat-value">${character.meleePower}</div>
                         <span id="ranged-power-label" class="stat-label round-style" title="Ranged Power">Ranged 🏹</span>
-                        <div class="stat-value" style="${statValueStyle('ranged_power')}">${effective.rangedPower}</div>
+                        <div class="stat-value">${character.rangedPower}</div>
                     </div>
                     <div class="stat-row">
                         <span id="might-label" class="stat-label round-style" title="Might">Might 💪</span>
-                        <div class="stat-value" style="${statValueStyle('might')}">${effective.might}</div>
+                        <div class="stat-value">${character.might}</div>
                         <span id="awareness-label" class="stat-label round-style" title="Awareness">Awareness 👁️</span>
-                        <div class="stat-value" style="${statValueStyle('awareness')}">${effective.awareness}</div>
+                        <div class="stat-value">${character.awareness}</div>
                     </div>
                     <div class="stat-row"">
                         <span id="resolve-label" class="stat-label round-style" title="Resolve">Resolve ✊</span>
-                        <div class="stat-value" style="${statValueStyle('resolve')}">${effective.resolve}</div>
+                        <div class="stat-value">${character.resolve}</div>
                         <span id="stress-label" class="stat-label round-style" title="Stress">Stress 💦</span>
-                        <div class="stat-value" style="${statValueStyle('stress')}">${effective.stress}</div>
+                        <div class="stat-value">${character.stress}</div>
                     </div>
                     <div style="display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;">
                         <button id="custom-neg-btn" class="custom-roll-btn round-style">-1</button>
-                        <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="0">
+                        <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="${character.customRoll}">
                         <button id="custom-pos-btn" class="custom-roll-btn round-style">+1</button>
                         <button id="custom-roll-btn" class="custom-roll-btn round-style" style="min-width: 5em; justify-content: center;">Roll</button>
                     </div>
@@ -179,6 +158,31 @@ export class CharacterView {
                     ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
                 </div>
                 <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
+            </div>
+        `;
+    }
+
+    public renderCardSection(character: Character) {
+        const container = document.getElementById('card-section-container');
+        if (!container) return;
+
+        let cardSection = document.getElementById('card-section');
+        if (!cardSection) {
+            cardSection = document.createElement('div');
+            cardSection.id = 'card-section';
+            container.appendChild(cardSection);
+        }
+
+        cardSection.innerHTML = `
+            <div style="margin-top: 1.5em;">
+                <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 1em;">
+                    <button id="draw-cards-btn" class="round-style" style="padding: 0.5em 1em; flex: 1;">Draw Cards</button>
+                    <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
+                        <input type="checkbox" id="unarmored-toggle" ${character.unarmored ? 'checked' : ''} style="cursor: pointer;">
+                        <span>Unarmored</span>
+                    </label>
+                </div>
+                <div id="card-result-box"></div>
             </div>
         `;
     }

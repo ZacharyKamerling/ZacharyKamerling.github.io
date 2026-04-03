@@ -1,5 +1,6 @@
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
+import { CardDrawer } from '../utils/cardDrawers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
@@ -7,6 +8,7 @@ var CharacterController = /** @class */ (function () {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
         (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.view.render(this.character);
@@ -19,11 +21,11 @@ var CharacterController = /** @class */ (function () {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     }
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character);
         this.view.render(this.character);
-        // Re-attach listeners after render
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
@@ -32,6 +34,7 @@ var CharacterController = /** @class */ (function () {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;
@@ -186,7 +189,6 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
-                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });
@@ -211,7 +213,6 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
-                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });
@@ -280,20 +281,7 @@ var CharacterController = /** @class */ (function () {
             var id = element.dataset.id;
             var type = element.dataset.type;
             var description = element.querySelector('.item-ability-description');
-            var checkbox = element.querySelector('.item-checkbox');
             var holdTimer;
-            // Checkbox change handler
-            if (checkbox && type === 'item') {
-                checkbox.addEventListener('change', function (e) {
-                    e.stopPropagation();
-                    var item = _this.character.items.find(function (i) { return i.id === id; });
-                    if (item) {
-                        item.equipped = checkbox.checked;
-                        _this.character.invalidateEffectiveStatsCache();
-                        _this.saveAndRender();
-                    }
-                });
-            }
             // Tap to toggle description
             element.addEventListener('click', function () {
                 if (description.style.display === 'none') {
@@ -348,7 +336,6 @@ var CharacterController = /** @class */ (function () {
             item.name = name_1;
             item.location = location_1;
             item.description = description;
-            this.character.invalidateEffectiveStatsCache();
         }
         else {
             var ability = this.character.abilities.find(function (a) { return a.id === id; });
@@ -371,7 +358,6 @@ var CharacterController = /** @class */ (function () {
             return;
         if (type === 'item') {
             this.character.items = this.character.items.filter(function (i) { return i.id !== id; });
-            this.character.invalidateEffectiveStatsCache();
         }
         else {
             this.character.abilities = this.character.abilities.filter(function (a) { return a.id !== id; });
@@ -403,48 +389,16 @@ var CharacterController = /** @class */ (function () {
         var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null)
             return;
-        // Show stat selection dropdown
-        var statOptions = [
-            'Melee Power',
-            'Ranged Power',
-            'Might',
-            'Awareness',
-            'Resolve',
-            'Stress',
-            'Blood Max',
-            'Stamina Max'
-        ];
-        var statKeys = [
-            'melee_power',
-            'ranged_power',
-            'might',
-            'awareness',
-            'resolve',
-            'stress',
-            'blood_max',
-            'stamina_max'
-        ];
-        var optionsText = statOptions.map(function (stat, i) { return "".concat(i + 1, ". ").concat(stat); }).join('\n');
-        var statChoice = prompt("Select a stat to boost (or skip):\n\n".concat(optionsText, "\n\nEnter number (1-").concat(statOptions.length, ") or leave blank:"));
-        var description = '';
-        if (statChoice && !isNaN(parseInt(statChoice))) {
-            var idx = parseInt(statChoice) - 1;
-            if (idx >= 0 && idx < statKeys.length) {
-                description = "$$".concat(statKeys[idx], ":1");
-            }
-        }
-        // Let them edit/add to the description
-        var descriptionInput = prompt('Description (you can edit the boost above):', description);
-        if (descriptionInput === null)
+        var description = prompt('Description:');
+        if (description === null)
             return;
         this.character.items.push({
             id: Date.now().toString(),
             name: name,
             location: location,
-            description: descriptionInput || description,
+            description: description,
             equipped: false
         });
-        this.character.invalidateEffectiveStatsCache();
         this.saveAndRender();
     };
     CharacterController.prototype.createNewAbility = function () {
@@ -460,6 +414,22 @@ var CharacterController = /** @class */ (function () {
             description: description
         });
         this.saveAndRender();
+    };
+    CharacterController.prototype.attachCardDrawingListeners = function () {
+        var _this = this;
+        var drawBtn = document.getElementById('draw-cards-btn');
+        var unarmoredToggle = document.getElementById('unarmored-toggle');
+        if (drawBtn) {
+            drawBtn.addEventListener('click', function () {
+                _this.cardDrawer.drawCards();
+            });
+        }
+        if (unarmoredToggle) {
+            unarmoredToggle.addEventListener('change', function () {
+                _this.character.unarmored = unarmoredToggle.checked;
+                _this.saveAndRender();
+            });
+        }
     };
     return CharacterController;
 }());
