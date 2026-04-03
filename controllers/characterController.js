@@ -7,12 +7,14 @@ var CharacterController = /** @class */ (function () {
         var _a, _b;
         this.character = character;
         this.view = view;
+        // Render view first to create DOM elements
+        this.view.render(this.character);
+        // Initialize components after DOM exists
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
+        // Attach all listeners
         (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
-        this.view.render(this.character);
-        // Initialize cardDrawer after render so DOM elements exist
-        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();

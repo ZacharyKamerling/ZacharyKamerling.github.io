@@ -31,7 +31,7 @@ var CharacterView = /** @class */ (function () {
         var container = document.getElementById('page-container');
         if (!container)
             return;
-        container.innerHTML = "\n            <div id=\"tabs-bar\" style=\"position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; z-index: 100; width: 100%; box-sizing: border-box;\">\n                ".concat(this.pages.map(function (name, idx) { return "\n                    <button class=\"page-btn round-style\" data-page=\"".concat(idx, "\" style=\"padding: 0.5em 1em; ").concat(idx === _this.currentPage ? 'background: #4a9eff; font-weight: bold;' : '', "\">\n                        ").concat(name, "\n                    </button>\n                "); }).join(''), "\n            </div>\n            <div id=\"pages-wrapper\" style=\"margin-top: ").concat(this.TAB_HEIGHT, "; display: flex; flex: 1; overflow: hidden; width: 100%; height: calc(100vh - 120px);\">\n                <div id=\"pages-content\" style=\"display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);\">\n                    ").concat(this.pages.map(function (_, idx) { return "<div id=\"page-".concat(idx, "\" style=\"flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;\"></div>"); }).join(''), "\n                </div>\n            </div>\n        ");
+        container.innerHTML = "\n            <div id=\"tabs-bar\" style=\"position: fixed; top: 90px; left: 0; right: 0; display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; z-index: 100; width: 100%; box-sizing: border-box;\">\n                ".concat(this.pages.map(function (name, idx) { return "\n                    <button class=\"page-btn round-style\" data-page=\"".concat(idx, "\" style=\"padding: 0.5em 1em; ").concat(idx === _this.currentPage ? 'background: #4a9eff; font-weight: bold;' : '', "\">\n                        ").concat(name, "\n                    </button>\n                "); }).join(''), "\n            </div>\n            <div id=\"pages-wrapper\" style=\"margin-top: 90px; display: flex; flex: 1; overflow: hidden; width: 100%; height: calc(100vh - 200px);\">\n                <div id=\"pages-content\" style=\"display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);\">\n                    ").concat(this.pages.map(function (_, idx) { return "<div id=\"page-".concat(idx, "\" style=\"flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;\"></div>"); }).join(''), "\n                </div>\n            </div>\n        ");
     };
     CharacterView.prototype.renderPage = function (character, pageIdx) {
         var pageEl = document.getElementById("page-".concat(pageIdx));
@@ -105,7 +105,7 @@ var CharacterView = /** @class */ (function () {
         }, false);
     };
     CharacterView.prototype.handleSwipe = function (startX, endX, pagesContent) {
-        var threshold = 30;
+        var threshold = 80;
         var diff = startX - endX;
         if (Math.abs(diff) > threshold) {
             if (diff > 0) {

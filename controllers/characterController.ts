@@ -14,12 +14,17 @@ export class CharacterController {
     constructor(character: Character, view: CharacterView) {
         this.character = character;
         this.view = view;
+
+        // Render view first to create DOM elements
+        this.view.render(this.character);
+
+        // Initialize components after DOM exists
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
+
+        // Attach all listeners
         document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
-        this.view.render(this.character);
-        // Initialize cardDrawer after render so DOM elements exist
-        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
