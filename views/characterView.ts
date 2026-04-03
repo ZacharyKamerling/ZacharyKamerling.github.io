@@ -10,16 +10,13 @@ export class CharacterView {
     render(character: Character) {
         this.renderVersion();
         this.renderName(character.name);
-        const pageContainerAlreadyExists = !!document.getElementById('pages-wrapper');
         this.renderPageContainer();
         // Render all pages
         for (let i = 0; i < this.pages.length; i++) {
             this.renderPage(character, i);
         }
-        // Only setup navigation if we just created the page container
-        if (!pageContainerAlreadyExists) {
-            this.setupPageNavigation();
-        }
+        // Always setup navigation after renderPageContainer since DOM is recreated
+        this.setupPageNavigation();
         // Navigate to current page
         const pagesContent = document.getElementById('pages-content');
         if (pagesContent) {

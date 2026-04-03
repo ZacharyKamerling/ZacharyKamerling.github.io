@@ -9,16 +9,13 @@ var CharacterView = /** @class */ (function () {
     CharacterView.prototype.render = function (character) {
         this.renderVersion();
         this.renderName(character.name);
-        var pageContainerAlreadyExists = !!document.getElementById('pages-wrapper');
         this.renderPageContainer();
         // Render all pages
         for (var i = 0; i < this.pages.length; i++) {
             this.renderPage(character, i);
         }
-        // Only setup navigation if we just created the page container
-        if (!pageContainerAlreadyExists) {
-            this.setupPageNavigation();
-        }
+        // Always setup navigation after renderPageContainer since DOM is recreated
+        this.setupPageNavigation();
         // Navigate to current page
         var pagesContent = document.getElementById('pages-content');
         if (pagesContent) {
