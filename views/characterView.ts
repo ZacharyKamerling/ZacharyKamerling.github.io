@@ -40,9 +40,9 @@ export class CharacterView {
         if (!container) return;
 
         container.innerHTML = `
-            <div id="tabs-bar" style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; flex-shrink: 0;">
+            <div id="tabs-bar" style="display: flex; justify-content: center; gap: 0.4em; padding: 0.5em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; flex-shrink: 0; position: sticky; top: 0; z-index: 50;">
                 ${this.pages.map((name, idx) => `
-                    <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
+                    <button class="page-btn round-style" data-page="${idx}" style="padding: 0.4em 0.8em; font-size: 0.9em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
                         ${name}
                     </button>
                 `).join('')}
