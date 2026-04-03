@@ -11,7 +11,8 @@ var DiceRoller = /** @class */ (function () {
     DiceRoller.prototype.rollPMAR = function (stat, label, rerollIdx) {
         var _this = this;
         if (rerollIdx === void 0) { rerollIdx = null; }
-        var dice = this.character[stat] || 0;
+        var effective = this.character.getEffectiveStats();
+        var dice = effective[stat] || 0;
         if (dice < 1) {
             this.resultBox.innerHTML = "<div class=\"dice-result-label\">No dice to roll for ".concat(label, ".</div>");
             this.lastRolls = null;

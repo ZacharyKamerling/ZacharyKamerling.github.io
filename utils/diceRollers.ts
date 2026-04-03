@@ -19,7 +19,8 @@ export class DiceRoller {
     }
 
     rollPMAR(stat: string, label: string, rerollIdx: number | null = null) {
-        const dice = this.character[stat] || 0;
+        const effective = this.character.getEffectiveStats();
+        const dice = effective[stat] || 0;
         if (dice < 1) {
             this.resultBox.innerHTML = `<div class="dice-result-label">No dice to roll for ${label}.</div>`;
             this.lastRolls = null;
