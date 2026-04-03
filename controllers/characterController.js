@@ -250,11 +250,13 @@ var CharacterController = /** @class */ (function () {
         // Handle -1 button
         minusBtn.addEventListener('click', function () {
             _this.character.customRoll = Math.max(1, _this.character.customRoll - 1);
+            _this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
         // Handle +1 button
         plusBtn.addEventListener('click', function () {
             _this.character.customRoll = Math.min(100, _this.character.customRoll + 1);
+            _this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
         // Handle direct input changes

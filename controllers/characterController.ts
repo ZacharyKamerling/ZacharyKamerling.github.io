@@ -251,12 +251,14 @@ export class CharacterController {
         // Handle -1 button
         minusBtn.addEventListener('click', () => {
             this.character.customRoll = Math.max(1, this.character.customRoll - 1);
+            this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
 
         // Handle +1 button
         plusBtn.addEventListener('click', () => {
             this.character.customRoll = Math.min(100, this.character.customRoll + 1);
+            this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
 
