@@ -9,7 +9,7 @@
 
 <body style="margin: 0; padding: 0; overflow: hidden;">
     <div class="character-sheet" style="display: flex; flex-direction: column; height: 100vh;">
-        <div style="position: relative; display: flex; align-items: center; justify-content: center; padding: 1em 0; flex-shrink: 0; z-index: 50;">
+        <div style="position: sticky; top: 0; display: flex; align-items: center; justify-content: center; padding: 1em 0; flex-shrink: 0; z-index: 100; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444;">
             <div id="version" style="font-size: 0.75em; opacity: 0.5; position: absolute; left: 0; padding: 0.5em;">
             </div>
             <div id="character-name" style="font-size: 2em; font-weight: 600; text-align: center; flex: 1 1 auto;">
@@ -19,7 +19,7 @@
                 <span style="vertical-align: middle;">&#8962;</span>
             </a>
         </div>
-        <div id="page-container" style="flex: 1; display: flex; flex-direction: column; position: relative;"></div>
+        <div id="page-container" style="flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;"></div>
     </div>
 
     <script type="module" src="./utils/ui.js"></script>
