@@ -307,8 +307,8 @@ var CardDrawer = /** @class */ (function () {
         this.resultBox.appendChild(dismissText);
         // Allow pointer events to pass through when needed
         this.resultBox.style.pointerEvents = 'auto';
-        // Scroll to cards
-        this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Scroll to cards (with offset for fixed header)
+        this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
         this.attachDismissListener();
     };
     CardDrawer.prototype.attachDismissListener = function () {
