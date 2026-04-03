@@ -23,6 +23,7 @@ var CharacterController = /** @class */ (function () {
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character);
         this.view.render(this.character);
+        // Re-attach listeners after render
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
@@ -185,6 +186,7 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
+                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });
@@ -209,6 +211,7 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
+                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });

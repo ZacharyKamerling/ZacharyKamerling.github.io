@@ -41,8 +41,10 @@ var CharacterView = /** @class */ (function () {
     };
     CharacterView.prototype.renderStats = function (character) {
         var statSection = document.getElementById('stat-section');
-        if (!statSection)
+        if (!statSection) {
+            console.warn('stat-section not found');
             return;
+        }
         var effective = character.getEffectiveStats();
         // Check if a stat is affected by any equipped item
         var isStatBoosted = function (statName) {

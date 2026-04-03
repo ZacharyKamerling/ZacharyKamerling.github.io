@@ -54,7 +54,10 @@ export class CharacterView {
 
     public renderStats(character: Character) {
         const statSection = document.getElementById('stat-section');
-        if (!statSection) return;
+        if (!statSection) {
+            console.warn('stat-section not found');
+            return;
+        }
 
         const effective = character.getEffectiveStats();
 

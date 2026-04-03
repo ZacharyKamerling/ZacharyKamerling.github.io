@@ -30,6 +30,7 @@ export class CharacterController {
     private saveAndRender() {
         db.saveCharacter(this.character);
         this.view.render(this.character);
+        // Re-attach listeners after render
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
@@ -181,9 +182,10 @@ export class CharacterController {
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
-                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
+                        numberPrompt(`Set ${label} (0-100):`, (this.character as any)[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
-                                this.character[prop] = val;
+                                (this.character as any)[prop] = val;
+                                this.character.invalidateEffectiveStatsCache();
                                 this.saveAndRender();
                             }
                         });
@@ -204,9 +206,10 @@ export class CharacterController {
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
-                        numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
+                        numberPrompt(`Set ${label} (0-100):`, (this.character as any)[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
-                                this.character[prop] = val;
+                                (this.character as any)[prop] = val;
+                                this.character.invalidateEffectiveStatsCache();
                                 this.saveAndRender();
                             }
                         });
