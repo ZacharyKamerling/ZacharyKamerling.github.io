@@ -15,10 +15,11 @@ export class CharacterController {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
-        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
         document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.view.render(this.character);
+        // Initialize cardDrawer after render so DOM elements exist
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
@@ -34,6 +35,7 @@ export class CharacterController {
     private saveAndRender() {
         db.saveCharacter(this.character);
         this.view.render(this.character);
+        this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box')!);
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();

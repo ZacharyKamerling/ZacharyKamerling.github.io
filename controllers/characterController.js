@@ -8,10 +8,11 @@ var CharacterController = /** @class */ (function () {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
-        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
         (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.view.render(this.character);
+        // Initialize cardDrawer after render so DOM elements exist
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
         this.attachNameEditListener();
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
@@ -26,6 +27,7 @@ var CharacterController = /** @class */ (function () {
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character);
         this.view.render(this.character);
+        this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box'));
         this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
