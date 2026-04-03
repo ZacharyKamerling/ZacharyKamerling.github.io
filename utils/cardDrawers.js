@@ -290,7 +290,23 @@ var CardDrawer = /** @class */ (function () {
             var borderColor = card.type === 'positive' ? '#3b82f6' : '#f59e0b';
             return "\n                <div class=\"card\" style=\"\n                    border: 2px solid ".concat(borderColor, ";\n                    border-radius: 8px;\n                    padding: 1em;\n                    margin: 0.5em 0;\n                    background: rgba(0, 0, 0, 0.3);\n                    flex: 1;\n                    min-width: 200px;\n                \">\n                    <div style=\"font-weight: bold; margin-bottom: 0.5em;\">").concat(card.title, "</div>\n                    <div style=\"font-size: 0.95em; line-height: 1.4;\">").concat(card.description, "</div>\n                </div>\n            ");
         }).join('');
-        this.resultBox.innerHTML = "\n            <div style=\"display: flex; flex-direction: column; gap: 0.5em;\">\n                ".concat(cardsHtml, "\n            </div>\n            <div style=\"font-style: italic; color: #999; font-size: 0.85em; margin-top: 1em;\">\n                Press and hold to dismiss\n            </div>\n        ");
+        // Create a wrapper div for cards to isolate event listeners
+        var wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.gap = '0.5em';
+        wrapper.innerHTML = cardsHtml;
+        var dismissText = document.createElement('div');
+        dismissText.style.fontStyle = 'italic';
+        dismissText.style.color = '#999';
+        dismissText.style.fontSize = '0.85em';
+        dismissText.style.marginTop = '1em';
+        dismissText.textContent = 'Press and hold to dismiss';
+        this.resultBox.innerHTML = '';
+        this.resultBox.appendChild(wrapper);
+        this.resultBox.appendChild(dismissText);
+        // Allow pointer events to pass through when needed
+        this.resultBox.style.pointerEvents = 'auto';
         // Scroll to cards
         this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         this.attachDismissListener();
@@ -301,11 +317,17 @@ var CardDrawer = /** @class */ (function () {
         var isHolding = false;
         var touchMoved = false;
         var startHold = function (e) {
+            // Only listen for events on the cards themselves or their descendants
+            var target = e.target;
+            if (!target.closest('.card') && e.target !== _this.resultBox) {
+                return;
+            }
             touchMoved = false;
             isHolding = true;
             holdTimer = window.setTimeout(function () {
                 if (isHolding && !touchMoved) {
                     _this.resultBox.innerHTML = '';
+                    _this.resultBox.style.pointerEvents = 'none';
                     _this.lastDrawnCards = null;
                 }
             }, 500);
@@ -321,12 +343,19 @@ var CardDrawer = /** @class */ (function () {
             touchMoved = true;
             endHold();
         };
-        this.resultBox.addEventListener('mousedown', startHold);
-        this.resultBox.addEventListener('touchstart', startHold);
+        // Only attach to direct card children to avoid interfering with page scrolling
+        var cards = this.resultBox.querySelectorAll('.card');
+        cards.forEach(function (card) {
+            card.addEventListener('mousedown', startHold);
+            card.addEventListener('touchstart', startHold);
+        });
         this.resultBox.addEventListener('mouseup', endHold);
         this.resultBox.addEventListener('touchend', endHold);
         this.resultBox.addEventListener('mouseleave', endHold);
-        this.resultBox.addEventListener('touchmove', handleMove);
+        // Only track touch moves on the cards to avoid interfering with page scrolling
+        cards.forEach(function (card) {
+            card.addEventListener('touchmove', handleMove);
+        });
     };
     return CardDrawer;
 }());
