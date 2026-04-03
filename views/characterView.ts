@@ -208,11 +208,11 @@ export class CharacterView {
 
     private renderNotesPage(character: Character): string {
         return `
-            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; box-sizing: border-box; height: 100%;">
                 <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                 <textarea id="notes-input" style="
                     width: 100%;
-                    min-height: 25em;
+                    flex: 1;
                     padding: 0.75em;
                     border: 1px solid #666;
                     border-radius: 4px;
@@ -224,7 +224,7 @@ export class CharacterView {
                     box-sizing: border-box;
                     margin-bottom: 0.5em;
                 ">${character.notes}</textarea>
-                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em;">Save Notes</button>
+                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; flex-shrink: 0;">Save Notes</button>
             </div>
         `;
     }
