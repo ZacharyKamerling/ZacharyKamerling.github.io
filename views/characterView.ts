@@ -127,7 +127,18 @@ export class CharacterView {
                     </div>
                 </div>
                 <div id="dice-results" style="width: 100%;"></div>
-                <div id="card-section-container" style="width: 100%;"></div>
+                <div id="card-section-container" style="width: 100%;">
+                    <div style="margin-top: 1.5em;">
+                        <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 1em;">
+                            <button id="draw-cards-btn" class="round-style" style="padding: 0.5em 1em; flex: 1;">Draw Cards</button>
+                            <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
+                                <input type="checkbox" id="unarmored-toggle" ${character.unarmored ? 'checked' : ''} style="cursor: pointer;">
+                                <span>Unarmored</span>
+                            </label>
+                        </div>
+                        <div id="card-result-box"></div>
+                    </div>
+                </div>
             </div>
         `;
     }
