@@ -33,14 +33,15 @@ export class CharacterView {
         if (!container) return;
 
         container.innerHTML = `
-            <div id="tabs-bar" style="position: fixed; top: 90px; left: 0; right: 0; display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; z-index: 100; width: 100%; box-sizing: border-box;">
+            <div style="height: 90px; flex-shrink: 0;"></div>
+            <div id="tabs-bar" style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; background: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #444; flex-shrink: 0;">
                 ${this.pages.map((name, idx) => `
                     <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
                         ${name}
                     </button>
                 `).join('')}
             </div>
-            <div id="pages-wrapper" style="margin-top: 90px; display: flex; flex: 1; overflow: hidden; width: 100%; height: calc(100vh - 200px);">
+            <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%;">
                 <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
                     ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
                 </div>
