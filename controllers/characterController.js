@@ -29,6 +29,7 @@ var CharacterController = /** @class */ (function () {
         this.attachNotesListener();
     }
     CharacterController.prototype.saveAndRender = function () {
+        var _this = this;
         db.saveCharacter(this.character);
         this.view.render(this.character);
         // Initialize cardDrawer after DOM is ready
@@ -36,18 +37,20 @@ var CharacterController = /** @class */ (function () {
         if (cardResultBox) {
             this.cardDrawer = new CardDrawer(this.character, cardResultBox);
         }
-        // Re-attach all listeners
-        this.attachStatRollListeners();
-        this.attachStatMaxSetListeners();
-        this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
-        this.attachCustomRollListeners();
-        this.attachItemAbilityListeners();
-        this.attachNewItemListener();
-        this.attachNewAbilityListener();
-        this.attachCardDrawingListeners();
-        this.attachItemCheckboxListeners();
-        this.attachNotesListener();
+        // Re-attach all listeners (use setTimeout to ensure DOM is settled)
+        requestAnimationFrame(function () {
+            _this.attachStatRollListeners();
+            _this.attachStatMaxSetListeners();
+            _this.attachTokenListeners();
+            _this.attachTokenMaxSetListeners();
+            _this.attachCustomRollListeners();
+            _this.attachItemAbilityListeners();
+            _this.attachNewItemListener();
+            _this.attachNewAbilityListener();
+            _this.attachCardDrawingListeners();
+            _this.attachItemCheckboxListeners();
+            _this.attachNotesListener();
+        });
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;

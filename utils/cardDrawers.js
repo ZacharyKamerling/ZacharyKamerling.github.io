@@ -299,10 +299,12 @@ var CardDrawer = /** @class */ (function () {
         var _this = this;
         var holdTimer = null;
         var isHolding = false;
-        var startHold = function () {
+        var touchMoved = false;
+        var startHold = function (e) {
+            touchMoved = false;
             isHolding = true;
             holdTimer = window.setTimeout(function () {
-                if (isHolding) {
+                if (isHolding && !touchMoved) {
                     _this.resultBox.innerHTML = '';
                     _this.lastDrawnCards = null;
                 }
@@ -315,11 +317,16 @@ var CardDrawer = /** @class */ (function () {
                 holdTimer = null;
             }
         };
+        var handleMove = function () {
+            touchMoved = true;
+            endHold();
+        };
         this.resultBox.addEventListener('mousedown', startHold);
         this.resultBox.addEventListener('touchstart', startHold);
         this.resultBox.addEventListener('mouseup', endHold);
         this.resultBox.addEventListener('touchend', endHold);
         this.resultBox.addEventListener('mouseleave', endHold);
+        this.resultBox.addEventListener('touchmove', handleMove);
     };
     return CardDrawer;
 }());

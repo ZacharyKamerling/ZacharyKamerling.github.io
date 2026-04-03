@@ -331,11 +331,13 @@ export class CardDrawer {
     private attachDismissListener() {
         let holdTimer: number | null = null;
         let isHolding = false;
+        let touchMoved = false;
 
-        const startHold = () => {
+        const startHold = (e: Event) => {
+            touchMoved = false;
             isHolding = true;
             holdTimer = window.setTimeout(() => {
-                if (isHolding) {
+                if (isHolding && !touchMoved) {
                     this.resultBox.innerHTML = '';
                     this.lastDrawnCards = null;
                 }
@@ -350,10 +352,16 @@ export class CardDrawer {
             }
         };
 
-        this.resultBox.addEventListener('mousedown', startHold);
-        this.resultBox.addEventListener('touchstart', startHold);
+        const handleMove = () => {
+            touchMoved = true;
+            endHold();
+        };
+
+        this.resultBox.addEventListener('mousedown', startHold as EventListener);
+        this.resultBox.addEventListener('touchstart', startHold as EventListener);
         this.resultBox.addEventListener('mouseup', endHold);
         this.resultBox.addEventListener('touchend', endHold);
         this.resultBox.addEventListener('mouseleave', endHold);
+        this.resultBox.addEventListener('touchmove', handleMove);
     }
 }
