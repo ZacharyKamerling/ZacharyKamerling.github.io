@@ -1,6 +1,6 @@
 var Character = /** @class */ (function () {
     function Character(data) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         this.cachedEffectiveStats = null;
         this.id = data.id;
         this.name = data.name || 'Unnamed Character';
@@ -16,6 +16,7 @@ var Character = /** @class */ (function () {
         this.staminaTokens = (_k = data.staminaTokens) !== null && _k !== void 0 ? _k : 0;
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
         this.unarmored = (_m = data.unarmored) !== null && _m !== void 0 ? _m : false;
+        this.notes = (_o = data.notes) !== null && _o !== void 0 ? _o : '';
         this.equipment = data.equipment || [];
         this.items = data.items || [];
         this.abilities = data.abilities || [];
@@ -36,6 +37,7 @@ var Character = /** @class */ (function () {
             stress: 0,
             customRoll: 1,
             unarmored: false,
+            notes: '',
             equipment: [],
             items: [],
             abilities: []
@@ -60,6 +62,7 @@ var Character = /** @class */ (function () {
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
             unarmored: this.unarmored,
+            notes: this.notes,
             equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []

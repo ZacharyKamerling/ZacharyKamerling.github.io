@@ -2,16 +2,16 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.3';
+    private VERSION = '1.0.4';
+    private currentPage = 0;
+    private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
 
     render(character: Character) {
         this.renderVersion();
         this.renderName(character.name);
-        this.renderTokens(character);
-        this.renderStats(character);
-        this.renderItems(character);
-        this.renderAbilities(character);
-        this.renderCardSection(character);
+        this.renderPageContainer();
+        this.renderPage(character, this.currentPage);
+        this.setupPageNavigation();
     }
 
     private renderVersion() {
@@ -24,8 +24,49 @@ export class CharacterView {
         if (nameDiv) nameDiv.textContent = name;
     }
 
-    // public for initial attachment, but internal for logic
-    public renderTokens(character: Character) {
+    private renderPageContainer() {
+        const container = document.getElementById('page-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div id="pages-wrapper" style="display: flex; overflow: hidden; width: 100%; height: 100%; position: relative;">
+                <div id="pages-content" style="display: flex; width: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
+                    ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto;"></div>`).join('')}
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap;">
+                ${this.pages.map((name, idx) => `
+                    <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
+                        ${name}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    private renderPage(character: Character, pageIdx: number) {
+        const pageEl = document.getElementById(`page-${pageIdx}`);
+        if (!pageEl) return;
+
+        let content = '';
+        switch (pageIdx) {
+            case 0:
+                content = this.renderStatsPage(character);
+                break;
+            case 1:
+                content = this.renderItemsPage(character);
+                break;
+            case 2:
+                content = this.renderAbilitiesPage(character);
+                break;
+            case 3:
+                content = this.renderNotesPage(character);
+                break;
+        }
+        pageEl.innerHTML = content;
+    }
+
+    private renderStatsPage(character: Character): string {
         let blood = '';
         let maxBlood = character.bloodMax || 1;
         let currentBlood = character.bloodTokens || 0;
@@ -38,26 +79,21 @@ export class CharacterView {
         for (let i = 0; i < maxStamina; i++) {
             stamina += `<button class="token-btn" data-type="stamina" data-idx="${i}" style="font-size:1.5em; margin:2px 2px;${i < currentStamina ? '' : 'opacity:0.3;'}">⚡</button>`;
         }
-        const tokenSection = document.getElementById('token-section');
-        if (!tokenSection) return;
-        tokenSection.innerHTML = `
-                    <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <span id="blood-label" style="padding-left: 0.5em; font-size: 1em;">Blood (${currentBlood} / ${maxBlood})</span>
-                            <div>${blood}</div>
-                        </div>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <span id="stamina-label" style="padding-left: 0.5em; font-size: 1em;">Stamina (${currentStamina} / ${maxStamina})</span>
-                            <div>${stamina}</div>
-                        </div>
-                    </div>
-                `;
-    }
 
-    public renderStats(character: Character) {
-        const statSection = document.getElementById('stat-section');
-        if (!statSection) return;
-        statSection.innerHTML = `
+        return `
+            <div id="token-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
+                <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <span id="blood-label" style="padding-left: 0.5em; font-size: 1em;">Blood (${currentBlood} / ${maxBlood})</span>
+                        <div>${blood}</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <span id="stamina-label" style="padding-left: 0.5em; font-size: 1em;">Stamina (${currentStamina} / ${maxStamina})</span>
+                        <div>${stamina}</div>
+                    </div>
+                </div>
+            </div>
+            <div id="stat-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
                 <div style="font-size:1em; display: flex; flex-direction: column;">
                     <div class="stat-row">
                         <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
@@ -71,7 +107,7 @@ export class CharacterView {
                         <span id="awareness-label" class="stat-label round-style" title="Awareness">Awareness 👁️</span>
                         <div class="stat-value">${character.awareness}</div>
                     </div>
-                    <div class="stat-row"">
+                    <div class="stat-row">
                         <span id="resolve-label" class="stat-label round-style" title="Resolve">Resolve ✊</span>
                         <div class="stat-value">${character.resolve}</div>
                         <span id="stress-label" class="stat-label round-style" title="Stress">Stress 💦</span>
@@ -84,10 +120,13 @@ export class CharacterView {
                         <button id="custom-roll-btn" class="custom-roll-btn round-style" style="min-width: 5em; justify-content: center;">Roll</button>
                     </div>
                 </div>
-            `;
+            </div>
+            <div id="dice-results" style="margin: 1em auto 0 auto; max-width: 22em;"></div>
+            <div id="card-section-container" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
+        `;
     }
 
-    public renderItems(character: Character) {
+    private renderItemsPage(character: Character): string {
         const maxSlots = character.might + 5;
         const itemsUsed = character.items.length;
         const exceedsSlots = itemsUsed > maxSlots;
@@ -105,30 +144,21 @@ export class CharacterView {
             </div>
         `).join('');
 
-        const container = document.getElementById('items-abilities-container');
-        if (!container) return;
-
-        let itemsSection = document.getElementById('items-section');
-        if (!itemsSection) {
-            itemsSection = document.createElement('div');
-            itemsSection.id = 'items-section';
-            container.appendChild(itemsSection);
-        }
-
-        itemsSection.className = 'items-abilities-section';
-        itemsSection.innerHTML = `
-            <div style="margin-top: 1.5em;">
-                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
-                <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
-                    ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
+        return `
+            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
+                <div style="margin-top: 1.5em;">
+                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
+                        ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
+                    </div>
+                    ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
+                    <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
                 </div>
-                ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
-                <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
             </div>
         `;
     }
 
-    public renderAbilities(character: Character) {
+    private renderAbilitiesPage(character: Character): string {
         let abilitiesHtml = character.abilities.map((ability) => `
             <div class="item-ability-entry" data-id="${ability.id}" data-type="ability">
                 <div class="item-ability-header">
@@ -140,50 +170,111 @@ export class CharacterView {
             </div>
         `).join('');
 
-        const container = document.getElementById('items-abilities-container');
-        if (!container) return;
-
-        let abilitiesSection = document.getElementById('abilities-section');
-        if (!abilitiesSection) {
-            abilitiesSection = document.createElement('div');
-            abilitiesSection.id = 'abilities-section';
-            container.appendChild(abilitiesSection);
-        }
-
-        abilitiesSection.className = 'items-abilities-section';
-        abilitiesSection.innerHTML = `
-            <div style="margin-top: 1.5em;">
-                <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.5em;">
-                    ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
+        return `
+            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
+                <div style="margin-top: 1.5em;">
+                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5em;">
+                        ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
+                    </div>
+                    <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
                 </div>
-                <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
             </div>
         `;
     }
 
-    public renderCardSection(character: Character) {
-        const container = document.getElementById('card-section-container');
-        if (!container) return;
-
-        let cardSection = document.getElementById('card-section');
-        if (!cardSection) {
-            cardSection = document.createElement('div');
-            cardSection.id = 'card-section';
-            container.appendChild(cardSection);
-        }
-
-        cardSection.innerHTML = `
-            <div style="margin-top: 1.5em;">
-                <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 1em;">
-                    <button id="draw-cards-btn" class="round-style" style="padding: 0.5em 1em; flex: 1;">Draw Cards</button>
-                    <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
-                        <input type="checkbox" id="unarmored-toggle" ${character.unarmored ? 'checked' : ''} style="cursor: pointer;">
-                        <span>Unarmored</span>
-                    </label>
+    private renderNotesPage(character: Character): string {
+        return `
+            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
+                <div style="margin-top: 1.5em;">
+                    <h3 style="margin: 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
+                    <textarea id="notes-input" style="
+                        width: 100%;
+                        min-height: 300px;
+                        padding: 0.75em;
+                        border: 1px solid #666;
+                        border-radius: 4px;
+                        background: rgba(0, 0, 0, 0.3);
+                        color: #fff;
+                        font-family: monospace;
+                        font-size: 0.9em;
+                        resize: vertical;
+                    ">${character.notes}</textarea>
+                    <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">Save Notes</button>
                 </div>
-                <div id="card-result-box"></div>
             </div>
         `;
+    }
+
+    private setupPageNavigation() {
+        const pagesContent = document.getElementById('pages-content');
+        const pageButtons = document.querySelectorAll('.page-btn');
+
+        pageButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const pageIdx = parseInt((e.target as HTMLElement).getAttribute('data-page')!);
+                this.goToPage(pageIdx, pagesContent);
+            });
+        });
+
+        // Swipe detection
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        pagesContent?.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        pagesContent?.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            this.handleSwipe(touchStartX, touchEndX, pagesContent);
+        });
+    }
+
+    private handleSwipe(startX: number, endX: number, pagesContent: HTMLElement | null) {
+        const threshold = 50;
+        const diff = startX - endX;
+
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                // Swiped left, go to next page
+                if (this.currentPage < this.pages.length - 1) {
+                    this.goToPage(this.currentPage + 1, pagesContent);
+                }
+            } else {
+                // Swiped right, go to previous page
+                if (this.currentPage > 0) {
+                    this.goToPage(this.currentPage - 1, pagesContent);
+                }
+            }
+        }
+    }
+
+    private goToPage(pageIdx: number, pagesContent: HTMLElement | null) {
+        if (pageIdx < 0 || pageIdx >= this.pages.length) return;
+
+        this.currentPage = pageIdx;
+        const translateX = -pageIdx * 100;
+        if (pagesContent) {
+            pagesContent.style.transform = `translateX(${translateX}%)`;
+        }
+
+        // Update button styles
+        document.querySelectorAll('.page-btn').forEach((btn, idx) => {
+            const btnEl = btn as HTMLElement;
+            if (idx === pageIdx) {
+                btnEl.style.background = '#4a9eff';
+                btnEl.style.fontWeight = 'bold';
+            } else {
+                btnEl.style.background = '';
+                btnEl.style.fontWeight = '';
+            }
+        });
+    }
+
+    // For controller to re-render a specific page
+    public renderCurrentPage(character: Character) {
+        this.renderPage(character, this.currentPage);
+        this.setupPageNavigation();
     }
 }

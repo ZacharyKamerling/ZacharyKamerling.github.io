@@ -23,20 +23,29 @@ var CharacterController = /** @class */ (function () {
         this.attachNewItemListener();
         this.attachNewAbilityListener();
         this.attachCardDrawingListeners();
+        this.attachItemCheckboxListeners();
+        this.attachNotesListener();
     }
     CharacterController.prototype.saveAndRender = function () {
+        var _this = this;
         db.saveCharacter(this.character);
         this.view.render(this.character);
-        this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box'));
-        this.attachStatRollListeners();
-        this.attachStatMaxSetListeners();
-        this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
-        this.attachCustomRollListeners();
-        this.attachItemAbilityListeners();
-        this.attachNewItemListener();
-        this.attachNewAbilityListener();
-        this.attachCardDrawingListeners();
+        // Re-initialize cardDrawer after render since DOM elements are recreated
+        setTimeout(function () {
+            _this.cardDrawer = new CardDrawer(_this.character, document.getElementById('card-result-box'));
+            // Re-attach listeners after render
+            _this.attachStatRollListeners();
+            _this.attachStatMaxSetListeners();
+            _this.attachTokenListeners();
+            _this.attachTokenMaxSetListeners();
+            _this.attachCustomRollListeners();
+            _this.attachItemAbilityListeners();
+            _this.attachNewItemListener();
+            _this.attachNewAbilityListener();
+            _this.attachCardDrawingListeners();
+            _this.attachItemCheckboxListeners();
+            _this.attachNotesListener();
+        }, 0);
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;
@@ -432,6 +441,40 @@ var CharacterController = /** @class */ (function () {
             unarmoredToggle.addEventListener('change', function () {
                 _this.character.unarmored = unarmoredToggle.checked;
                 _this.saveAndRender();
+            });
+        }
+    };
+    CharacterController.prototype.attachItemCheckboxListeners = function () {
+        var _this = this;
+        document.querySelectorAll('.item-checkbox').forEach(function (checkbox) {
+            var input = checkbox;
+            input.addEventListener('change', function () {
+                var itemId = input.dataset.id;
+                var item = _this.character.items.find(function (i) { return i.id === itemId; });
+                if (item) {
+                    item.equipped = input.checked;
+                    _this.character.invalidateEffectiveStatsCache();
+                    db.saveCharacter(_this.character);
+                }
+            });
+        });
+    };
+    CharacterController.prototype.attachNotesListener = function () {
+        var _this = this;
+        var notesInput = document.getElementById('notes-input');
+        var saveNotesBtn = document.getElementById('save-notes-btn');
+        if (notesInput) {
+            notesInput.addEventListener('input', function () {
+                _this.character.notes = notesInput.value;
+            });
+        }
+        if (saveNotesBtn) {
+            saveNotesBtn.addEventListener('click', function () {
+                db.saveCharacter(_this.character);
+                saveNotesBtn.textContent = 'Saved!';
+                setTimeout(function () {
+                    saveNotesBtn.textContent = 'Save Notes';
+                }, 1500);
             });
         }
     };

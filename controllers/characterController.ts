@@ -30,21 +30,29 @@ export class CharacterController {
         this.attachNewItemListener();
         this.attachNewAbilityListener();
         this.attachCardDrawingListeners();
+        this.attachItemCheckboxListeners();
+        this.attachNotesListener();
     }
 
     private saveAndRender() {
         db.saveCharacter(this.character);
         this.view.render(this.character);
-        this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box')!);
-        this.attachStatRollListeners();
-        this.attachStatMaxSetListeners();
-        this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
-        this.attachCustomRollListeners();
-        this.attachItemAbilityListeners();
-        this.attachNewItemListener();
-        this.attachNewAbilityListener();
-        this.attachCardDrawingListeners();
+        // Re-initialize cardDrawer after render since DOM elements are recreated
+        setTimeout(() => {
+            this.cardDrawer = new CardDrawer(this.character, document.getElementById('card-result-box')!);
+            // Re-attach listeners after render
+            this.attachStatRollListeners();
+            this.attachStatMaxSetListeners();
+            this.attachTokenListeners();
+            this.attachTokenMaxSetListeners();
+            this.attachCustomRollListeners();
+            this.attachItemAbilityListeners();
+            this.attachNewItemListener();
+            this.attachNewAbilityListener();
+            this.attachCardDrawingListeners();
+            this.attachItemCheckboxListeners();
+            this.attachNotesListener();
+        }, 0);
     }
 
     private attachTokenMaxSetListeners() {
@@ -448,6 +456,42 @@ export class CharacterController {
             unarmoredToggle.addEventListener('change', () => {
                 this.character.unarmored = unarmoredToggle.checked;
                 this.saveAndRender();
+            });
+        }
+    }
+
+    private attachItemCheckboxListeners() {
+        document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+            const input = checkbox as HTMLInputElement;
+            input.addEventListener('change', () => {
+                const itemId = input.dataset.id;
+                const item = this.character.items.find(i => i.id === itemId);
+                if (item) {
+                    item.equipped = input.checked;
+                    this.character.invalidateEffectiveStatsCache();
+                    db.saveCharacter(this.character);
+                }
+            });
+        });
+    }
+
+    private attachNotesListener() {
+        const notesInput = document.getElementById('notes-input') as HTMLTextAreaElement;
+        const saveNotesBtn = document.getElementById('save-notes-btn') as HTMLButtonElement;
+
+        if (notesInput) {
+            notesInput.addEventListener('input', () => {
+                this.character.notes = notesInput.value;
+            });
+        }
+
+        if (saveNotesBtn) {
+            saveNotesBtn.addEventListener('click', () => {
+                db.saveCharacter(this.character);
+                saveNotesBtn.textContent = 'Saved!';
+                setTimeout(() => {
+                    saveNotesBtn.textContent = 'Save Notes';
+                }, 1500);
             });
         }
     }
