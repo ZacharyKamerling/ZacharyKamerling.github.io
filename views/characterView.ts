@@ -146,18 +146,15 @@ export class CharacterView {
                         <div id="card-result-box"></div>
                     </div>
                 </div>
-                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
-                    <p>↓ Scroll space for testing ↓</p>
-                    <p style="white-space: pre-line;">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco.
-Laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit.
-Esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident.
-Sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    </p>
+                <div style="margin-top: 3em; padding: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓↓↓ Scroll space for testing ↓↓↓</p>
+                    <div style="height: 60vh; border: 1px solid #666; border-radius: 4px; padding: 1em; background: rgba(0,0,0,0.2);">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -189,9 +186,15 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </div>
                 ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
                 <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
-                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
-                    <p>↓ Scroll space for testing ↓</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <div style="margin-top: 3em; padding: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓↓↓ Scroll space for testing ↓↓↓</p>
+                    <div style="height: 60vh; border: 1px solid #666; border-radius: 4px; padding: 1em; background: rgba(0,0,0,0.2);">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -216,9 +219,15 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                     ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
                 </div>
                 <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
-                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
-                    <p>↓ Scroll space for testing ↓</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <div style="margin-top: 3em; padding: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓↓↓ Scroll space for testing ↓↓↓</p>
+                    <div style="height: 60vh; border: 1px solid #666; border-radius: 4px; padding: 1em; background: rgba(0,0,0,0.2);">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -242,10 +251,16 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                     box-sizing: border-box;
                     margin-bottom: 0.5em;
                 ">${character.notes}</textarea>
-                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-bottom: 2em;">Save Notes</button>
-                <div style="margin-top: 2em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
-                    <p>↓ Scroll space for testing ↓</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-bottom: 0.5em;">Save Notes</button>
+                <div style="margin-top: 1em; padding: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓↓↓ Scroll space for testing ↓↓↓</p>
+                    <div style="height: 60vh; border: 1px solid #666; border-radius: 4px; padding: 1em; background: rgba(0,0,0,0.2);">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
                 </div>
             </div>
         `;
