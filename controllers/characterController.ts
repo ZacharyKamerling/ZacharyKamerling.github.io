@@ -411,14 +411,50 @@ export class CharacterController {
         const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null) return;
 
-        const description = prompt('Description (use $$stat_name:value for buffs, e.g., $$melee_power:2):');
-        if (description === null) return;
+        // Show stat selection dropdown
+        const statOptions = [
+            'Melee Power',
+            'Ranged Power',
+            'Might',
+            'Awareness',
+            'Resolve',
+            'Stress',
+            'Blood Max',
+            'Stamina Max',
+            'Custom Roll'
+        ];
+        const statKeys = [
+            'melee_power',
+            'ranged_power',
+            'might',
+            'awareness',
+            'resolve',
+            'stress',
+            'blood_max',
+            'stamina_max',
+            'custom_roll'
+        ];
+
+        const optionsText = statOptions.map((stat, i) => `${i + 1}. ${stat}`).join('\n');
+        const statChoice = prompt(`Select a stat to boost (or skip):\n\n${optionsText}\n\nEnter number (1-${statOptions.length}) or leave blank:`);
+
+        let description = '';
+        if (statChoice && !isNaN(parseInt(statChoice))) {
+            const idx = parseInt(statChoice) - 1;
+            if (idx >= 0 && idx < statKeys.length) {
+                description = `$$${statKeys[idx]}:1`;
+            }
+        }
+
+        // Let them edit/add to the description
+        const descriptionInput = prompt('Description (you can edit the boost above):', description);
+        if (descriptionInput === null) return;
 
         this.character.items.push({
             id: Date.now().toString(),
             name,
             location,
-            description,
+            description: descriptionInput || description,
             equipped: false
         });
 
