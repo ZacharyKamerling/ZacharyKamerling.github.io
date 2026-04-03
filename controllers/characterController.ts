@@ -1,6 +1,7 @@
 import { Character } from '../models/character.js';
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
+import { CardDrawer } from '../utils/cardDrawers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 
@@ -8,11 +9,13 @@ export class CharacterController {
     private character: Character;
     private view: CharacterView;
     private diceRoller: DiceRoller;
+    private cardDrawer: CardDrawer;
 
     constructor(character: Character, view: CharacterView) {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
         document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.view.render(this.character);
@@ -25,6 +28,7 @@ export class CharacterController {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     }
 
     private saveAndRender() {
@@ -38,6 +42,7 @@ export class CharacterController {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     }
 
     private attachTokenMaxSetListeners() {
@@ -422,5 +427,23 @@ export class CharacterController {
         });
 
         this.saveAndRender();
+    }
+
+    private attachCardDrawingListeners() {
+        const drawBtn = document.getElementById('draw-cards-btn') as HTMLButtonElement;
+        const unarmoredToggle = document.getElementById('unarmored-toggle') as HTMLInputElement;
+
+        if (drawBtn) {
+            drawBtn.addEventListener('click', () => {
+                this.cardDrawer.drawCards();
+            });
+        }
+
+        if (unarmoredToggle) {
+            unarmoredToggle.addEventListener('change', () => {
+                this.character.unarmored = unarmoredToggle.checked;
+                this.saveAndRender();
+            });
+        }
     }
 }

@@ -7,6 +7,7 @@ export class CharacterView {
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
+        this.renderCardSection(character);
     }
 
     private renderName(name: string) {
@@ -147,6 +148,31 @@ export class CharacterView {
                     ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
                 </div>
                 <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
+            </div>
+        `;
+    }
+
+    public renderCardSection(character: Character) {
+        const container = document.getElementById('card-section-container');
+        if (!container) return;
+
+        let cardSection = document.getElementById('card-section');
+        if (!cardSection) {
+            cardSection = document.createElement('div');
+            cardSection.id = 'card-section';
+            container.appendChild(cardSection);
+        }
+
+        cardSection.innerHTML = `
+            <div style="margin-top: 1.5em;">
+                <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 1em;">
+                    <button id="draw-cards-btn" class="round-style" style="padding: 0.5em 1em; flex: 1;">Draw Cards</button>
+                    <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
+                        <input type="checkbox" id="unarmored-toggle" ${character.unarmored ? 'checked' : ''} style="cursor: pointer;">
+                        <span>Unarmored</span>
+                    </label>
+                </div>
+                <div id="card-result-box"></div>
             </div>
         `;
     }
