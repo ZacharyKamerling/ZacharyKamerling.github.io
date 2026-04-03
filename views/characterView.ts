@@ -146,6 +146,19 @@ export class CharacterView {
                         <div id="card-result-box"></div>
                     </div>
                 </div>
+                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓ Scroll space for testing ↓</p>
+                    <p style="white-space: pre-line;">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+Laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit.
+Esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident.
+Sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+                </div>
             </div>
         `;
     }
@@ -176,6 +189,10 @@ export class CharacterView {
                 </div>
                 ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
                 <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
+                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓ Scroll space for testing ↓</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                </div>
             </div>
         `;
     }
@@ -199,17 +216,21 @@ export class CharacterView {
                     ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
                 </div>
                 <button class="new-ability-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Ability</button>
+                <div style="margin-top: 3em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓ Scroll space for testing ↓</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                </div>
             </div>
         `;
     }
 
     private renderNotesPage(character: Character): string {
         return `
-            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+            <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
                 <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                 <textarea id="notes-input" style="
                     width: 100%;
-                    flex: 1;
+                    min-height: 12em;
                     padding: 0.75em;
                     border: 1px solid #666;
                     border-radius: 4px;
@@ -219,8 +240,13 @@ export class CharacterView {
                     font-size: 0.9em;
                     resize: none;
                     box-sizing: border-box;
+                    margin-bottom: 0.5em;
                 ">${character.notes}</textarea>
-                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">Save Notes</button>
+                <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-bottom: 2em;">Save Notes</button>
+                <div style="margin-top: 2em; padding-top: 2em; border-top: 1px solid #444; opacity: 0.5; font-size: 0.9em;">
+                    <p>↓ Scroll space for testing ↓</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                </div>
             </div>
         `;
     }
