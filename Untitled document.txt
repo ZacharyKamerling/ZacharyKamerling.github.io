@@ -1,0 +1,109 @@
+﻿TYPE        TEXT        AMOUNT        FONTSIZE        IMG        ARTIST        BACKCOLOR        TEXTCOLOR                                                                                                                                                
+Negative        "- Lose a <b>Blood Token</b>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000        <b></b><i></i></br>                                                                                                                                        
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- Lose a <b>Stamina Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- Lose a <b>Stamina Token</b>
+</br></br>- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>
+</br></br>- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>
+</br></br>- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br>- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br>- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br><i>These stack</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br>- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You are <b>Stunned</b>
+</br><i>(Can't use abilities next round)</i>
+</br></br>- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>
+</br></br>- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>
+</br></br>- Lose a <b>Blood Token</b>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>
+</br></br>- You <b>Panic!</b> You gain <b>Stress</b>
+</br><i>(Roll on the Panic table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>
+</br></br>- You have been <b>Dismembered</b>
+</br><i>(Roll on the Dismember table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Negative        "- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>
+</br></br>- You have been <b>Wounded</b>
+</br><i>(Roll on the Wound table)</i>"        1        8                        #FFC000#FF8000#C06000#000000@75        #000000                                                                                                                                                
+Positive        - You deliver a killing a blow        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - You wound an enemy        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - You stun an enemy        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - You bleed an enemy        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - An enemies will falters        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - You gain a <b>Stamina Token</b>        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        - Reduce your <b>Stress</b>        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You wound an enemy
+</br></br>- You stun an enemy"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You wound an enemy
+</br></br>- You bleed an enemy"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You wound an enemy
+</br></br>- An enemies will falters"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You wound an enemy
+</br></br>- You gain a <b>Stamina Token</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You wound an enemy
+</br></br>- Reduce your <b>Stress</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You stun an enemy
+</br></br>- You bleed an enemy"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You stun an enemy
+</br></br>- An enemies will falters"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You stun an enemy
+</br></br>- You gain a <b>Stamina Token</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You stun an enemy
+</br></br>- Reduce your <b>Stress</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You bleed an enemy
+</br></br>- An enemies will falters"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You bleed an enemy
+</br></br>- You gain a <b>Stamina Token</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You bleed an enemy
+</br></br>- Reduce your <b>Stress</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- An enemies will falters
+</br></br>- You gain a <b>Stamina Token</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- An enemies will falters
+</br></br>- Reduce your <b>Stress</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000                                                                                                                                                
+Positive        "- You gain a <b>Stamina Token</b>
+</br></br>- Reduce your <b>Stress</b>"        1        8                        #00C0FF#0080FF#0060C0#000000@75        #000000
