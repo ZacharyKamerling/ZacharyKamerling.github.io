@@ -1,13 +1,22 @@
 import { Character } from '../models/character.js';
 
 export class CharacterView {
+    // REMEMBER: Increment VERSION when making UI changes
+    private VERSION = '1.0.3';
+
     render(character: Character) {
+        this.renderVersion();
         this.renderName(character.name);
         this.renderTokens(character);
         this.renderStats(character);
         this.renderItems(character);
         this.renderAbilities(character);
         this.renderCardSection(character);
+    }
+
+    private renderVersion() {
+        const versionDiv = document.getElementById('version');
+        if (versionDiv) versionDiv.textContent = `v${this.VERSION}`;
     }
 
     private renderName(name: string) {
@@ -70,7 +79,7 @@ export class CharacterView {
                     </div>
                     <div style="display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;">
                         <button id="custom-neg-btn" class="custom-roll-btn round-style">-1</button>
-                        <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="0">
+                        <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="${character.customRoll}">
                         <button id="custom-pos-btn" class="custom-roll-btn round-style">+1</button>
                         <button id="custom-roll-btn" class="custom-roll-btn round-style" style="min-width: 5em; justify-content: center;">Roll</button>
                     </div>
@@ -86,6 +95,7 @@ export class CharacterView {
         let itemsHtml = character.items.map((item, idx) => `
             <div class="item-ability-entry" data-id="${item.id}" data-type="item">
                 <div class="item-ability-header">
+                    <input type="checkbox" class="item-checkbox" data-id="${item.id}" ${item.equipped ? 'checked' : ''} style="cursor: pointer;">
                     <span class="item-ability-name">${item.name}</span>
                     <span class="item-location">${item.location}</span>
                 </div>

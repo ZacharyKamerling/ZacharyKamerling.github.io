@@ -1,6 +1,6 @@
 var Character = /** @class */ (function () {
     function Character(data) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         this.id = data.id;
         this.name = data.name || 'Unnamed Character';
         this.meleePower = (_a = data.meleePower) !== null && _a !== void 0 ? _a : 0;
@@ -14,6 +14,7 @@ var Character = /** @class */ (function () {
         this.staminaMax = (_j = data.staminaMax) !== null && _j !== void 0 ? _j : 1;
         this.staminaTokens = (_k = data.staminaTokens) !== null && _k !== void 0 ? _k : 0;
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
+        this.unarmored = (_m = data.unarmored) !== null && _m !== void 0 ? _m : false;
         this.equipment = data.equipment || [];
         this.items = data.items || [];
         this.abilities = data.abilities || [];
@@ -33,6 +34,7 @@ var Character = /** @class */ (function () {
             resolve: 3,
             stress: 0,
             customRoll: 1,
+            unarmored: false,
             equipment: [],
             items: [],
             abilities: []
@@ -56,6 +58,7 @@ var Character = /** @class */ (function () {
             staminaMax: this.staminaMax,
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
+            unarmored: this.unarmored,
             equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []

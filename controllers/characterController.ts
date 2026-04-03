@@ -407,7 +407,8 @@ export class CharacterController {
             id: Date.now().toString(),
             name,
             location,
-            description
+            description,
+            equipped: false
         });
 
         this.saveAndRender();

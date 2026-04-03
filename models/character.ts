@@ -23,6 +23,7 @@ export interface ItemData {
     name: string;
     description: string;
     location: string;
+    equipped: boolean;
 }
 
 export interface EquipmentData {

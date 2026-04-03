@@ -1,5 +1,6 @@
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
+import { CardDrawer } from '../utils/cardDrawers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
@@ -7,6 +8,7 @@ var CharacterController = /** @class */ (function () {
         this.character = character;
         this.view = view;
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
+        this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
         (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.view.render(this.character);
@@ -19,6 +21,7 @@ var CharacterController = /** @class */ (function () {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     }
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character);
@@ -31,6 +34,7 @@ var CharacterController = /** @class */ (function () {
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
         this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
     };
     CharacterController.prototype.attachTokenMaxSetListeners = function () {
         var _this = this;
@@ -392,7 +396,8 @@ var CharacterController = /** @class */ (function () {
             id: Date.now().toString(),
             name: name,
             location: location,
-            description: description
+            description: description,
+            equipped: false
         });
         this.saveAndRender();
     };
@@ -409,6 +414,22 @@ var CharacterController = /** @class */ (function () {
             description: description
         });
         this.saveAndRender();
+    };
+    CharacterController.prototype.attachCardDrawingListeners = function () {
+        var _this = this;
+        var drawBtn = document.getElementById('draw-cards-btn');
+        var unarmoredToggle = document.getElementById('unarmored-toggle');
+        if (drawBtn) {
+            drawBtn.addEventListener('click', function () {
+                _this.cardDrawer.drawCards();
+            });
+        }
+        if (unarmoredToggle) {
+            unarmoredToggle.addEventListener('change', function () {
+                _this.character.unarmored = unarmoredToggle.checked;
+                _this.saveAndRender();
+            });
+        }
     };
     return CharacterController;
 }());
