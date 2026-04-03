@@ -10,12 +10,22 @@ export class CharacterView {
     render(character: Character) {
         this.renderVersion();
         this.renderName(character.name);
+        const pageContainerAlreadyExists = !!document.getElementById('pages-wrapper');
         this.renderPageContainer();
         // Render all pages
         for (let i = 0; i < this.pages.length; i++) {
             this.renderPage(character, i);
         }
-        this.setupPageNavigation();
+        // Only setup navigation if we just created the page container
+        if (!pageContainerAlreadyExists) {
+            this.setupPageNavigation();
+        }
+        // Navigate to current page
+        const pagesContent = document.getElementById('pages-content');
+        if (pagesContent) {
+            const translateX = -this.currentPage * 100;
+            pagesContent.style.transform = `translateX(${translateX}%)`;
+        }
     }
 
     private renderVersion() {
@@ -282,5 +292,11 @@ export class CharacterView {
                 btnEl.style.fontWeight = '';
             }
         });
+
+        // Reset scroll position of the page
+        const pageEl = document.getElementById(`page-${pageIdx}`);
+        if (pageEl) {
+            pageEl.scrollTop = 0;
+        }
     }
 }

@@ -322,11 +322,6 @@ export class CardDrawer {
             </div>
         `;
 
-        // Scroll to cards with a smooth animation
-        setTimeout(() => {
-            this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
-
         this.attachDismissListener();
     }
 

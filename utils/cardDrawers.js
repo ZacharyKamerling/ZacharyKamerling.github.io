@@ -286,16 +286,11 @@ var CardDrawer = /** @class */ (function () {
         this.renderCards(drawn);
     };
     CardDrawer.prototype.renderCards = function (cards) {
-        var _this = this;
         var cardsHtml = cards.map(function (card) {
             var borderColor = card.type === 'positive' ? '#3b82f6' : '#f59e0b';
             return "\n                <div class=\"card\" style=\"\n                    border: 2px solid ".concat(borderColor, ";\n                    border-radius: 8px;\n                    padding: 1em;\n                    margin: 0.5em 0;\n                    background: rgba(0, 0, 0, 0.3);\n                    flex: 1;\n                    min-width: 200px;\n                \">\n                    <div style=\"font-weight: bold; margin-bottom: 0.5em;\">").concat(card.title, "</div>\n                    <div style=\"font-size: 0.95em; line-height: 1.4;\">").concat(card.description, "</div>\n                </div>\n            ");
         }).join('');
         this.resultBox.innerHTML = "\n            <div style=\"display: flex; flex-direction: column; gap: 0.5em;\">\n                ".concat(cardsHtml, "\n            </div>\n            <div style=\"font-style: italic; color: #999; font-size: 0.85em; margin-top: 1em;\">\n                Press and hold to dismiss\n            </div>\n        ");
-        // Scroll to cards with a smooth animation
-        setTimeout(function () {
-            _this.resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
         this.attachDismissListener();
     };
     CardDrawer.prototype.attachDismissListener = function () {
