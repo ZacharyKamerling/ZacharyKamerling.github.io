@@ -307,6 +307,14 @@ var CardDrawer = /** @class */ (function () {
         this.resultBox.appendChild(dismissText);
         // Allow pointer events to pass through when needed
         this.resultBox.style.pointerEvents = 'auto';
+        // Scroll the Draw Cards button to the top of the page
+        var drawButton = document.getElementById('draw-cards-btn');
+        if (drawButton && drawButton.parentElement) {
+            var page = drawButton.closest('[style*="overflow-y"]');
+            if (page && page instanceof HTMLElement) {
+                page.scrollTop = drawButton.offsetTop - 100;
+            }
+        }
         this.attachDismissListener();
     };
     CardDrawer.prototype.attachDismissListener = function () {
