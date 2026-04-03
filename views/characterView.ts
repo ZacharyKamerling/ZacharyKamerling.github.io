@@ -29,17 +29,17 @@ export class CharacterView {
         if (!container) return;
 
         container.innerHTML = `
-            <div id="pages-wrapper" style="display: flex; overflow: hidden; width: 100%; height: 100%; position: relative;">
-                <div id="pages-content" style="display: flex; width: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
-                    ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto;"></div>`).join('')}
-                </div>
-            </div>
-            <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap;">
+            <div style="display: flex; justify-content: center; gap: 0.5em; padding: 1em 0; flex-wrap: wrap; flex-shrink: 0; border-bottom: 1px solid #444; position: sticky; top: 0; z-index: 10; background: rgba(0, 0, 0, 0.5);">
                 ${this.pages.map((name, idx) => `
                     <button class="page-btn round-style" data-page="${idx}" style="padding: 0.5em 1em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
                         ${name}
                     </button>
                 `).join('')}
+            </div>
+            <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%; position: relative;">
+                <div id="pages-content" style="display: flex; width: 100%; height: 100%; transition: transform 0.3s ease-out; transform: translateX(0);">
+                    ${this.pages.map((_, idx) => `<div id="page-${idx}" style="flex: 0 0 100%; width: 100%; overflow-y: auto; overflow-x: hidden;"></div>`).join('')}
+                </div>
             </div>
         `;
     }
@@ -81,48 +81,50 @@ export class CharacterView {
         }
 
         return `
-            <div id="token-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
-                <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <span id="blood-label" style="padding-left: 0.5em; font-size: 1em;">Blood (${currentBlood} / ${maxBlood})</span>
-                        <div>${blood}</div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <span id="stamina-label" style="padding-left: 0.5em; font-size: 1em;">Stamina (${currentStamina} / ${maxStamina})</span>
-                        <div>${stamina}</div>
-                    </div>
-                </div>
-            </div>
-            <div id="stat-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
-                <div style="font-size:1em; display: flex; flex-direction: column;">
-                    <div class="stat-row">
-                        <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
-                        <div class="stat-value">${character.meleePower}</div>
-                        <span id="ranged-power-label" class="stat-label round-style" title="Ranged Power">Ranged 🏹</span>
-                        <div class="stat-value">${character.rangedPower}</div>
-                    </div>
-                    <div class="stat-row">
-                        <span id="might-label" class="stat-label round-style" title="Might">Might 💪</span>
-                        <div class="stat-value">${character.might}</div>
-                        <span id="awareness-label" class="stat-label round-style" title="Awareness">Awareness 👁️</span>
-                        <div class="stat-value">${character.awareness}</div>
-                    </div>
-                    <div class="stat-row">
-                        <span id="resolve-label" class="stat-label round-style" title="Resolve">Resolve ✊</span>
-                        <div class="stat-value">${character.resolve}</div>
-                        <span id="stress-label" class="stat-label round-style" title="Stress">Stress 💦</span>
-                        <div class="stat-value">${character.stress}</div>
-                    </div>
-                    <div style="display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;">
-                        <button id="custom-neg-btn" class="custom-roll-btn round-style">-1</button>
-                        <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="${character.customRoll}">
-                        <button id="custom-pos-btn" class="custom-roll-btn round-style">+1</button>
-                        <button id="custom-roll-btn" class="custom-roll-btn round-style" style="min-width: 5em; justify-content: center;">Roll</button>
+            <div style="display: flex; flex-direction: column; padding: 1em;">
+                <div id="token-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
+                    <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                            <span id="blood-label" style="padding-left: 0.5em; font-size: 1em;">Blood (${currentBlood} / ${maxBlood})</span>
+                            <div>${blood}</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                            <span id="stamina-label" style="padding-left: 0.5em; font-size: 1em;">Stamina (${currentStamina} / ${maxStamina})</span>
+                            <div>${stamina}</div>
+                        </div>
                     </div>
                 </div>
+                <div id="stat-section" style="max-width: 22em; margin: 0 auto; width: 100%;">
+                    <div style="font-size:1em; display: flex; flex-direction: column;">
+                        <div class="stat-row">
+                            <span id="melee-power-label" class="stat-label round-style" title="Melee Power">Melee ⚔️</span>
+                            <div class="stat-value">${character.meleePower}</div>
+                            <span id="ranged-power-label" class="stat-label round-style" title="Ranged Power">Ranged 🏹</span>
+                            <div class="stat-value">${character.rangedPower}</div>
+                        </div>
+                        <div class="stat-row">
+                            <span id="might-label" class="stat-label round-style" title="Might">Might 💪</span>
+                            <div class="stat-value">${character.might}</div>
+                            <span id="awareness-label" class="stat-label round-style" title="Awareness">Awareness 👁️</span>
+                            <div class="stat-value">${character.awareness}</div>
+                        </div>
+                        <div class="stat-row">
+                            <span id="resolve-label" class="stat-label round-style" title="Resolve">Resolve ✊</span>
+                            <div class="stat-value">${character.resolve}</div>
+                            <span id="stress-label" class="stat-label round-style" title="Stress">Stress 💦</span>
+                            <div class="stat-value">${character.stress}</div>
+                        </div>
+                        <div style="display: flex; flex-direction: row; align-items: center; column-gap: 0.5em;">
+                            <button id="custom-neg-btn" class="custom-roll-btn round-style">-1</button>
+                            <input id="custom-roll-input" class="custom-roll-input round-style" type="number" value="${character.customRoll}">
+                            <button id="custom-pos-btn" class="custom-roll-btn round-style">+1</button>
+                            <button id="custom-roll-btn" class="custom-roll-btn round-style" style="min-width: 5em; justify-content: center;">Roll</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="dice-results" style="margin: 1em auto 0 auto; max-width: 22em;"></div>
+                <div id="card-section-container" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
             </div>
-            <div id="dice-results" style="margin: 1em auto 0 auto; max-width: 22em;"></div>
-            <div id="card-section-container" style="max-width: 22em; margin: 0 auto; width: 100%;"></div>
         `;
     }
 
@@ -145,8 +147,8 @@ export class CharacterView {
         `).join('');
 
         return `
-            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
-                <div style="margin-top: 1.5em;">
+            <div style="padding: 1em;">
+                <div style="max-width: 22em; margin: 0 auto;">
                     <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
                     <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
                         ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
@@ -171,8 +173,8 @@ export class CharacterView {
         `).join('');
 
         return `
-            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
-                <div style="margin-top: 1.5em;">
+            <div style="padding: 1em;">
+                <div style="max-width: 22em; margin: 0 auto;">
                     <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
                     <div style="display: flex; flex-direction: column; gap: 0.5em;">
                         ${abilitiesHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No abilities</div>'}
@@ -185,12 +187,13 @@ export class CharacterView {
 
     private renderNotesPage(character: Character): string {
         return `
-            <div style="max-width: 22em; margin: 0 auto; width: 100%; padding: 0 1em;">
-                <div style="margin-top: 1.5em;">
+            <div style="padding: 1em; display: flex; flex-direction: column;">
+                <div style="max-width: 22em; margin: 0 auto; width: 100%;">
                     <h3 style="margin: 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                     <textarea id="notes-input" style="
                         width: 100%;
-                        min-height: 300px;
+                        flex: 1;
+                        min-height: 250px;
                         padding: 0.75em;
                         border: 1px solid #666;
                         border-radius: 4px;
@@ -198,7 +201,8 @@ export class CharacterView {
                         color: #fff;
                         font-family: monospace;
                         font-size: 0.9em;
-                        resize: vertical;
+                        resize: none;
+                        box-sizing: border-box;
                     ">${character.notes}</textarea>
                     <button id="save-notes-btn" class="round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">Save Notes</button>
                 </div>
@@ -207,6 +211,7 @@ export class CharacterView {
     }
 
     private setupPageNavigation() {
+        const pagesWrapper = document.getElementById('pages-wrapper');
         const pagesContent = document.getElementById('pages-content');
         const pageButtons = document.querySelectorAll('.page-btn');
 
@@ -221,18 +226,18 @@ export class CharacterView {
         let touchStartX = 0;
         let touchEndX = 0;
 
-        pagesContent?.addEventListener('touchstart', (e) => {
+        pagesWrapper?.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
-        });
+        }, false);
 
-        pagesContent?.addEventListener('touchend', (e) => {
+        pagesWrapper?.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
             this.handleSwipe(touchStartX, touchEndX, pagesContent);
-        });
+        }, false);
     }
 
     private handleSwipe(startX: number, endX: number, pagesContent: HTMLElement | null) {
-        const threshold = 50;
+        const threshold = 30;
         const diff = startX - endX;
 
         if (Math.abs(diff) > threshold) {
