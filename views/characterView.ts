@@ -8,8 +8,7 @@ export class CharacterView {
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
 
     render(character: Character) {
-        this.renderVersion();
-        this.renderName(character.name);
+        this.currentCharacterName = character.name;
         this.renderPageContainer();
         // Render all pages
         for (let i = 0; i < this.pages.length; i++) {
@@ -26,28 +25,30 @@ export class CharacterView {
     }
 
     private renderVersion() {
-        const versionDiv = document.getElementById('version');
-        if (versionDiv) versionDiv.textContent = `v${this.VERSION}`;
+        // Version is now rendered in each page header
     }
 
     private renderName(name: string) {
-        const nameDiv = document.getElementById('character-name');
-        if (nameDiv) nameDiv.textContent = name;
+        // Name is now rendered in each page header
     }
+
+    private getPageHeader(pageName: string): string {
+        return `
+            <div style="display: flex; align-items: center; justify-content: center; padding: 0.5em 0; border-bottom: 1px solid #444; background: rgba(0, 0, 0, 0.9);">
+                <div style="font-size: 0.7em; opacity: 0.5; position: absolute; left: 0; padding: 0.3em;">v${this.VERSION}</div>
+                <div style="font-size: 1.5em; font-weight: 600; text-align: center; flex: 1 1 auto;">${this.currentCharacterName}</div>
+                <a href="index.html" title="Return to Character List" style="color: #fff; text-decoration: none; font-size: 1.4em; position: absolute; right: 0; padding: 0.2em 0.3em;">
+                    <span style="vertical-align: middle;">&#8962;</span>
+                </a>
+            </div>
+        `;
+    }
+
+    private currentCharacterName = '';
 
     private renderPageContainer() {
         const container = document.getElementById('page-container');
         if (!container) return;
-
-        // Render tabs in the fixed header
-        const tabsBar = document.getElementById('tabs-bar');
-        if (tabsBar) {
-            tabsBar.innerHTML = this.pages.map((name, idx) => `
-                <button class="page-btn round-style" data-page="${idx}" style="padding: 0.4em 0.8em; font-size: 0.9em; ${idx === this.currentPage ? 'background: #4a9eff; font-weight: bold;' : ''}">
-                    ${name}
-                </button>
-            `).join('');
-        }
 
         container.innerHTML = `
             <div id="pages-wrapper" style="display: flex; flex: 1; overflow: hidden; width: 100%; min-height: 0;">
@@ -95,6 +96,7 @@ export class CharacterView {
         }
 
         return `
+            ${this.getPageHeader('Stats')}
             <div style="display: flex; flex-direction: column; gap: 1em; padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
                 <div id="token-section" style="width: 100%;">
                     <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
@@ -182,6 +184,7 @@ export class CharacterView {
         `).join('');
 
         return `
+            ${this.getPageHeader('Items')}
             <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
                 <h3 style="margin: 0.5em 0; font-size: 1.2em;">Items <span style="font-size: 0.9em; font-weight: normal;">(${itemsUsed}/${maxSlots})</span></h3>
                 <div style="display: flex; flex-direction: column; gap: 0.5em; ${exceedsSlots ? 'margin-bottom: 0.5em;' : ''}">
@@ -216,6 +219,7 @@ export class CharacterView {
         `).join('');
 
         return `
+            ${this.getPageHeader('Abilities')}
             <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
                 <h3 style="margin: 0.5em 0; font-size: 1.2em;">Abilities</h3>
                 <div style="display: flex; flex-direction: column; gap: 0.5em;">
@@ -238,6 +242,7 @@ export class CharacterView {
 
     private renderNotesPage(character: Character): string {
         return `
+            ${this.getPageHeader('Notes')}
             <div style="padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
                 <h3 style="margin: 0 0 0.5em 0; font-size: 1.2em;">Campaign Notes</h3>
                 <textarea id="notes-input" style="
