@@ -420,8 +420,7 @@ export class CharacterController {
             'Resolve',
             'Stress',
             'Blood Max',
-            'Stamina Max',
-            'Custom Roll'
+            'Stamina Max'
         ];
         const statKeys = [
             'melee_power',
@@ -431,8 +430,7 @@ export class CharacterController {
             'resolve',
             'stress',
             'blood_max',
-            'stamina_max',
-            'custom_roll'
+            'stamina_max'
         ];
 
         const optionsText = statOptions.map((stat, i) => `${i + 1}. ${stat}`).join('\n');

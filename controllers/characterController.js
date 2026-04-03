@@ -409,8 +409,7 @@ var CharacterController = /** @class */ (function () {
             'Resolve',
             'Stress',
             'Blood Max',
-            'Stamina Max',
-            'Custom Roll'
+            'Stamina Max'
         ];
         var statKeys = [
             'melee_power',
@@ -420,8 +419,7 @@ var CharacterController = /** @class */ (function () {
             'resolve',
             'stress',
             'blood_max',
-            'stamina_max',
-            'custom_roll'
+            'stamina_max'
         ];
         var optionsText = statOptions.map(function (stat, i) { return "".concat(i + 1, ". ").concat(stat); }).join('\n');
         var statChoice = prompt("Select a stat to boost (or skip):\n\n".concat(optionsText, "\n\nEnter number (1-").concat(statOptions.length, ") or leave blank:"));
