@@ -143,15 +143,13 @@ export class CharacterController {
         ].forEach(([id, stat, label]) => {
             const el = document.getElementById(id);
             if (el) {
-                el.addEventListener('click', (e) => {
-                    if (e.detail === 1) {
-                        if (stat === 'stress') {
-                            this.diceRoller.rollStress();
-                        } else {
-                            this.diceRoller.rollPMAR(stat, label);
-                        }
+                (el as any).onclick = () => {
+                    if (stat === 'stress') {
+                        this.diceRoller.rollStress();
+                    } else {
+                        this.diceRoller.rollPMAR(stat as any, label);
                     }
-                });
+                };
             }
         });
     }

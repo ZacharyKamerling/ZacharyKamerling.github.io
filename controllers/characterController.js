@@ -135,16 +135,14 @@ var CharacterController = /** @class */ (function () {
             var id = _a[0], stat = _a[1], label = _a[2];
             var el = document.getElementById(id);
             if (el) {
-                el.addEventListener('click', function (e) {
-                    if (e.detail === 1) {
-                        if (stat === 'stress') {
-                            _this.diceRoller.rollStress();
-                        }
-                        else {
-                            _this.diceRoller.rollPMAR(stat, label);
-                        }
+                el.onclick = function () {
+                    if (stat === 'stress') {
+                        _this.diceRoller.rollStress();
                     }
-                });
+                    else {
+                        _this.diceRoller.rollPMAR(stat, label);
+                    }
+                };
             }
         });
     };
