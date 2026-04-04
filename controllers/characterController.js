@@ -204,6 +204,7 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
+                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });
@@ -228,6 +229,7 @@ var CharacterController = /** @class */ (function () {
                         numberPrompt("Set ".concat(label, " (0-100):"), _this.character[prop] || 0, 0, 100).then(function (val) {
                             if (val !== null && !isNaN(val)) {
                                 _this.character[prop] = val;
+                                _this.character.invalidateEffectiveStatsCache();
                                 _this.saveAndRender();
                             }
                         });

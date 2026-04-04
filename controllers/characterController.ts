@@ -209,6 +209,7 @@ export class CharacterController {
                         numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
                                 this.character[prop] = val;
+                                this.character.invalidateEffectiveStatsCache();
                                 this.saveAndRender();
                             }
                         });
@@ -232,6 +233,7 @@ export class CharacterController {
                         numberPrompt(`Set ${label} (0-100):`, this.character[prop] || 0, 0, 100).then(val => {
                             if (val !== null && !isNaN(val)) {
                                 this.character[prop] = val;
+                                this.character.invalidateEffectiveStatsCache();
                                 this.saveAndRender();
                             }
                         });
