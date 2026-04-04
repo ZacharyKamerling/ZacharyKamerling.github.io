@@ -1,37 +1,4 @@
 import { db } from '../data/db.js';
-export function addHoldToSetMax(id, label, maxProp, character, db, renderTokens, renderStats, numberPrompt) {
-    var el = document.getElementById(id);
-    if (!el)
-        return;
-    var holdTimer;
-    function handleSetMax(label, maxProp) {
-        numberPrompt("Set max ".concat(label, " (1-20):"), character[maxProp] || 5, 1, 20).then(function (val) {
-            if (val !== null && !isNaN(val)) {
-                character[maxProp] = val;
-                db.saveCharacter(character);
-                renderTokens();
-                renderStats();
-            }
-        });
-    }
-    // Only attach to Blood and Stamina labels, not PMAR
-    if (id === 'blood-label' || id === 'stamina-label') {
-        el.addEventListener('mousedown', function (e) {
-            holdTimer = setTimeout(function () {
-                handleSetMax(label, maxProp);
-            }, 600);
-        });
-        el.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-        el.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-        el.addEventListener('touchstart', function (e) {
-            holdTimer = setTimeout(function () {
-                handleSetMax(label, maxProp);
-            }, 600);
-        });
-        el.addEventListener('touchend', function (e) { return clearTimeout(holdTimer); });
-        el.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
-    }
-}
 export function numberPrompt(message, defaultValue, min, max) {
     return new Promise(function (resolve) {
         var length = defaultValue.toString().length;

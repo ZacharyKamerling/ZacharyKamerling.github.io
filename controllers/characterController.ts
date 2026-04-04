@@ -26,10 +26,8 @@ export class CharacterController {
         document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.attachNameEditListener();
-        this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
@@ -40,13 +38,18 @@ export class CharacterController {
     }
 
     private saveAndRender() {
-        db.saveCharacter(this.character);
+        db.saveCharacter(this.character.toJSON());
+
+        // Preserve dice results across re-render
+        const savedDiceHtml = this.diceRoller.resultBox.innerHTML;
+
         this.view.render(this.character);
 
         // Re-initialize diceRoller and cardDrawer after DOM is ready
         const diceResultBox = document.getElementById('dice-results');
         if (diceResultBox) {
             this.diceRoller.resultBox = diceResultBox;
+            diceResultBox.innerHTML = savedDiceHtml;
         }
         const cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {
@@ -54,10 +57,8 @@ export class CharacterController {
         }
 
         // Re-attach all listeners immediately (DOM is already rendered)
-        this.attachStatRollListeners();
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
-        this.attachTokenMaxSetListeners();
         this.attachCustomRollListeners();
         this.attachItemAbilityListeners();
         this.attachNewItemListener();
@@ -67,14 +68,18 @@ export class CharacterController {
         this.attachNotesListener();
     }
 
-    private attachTokenMaxSetListeners() {
+    private attachTokenListeners() {
         document.querySelectorAll('.token-btn').forEach(btn => {
             const button = btn as HTMLButtonElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
-            const timeoutFunction = (btn: HTMLButtonElement) => {
-                return () => {
-                    const type = btn.dataset.type as 'blood' | 'stamina';
-                    let label = type === 'blood' ? 'Blood' : 'Stamina';
+            let held = false;
+
+            const startHold = () => {
+                held = false;
+                holdTimer = setTimeout(() => {
+                    held = true;
+                    const type = button.dataset.type as 'blood' | 'stamina';
+                    const label = type === 'blood' ? 'Blood' : 'Stamina';
                     if (type === 'blood') {
                         numberPrompt(`Set max ${label} (1-20):`, this.character.bloodMax || 5, 1, 20).then(val => {
                             if (val !== null && !isNaN(val)) {
@@ -92,69 +97,30 @@ export class CharacterController {
                             }
                         });
                     }
+                }, 600);
+            };
+
+            const endHold = (doClick: boolean) => {
+                clearTimeout(holdTimer);
+                if (doClick && !held) {
+                    const type = button.dataset.type as 'blood' | 'stamina';
+                    const idx = parseInt(button.dataset.idx!);
+                    if (type === 'blood') {
+                        this.character.bloodTokens = this.character.bloodTokens === idx + 1 ? idx : idx + 1;
+                    } else {
+                        this.character.staminaTokens = this.character.staminaTokens === idx + 1 ? idx : idx + 1;
+                    }
+                    this.saveAndRender();
                 }
             };
 
-            button.addEventListener('mousedown', (e: MouseEvent) => {
-                holdTimer = setTimeout(timeoutFunction(button), 600);
-            });
-            button.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            button.addEventListener('mousedown', (e: MouseEvent) => { if (e.button === 0) startHold(); });
+            button.addEventListener('mouseup', (e: MouseEvent) => { if (e.button === 0) endHold(true); });
             button.addEventListener('mouseleave', () => clearTimeout(holdTimer));
-            button.addEventListener('touchstart', (e: TouchEvent) => {
-                holdTimer = setTimeout(timeoutFunction(button), 600);
-            });
-            button.addEventListener('touchend', () => {
-                clearTimeout(holdTimer);
-            });
+            button.addEventListener('touchstart', () => startHold());
+            button.addEventListener('touchend', () => endHold(true));
             button.addEventListener('touchcancel', () => clearTimeout(holdTimer));
             button.addEventListener('contextmenu', (e) => e.preventDefault());
-        });
-    }
-
-    private attachTokenListeners() {
-        document.querySelectorAll('.token-btn').forEach(btn => {
-            const button = btn as HTMLButtonElement;
-            button.onclick = (e: MouseEvent) => {
-                const type = button.dataset.type as 'blood' | 'stamina';
-                const idx = parseInt(button.dataset.idx!);
-                if (type === 'blood') {
-                    if (this.character.bloodTokens === (idx + 1)) {
-                        this.character.bloodTokens -= 1;
-                    } else {
-                        this.character.bloodTokens = idx + 1;
-                    }
-                }
-                if (type === 'stamina') {
-                    if (this.character.staminaTokens === (idx + 1)) {
-                        this.character.staminaTokens -= 1;
-                    } else {
-                        this.character.staminaTokens = idx + 1;
-                    }
-                }
-                this.saveAndRender();
-            };
-        });
-    }
-
-    private attachStatRollListeners() {
-        [
-            ['melee-power-label', 'meleePower', 'Melee Power'],
-            ['ranged-power-label', 'rangedPower', 'Ranged Power'],
-            ['might-label', 'might', 'Might'],
-            ['awareness-label', 'awareness', 'Awareness'],
-            ['resolve-label', 'resolve', 'Resolve'],
-            ['stress-label', 'stress', 'Stress'],
-        ].forEach(([id, stat, label]) => {
-            const el = document.getElementById(id);
-            if (el) {
-                (el as any).onclick = () => {
-                    if (stat === 'stress') {
-                        this.diceRoller.rollStress();
-                    } else {
-                        this.diceRoller.rollPMAR(stat as any, label);
-                    }
-                };
-            }
         });
     }
 

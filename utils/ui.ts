@@ -1,55 +1,5 @@
-import { Character, CharacterData } from '../models/character.js';
+import { CharacterData } from '../models/character.js';
 import { db } from '../data/db.js';
-
-// Utility: add hold-to-set-MAX-value to a label
-type MaxProp = 'bloodMax' | 'staminaMax';
-interface CharacterLike {
-    [key: string]: number | string | undefined;
-}
-interface DBLike {
-    saveCharacter: (character: CharacterLike) => void;
-}
-export function addHoldToSetMax(
-    id: string,
-    label: string,
-    maxProp: MaxProp,
-    character: CharacterLike,
-    db: DBLike,
-    renderTokens: () => void,
-    renderStats: () => void,
-    numberPrompt: (msg: string, val: number, min: number, max: number) => Promise<number|null>
-): void {
-    const el = document.getElementById(id);
-    if (!el) return;
-    let holdTimer: ReturnType<typeof setTimeout> | undefined;
-    function handleSetMax(label: string, maxProp: MaxProp): void {
-        numberPrompt(`Set max ${label} (1-20):`, (character[maxProp] as number) || 5, 1, 20).then(val => {
-            if (val !== null && !isNaN(val)) {
-                character[maxProp] = val;
-                db.saveCharacter(character);
-                renderTokens();
-                renderStats();
-            }
-        });
-    }
-    // Only attach to Blood and Stamina labels, not PMAR
-    if (id === 'blood-label' || id === 'stamina-label') {
-        el.addEventListener('mousedown', (e: MouseEvent) => {
-            holdTimer = setTimeout(() => {
-                handleSetMax(label, maxProp);
-            }, 600);
-        });
-        el.addEventListener('mouseup', () => clearTimeout(holdTimer));
-        el.addEventListener('mouseleave', () => clearTimeout(holdTimer));
-        el.addEventListener('touchstart', (e: TouchEvent) => {
-            holdTimer = setTimeout(() => {
-                handleSetMax(label, maxProp);
-            }, 600);
-        });
-        el.addEventListener('touchend', (e) => clearTimeout(holdTimer));
-        el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
-    }
-}
 
 export function numberPrompt(
     message: string,

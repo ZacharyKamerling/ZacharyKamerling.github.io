@@ -17,7 +17,6 @@ var Character = /** @class */ (function () {
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
         this.unarmored = (_m = data.unarmored) !== null && _m !== void 0 ? _m : false;
         this.notes = (_o = data.notes) !== null && _o !== void 0 ? _o : '';
-        this.equipment = data.equipment || [];
         this.items = data.items || [];
         this.abilities = data.abilities || [];
     }
@@ -38,7 +37,6 @@ var Character = /** @class */ (function () {
             customRoll: 1,
             unarmored: false,
             notes: '',
-            equipment: [],
             items: [],
             abilities: []
         };
@@ -63,7 +61,6 @@ var Character = /** @class */ (function () {
             customRoll: this.customRoll,
             unarmored: this.unarmored,
             notes: this.notes,
-            equipment: this.equipment || [],
             items: this.items || [],
             abilities: this.abilities || []
         };
