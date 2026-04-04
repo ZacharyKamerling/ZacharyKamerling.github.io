@@ -49,20 +49,18 @@ export class CharacterController {
             this.cardDrawer = new CardDrawer(this.character, cardResultBox);
         }
 
-        // Re-attach all listeners (use setTimeout to ensure DOM is settled)
-        requestAnimationFrame(() => {
-            this.attachStatRollListeners();
-            this.attachStatMaxSetListeners();
-            this.attachTokenListeners();
-            this.attachTokenMaxSetListeners();
-            this.attachCustomRollListeners();
-            this.attachItemAbilityListeners();
-            this.attachNewItemListener();
-            this.attachNewAbilityListener();
-            this.attachCardDrawingListeners();
-            this.attachItemCheckboxListeners();
-            this.attachNotesListener();
-        });
+        // Re-attach all listeners immediately (DOM is already rendered)
+        this.attachStatRollListeners();
+        this.attachStatMaxSetListeners();
+        this.attachTokenListeners();
+        this.attachTokenMaxSetListeners();
+        this.attachCustomRollListeners();
+        this.attachItemAbilityListeners();
+        this.attachNewItemListener();
+        this.attachNewAbilityListener();
+        this.attachCardDrawingListeners();
+        this.attachItemCheckboxListeners();
+        this.attachNotesListener();
     }
 
     private attachTokenMaxSetListeners() {
