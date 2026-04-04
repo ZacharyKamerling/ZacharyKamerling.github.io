@@ -197,7 +197,7 @@ export class CharacterController {
                 el.title = `Hold to set ${label}`;
                 let holdTimer: ReturnType<typeof setTimeout> | undefined;
                 let held = false;
-                el.addEventListener('mousedown', (e: MouseEvent) => {
+                el.onmousedown = (e: MouseEvent) => {
                     if (e.button === 2) return; // ignore right click
                     held = false;
                     holdTimer = setTimeout(() => {
@@ -209,8 +209,8 @@ export class CharacterController {
                             }
                         });
                     }, 600);
-                });
-                el.addEventListener('mouseup', (e: MouseEvent) => {
+                };
+                el.onmouseup = (e: MouseEvent) => {
                     clearTimeout(holdTimer);
                     if (!held && e.button === 0) {
                         if (prop === 'stress') {
@@ -219,9 +219,9 @@ export class CharacterController {
                             this.diceRoller.rollPMAR(prop, label);
                         }
                     }
-                });
-                el.addEventListener('mouseleave', () => clearTimeout(holdTimer));
-                el.addEventListener('touchstart', () => {
+                };
+                el.onmouseleave = () => clearTimeout(holdTimer);
+                el.ontouchstart = () => {
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
@@ -232,8 +232,8 @@ export class CharacterController {
                             }
                         });
                     }, 600);
-                });
-                el.addEventListener('touchend', () => {
+                };
+                el.ontouchend = () => {
                     clearTimeout(holdTimer);
                     if (!held) {
                         if (prop === 'stress') {
@@ -242,9 +242,12 @@ export class CharacterController {
                             this.diceRoller.rollPMAR(prop, label);
                         }
                     }
-                });
-                el.addEventListener('touchcancel', () => clearTimeout(holdTimer));
-                el.addEventListener('contextmenu', (e) => e.preventDefault());
+                };
+                el.ontouchcancel = () => clearTimeout(holdTimer);
+                el.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    return false;
+                };
             }
         });
     }

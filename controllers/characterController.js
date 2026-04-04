@@ -191,7 +191,7 @@ var CharacterController = /** @class */ (function () {
                 el.title = "Hold to set ".concat(label);
                 var holdTimer_2;
                 var held_1 = false;
-                el.addEventListener('mousedown', function (e) {
+                el.onmousedown = function (e) {
                     if (e.button === 2)
                         return; // ignore right click
                     held_1 = false;
@@ -204,8 +204,8 @@ var CharacterController = /** @class */ (function () {
                             }
                         });
                     }, 600);
-                });
-                el.addEventListener('mouseup', function (e) {
+                };
+                el.onmouseup = function (e) {
                     clearTimeout(holdTimer_2);
                     if (!held_1 && e.button === 0) {
                         if (prop === 'stress') {
@@ -215,9 +215,9 @@ var CharacterController = /** @class */ (function () {
                             _this.diceRoller.rollPMAR(prop, label);
                         }
                     }
-                });
-                el.addEventListener('mouseleave', function () { return clearTimeout(holdTimer_2); });
-                el.addEventListener('touchstart', function () {
+                };
+                el.onmouseleave = function () { return clearTimeout(holdTimer_2); };
+                el.ontouchstart = function () {
                     held_1 = false;
                     holdTimer_2 = setTimeout(function () {
                         held_1 = true;
@@ -228,8 +228,8 @@ var CharacterController = /** @class */ (function () {
                             }
                         });
                     }, 600);
-                });
-                el.addEventListener('touchend', function () {
+                };
+                el.ontouchend = function () {
                     clearTimeout(holdTimer_2);
                     if (!held_1) {
                         if (prop === 'stress') {
@@ -239,9 +239,12 @@ var CharacterController = /** @class */ (function () {
                             _this.diceRoller.rollPMAR(prop, label);
                         }
                     }
-                });
-                el.addEventListener('touchcancel', function () { return clearTimeout(holdTimer_2); });
-                el.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
+                };
+                el.ontouchcancel = function () { return clearTimeout(holdTimer_2); };
+                el.oncontextmenu = function (e) {
+                    e.preventDefault();
+                    return false;
+                };
             }
         });
     };
