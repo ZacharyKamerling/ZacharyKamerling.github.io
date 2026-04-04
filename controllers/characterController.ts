@@ -43,7 +43,11 @@ export class CharacterController {
         db.saveCharacter(this.character);
         this.view.render(this.character);
 
-        // Initialize cardDrawer after DOM is ready
+        // Re-initialize diceRoller and cardDrawer after DOM is ready
+        const diceResultBox = document.getElementById('dice-results');
+        if (diceResultBox) {
+            this.diceRoller.resultBox = diceResultBox;
+        }
         const cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {
             this.cardDrawer = new CardDrawer(this.character, cardResultBox);
