@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.23';
+    private VERSION = '1.0.24';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -178,7 +178,21 @@ export class CharacterView {
                     ${itemsHtml || '<div style="font-size: 0.9em; opacity: 0.6; padding: 0.5em;">No items</div>'}
                 </div>
                 ${exceedsSlots ? `<div style="color: #ff6b6b; font-style: italic; font-size: 0.9em; margin-bottom: 0.5em;">⚠️ Item slots exceeded</div>` : ''}
-                <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">+ New Item</button>
+                <div style="margin-top: 0.5em; display: flex; flex-direction: column; gap: 0.4em;">
+                    <select id="item-template-select" class="round-style" style="width: 100%; padding: 0.5em;">
+                        <option value="">Custom Item</option>
+                        <option value="melee_power">⚔️  Melee Power Bonus  ($$melee_power:1)</option>
+                        <option value="ranged_power">🏹  Ranged Power Bonus  ($$ranged_power:1)</option>
+                        <option value="might">💪  Might Bonus  ($$might:1)</option>
+                        <option value="awareness">👁️  Awareness Bonus  ($$awareness:1)</option>
+                        <option value="resolve">✊  Resolve Bonus  ($$resolve:1)</option>
+                        <option value="stress">💦  Stress Modifier  ($$stress:1)</option>
+                        <option value="blood_max">🩸  Blood Max Bonus  ($$blood_max:1)</option>
+                        <option value="stamina_max">⚡  Stamina Max Bonus  ($$stamina_max:1)</option>
+                        <option value="custom_roll">🎲  Custom Roll Bonus  ($$custom_roll:1)</option>
+                    </select>
+                    <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em;">+ Add Item</button>
+                </div>
             </div>
         `;
     }

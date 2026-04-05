@@ -383,13 +383,28 @@ export class CharacterController {
     }
 
     private createNewItem() {
+        const templateSelect = document.getElementById('item-template-select') as HTMLSelectElement;
+        const template = templateSelect?.value || '';
+        const templateDescriptions: { [key: string]: string } = {
+            melee_power:  '$$melee_power:1',
+            ranged_power: '$$ranged_power:1',
+            might:        '$$might:1',
+            awareness:    '$$awareness:1',
+            resolve:      '$$resolve:1',
+            stress:       '$$stress:1',
+            blood_max:    '$$blood_max:1',
+            stamina_max:  '$$stamina_max:1',
+            custom_roll:  '$$custom_roll:1',
+        };
+
         const name = prompt('Item name:');
         if (!name) return;
 
         const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null) return;
 
-        const description = prompt('Description:');
+        const defaultDesc = template ? templateDescriptions[template] || '' : '';
+        const description = prompt('Description:', defaultDesc);
         if (description === null) return;
 
         this.character.items.push({

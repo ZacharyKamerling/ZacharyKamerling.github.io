@@ -364,13 +364,27 @@ var CharacterController = /** @class */ (function () {
         }
     };
     CharacterController.prototype.createNewItem = function () {
+        var templateSelect = document.getElementById('item-template-select');
+        var template = (templateSelect === null || templateSelect === void 0 ? void 0 : templateSelect.value) || '';
+        var templateDescriptions = {
+            melee_power: '$$melee_power:1',
+            ranged_power: '$$ranged_power:1',
+            might: '$$might:1',
+            awareness: '$$awareness:1',
+            resolve: '$$resolve:1',
+            stress: '$$stress:1',
+            blood_max: '$$blood_max:1',
+            stamina_max: '$$stamina_max:1',
+            custom_roll: '$$custom_roll:1',
+        };
         var name = prompt('Item name:');
         if (!name)
             return;
         var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
         if (location === null)
             return;
-        var description = prompt('Description:');
+        var defaultDesc = template ? templateDescriptions[template] || '' : '';
+        var description = prompt('Description:', defaultDesc);
         if (description === null)
             return;
         this.character.items.push({
