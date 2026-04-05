@@ -1,7 +1,7 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
         // REMEMBER: Increment VERSION when making UI changes
-        this.VERSION = '1.0.22';
+        this.VERSION = '1.0.23';
         this.currentPage = 0;
         this.pages = ['Stats', 'Items', 'Abilities', 'Notes'];
         this.TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -121,16 +121,10 @@ var CharacterView = /** @class */ (function () {
         var diff = startX - endX;
         if (Math.abs(diff) > threshold) {
             if (diff > 0) {
-                // Swiped left, go to next page
-                if (this.currentPage < this.pages.length - 1) {
-                    this.goToPage(this.currentPage + 1, pagesContent);
-                }
+                this.goToPage((this.currentPage + 1) % this.pages.length, pagesContent);
             }
             else {
-                // Swiped right, go to previous page
-                if (this.currentPage > 0) {
-                    this.goToPage(this.currentPage - 1, pagesContent);
-                }
+                this.goToPage((this.currentPage - 1 + this.pages.length) % this.pages.length, pagesContent);
             }
         }
     };

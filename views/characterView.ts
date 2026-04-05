@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.22';
+    private VERSION = '1.0.23';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -262,15 +262,9 @@ export class CharacterView {
 
         if (Math.abs(diff) > threshold) {
             if (diff > 0) {
-                // Swiped left, go to next page
-                if (this.currentPage < this.pages.length - 1) {
-                    this.goToPage(this.currentPage + 1, pagesContent);
-                }
+                this.goToPage((this.currentPage + 1) % this.pages.length, pagesContent);
             } else {
-                // Swiped right, go to previous page
-                if (this.currentPage > 0) {
-                    this.goToPage(this.currentPage - 1, pagesContent);
-                }
+                this.goToPage((this.currentPage - 1 + this.pages.length) % this.pages.length, pagesContent);
             }
         }
     }
