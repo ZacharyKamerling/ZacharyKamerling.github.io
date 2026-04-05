@@ -114,7 +114,7 @@ export class CharacterController {
             button.addEventListener('mouseup', (e: MouseEvent) => { if (e.button === 0) endHold(true); });
             button.addEventListener('mouseleave', () => clearTimeout(holdTimer));
             button.addEventListener('touchstart', () => startHold());
-            button.addEventListener('touchend', () => endHold(true));
+            button.addEventListener('touchend', (e: TouchEvent) => { e.preventDefault(); endHold(true); });
             button.addEventListener('touchcancel', () => clearTimeout(holdTimer));
             button.addEventListener('contextmenu', (e) => e.preventDefault());
         });

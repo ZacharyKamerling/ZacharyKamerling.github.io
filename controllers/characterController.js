@@ -104,7 +104,7 @@ var CharacterController = /** @class */ (function () {
                 endHold(true); });
             button.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
             button.addEventListener('touchstart', function () { return startHold(); });
-            button.addEventListener('touchend', function () { return endHold(true); });
+            button.addEventListener('touchend', function (e) { e.preventDefault(); endHold(true); });
             button.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
             button.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         });
