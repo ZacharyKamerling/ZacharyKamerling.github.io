@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.24';
+    private VERSION = '1.0.25';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -189,7 +189,6 @@ export class CharacterView {
                         <option value="stress">💦  Stress Modifier  ($$stress:1)</option>
                         <option value="blood_max">🩸  Blood Max Bonus  ($$blood_max:1)</option>
                         <option value="stamina_max">⚡  Stamina Max Bonus  ($$stamina_max:1)</option>
-                        <option value="custom_roll">🎲  Custom Roll Bonus  ($$custom_roll:1)</option>
                     </select>
                     <button class="new-item-btn round-style" style="width: 100%; padding: 0.5em;">+ Add Item</button>
                 </div>

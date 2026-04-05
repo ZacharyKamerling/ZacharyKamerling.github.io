@@ -375,7 +375,6 @@ var CharacterController = /** @class */ (function () {
             stress: '$$stress:1',
             blood_max: '$$blood_max:1',
             stamina_max: '$$stamina_max:1',
-            custom_roll: '$$custom_roll:1',
         };
         var name = prompt('Item name:');
         if (!name)
