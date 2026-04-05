@@ -28,14 +28,12 @@ var CharacterController = /** @class */ (function () {
     }
     CharacterController.prototype.saveAndRender = function () {
         db.saveCharacter(this.character.toJSON());
-        // Preserve dice results across re-render
-        var savedDiceHtml = this.diceRoller.resultBox.innerHTML;
         this.view.render(this.character);
         // Re-initialize diceRoller and cardDrawer after DOM is ready
         var diceResultBox = document.getElementById('dice-results');
         if (diceResultBox) {
             this.diceRoller.resultBox = diceResultBox;
-            diceResultBox.innerHTML = savedDiceHtml;
+            this.diceRoller.redisplay();
         }
         var cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {

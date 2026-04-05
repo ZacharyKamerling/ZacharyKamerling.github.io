@@ -39,17 +39,13 @@ export class CharacterController {
 
     private saveAndRender() {
         db.saveCharacter(this.character.toJSON());
-
-        // Preserve dice results across re-render
-        const savedDiceHtml = this.diceRoller.resultBox.innerHTML;
-
         this.view.render(this.character);
 
         // Re-initialize diceRoller and cardDrawer after DOM is ready
         const diceResultBox = document.getElementById('dice-results');
         if (diceResultBox) {
             this.diceRoller.resultBox = diceResultBox;
-            diceResultBox.innerHTML = savedDiceHtml;
+            this.diceRoller.redisplay();
         }
         const cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {

@@ -141,6 +141,65 @@ var DiceRoller = /** @class */ (function () {
             face.addEventListener('touchstart', reroll);
         });
     };
+    // Re-renders the last result into resultBox without animation or re-rolling.
+    // Call this after the DOM is re-created (e.g. after saveAndRender).
+    DiceRoller.prototype.redisplay = function () {
+        var _this = this;
+        if (this.lastRolls !== null && this.lastStat !== null && this.lastLabel !== null) {
+            var rolls = this.lastRolls;
+            var stat_1 = this.lastStat;
+            var label_1 = this.lastLabel;
+            var successes = rolls.filter(function (r) { return r >= 4; }).length;
+            var diceHtml = rolls.map(function (roll, i) {
+                return "<span class=\"dice-face".concat(roll >= 4 ? ' dice-success' : ' dice-fail', "\" data-idx=\"").concat(i, "\" style=\"cursor:pointer;\" title=\"Click to reroll\">").concat(roll, "</span>");
+            }).join('');
+            this.resultBox.innerHTML = "\n                <div class=\"dice-result-label\">".concat(label_1, " Roll</div>\n                <div class=\"dice-result-row\">").concat(diceHtml, "</div>\n                <div class=\"dice-result-summary\">").concat(successes, " Successes (4+)</div>\n            ");
+            this.resultBox.querySelectorAll('.dice-face').forEach(function (face) {
+                var reroll = function (e) {
+                    e.preventDefault();
+                    var idx = parseInt(face.getAttribute('data-idx') || '0');
+                    _this.rollPMAR(stat_1, label_1, idx);
+                };
+                face.addEventListener('click', reroll);
+                face.addEventListener('touchstart', reroll);
+            });
+        }
+        else if (this.lastStressDice !== null) {
+            var stress = this.character.stress || 0;
+            var resolve = this.character.resolve || 0;
+            var _a = this.lastStressDice, d1 = _a[0], d2 = _a[1];
+            var total = Math.max(0, Math.min(20, d1 + d2 + stress - resolve));
+            var resultText = '';
+            if (total <= 5)
+                resultText = 'Steady Nerves - No effect as you steel yourself and press on.';
+            else if (total <= 7)
+                resultText = 'Shaken - Ignore the next Positive card result you take.';
+            else if (total <= 9)
+                resultText = 'Jittery - Lose 1 Stamina Token.';
+            else if (total <= 11)
+                resultText = 'Hesitation - You can\u2019t use abilities in your next round of combat.';
+            else if (total <= 13)
+                resultText = 'Lash Out - You bleed or wound an ally.';
+            else if (total <= 15)
+                resultText = 'Despair - You cannot reduce your Stress for 24 hours.';
+            else if (total <= 17)
+                resultText = 'Faint - Collapse. You can do nothing until one round passes.';
+            else if (total <= 19)
+                resultText = 'Heart Attack - Your heart stops and you collapse. You die in 2 rounds unless revived.';
+            else
+                resultText = 'Retirement - You\u2019ve seen enough. Your adventuring days are done.';
+            this.resultBox.innerHTML = "\n                <div class=\"dice-result-label\">Stress Panic Roll</div>\n                <div class=\"dice-result-row\">\n                    <span class=\"dice-face\" data-idx=\"0\" style=\"margin-right:0.5em; color:#fff; background:none; font-weight:bold; text-shadow:none; cursor:pointer;\" title=\"Click to reroll\">".concat(d1, "</span>\n                    <span class=\"dice-face\" data-idx=\"1\" style=\"margin-right:0.5em; color:#fff; background:none; font-weight:bold; text-shadow:none; cursor:pointer;\" title=\"Click to reroll\">").concat(d2, "</span>\n                    <span style=\"font-weight:bold;\">+ Stress (").concat(stress, ") - Resolve (").concat(resolve, ") = <span style=\"color:#ffb300;\">").concat(total, "</span></span>\n                </div>\n                <hr style=\"border:0;border-top:1.5px solid #666; margin:0.7em 0 0.7em 0; width:90%;\">\n                <div class=\"dice-result-summary\">").concat(resultText, "</div>\n            ");
+            this.resultBox.querySelectorAll('.dice-face').forEach(function (face) {
+                var reroll = function (e) {
+                    e.preventDefault();
+                    var idx = parseInt(face.getAttribute('data-idx') || '0');
+                    _this.rollStress(idx);
+                };
+                face.addEventListener('click', reroll);
+                face.addEventListener('touchstart', reroll);
+            });
+        }
+    };
     return DiceRoller;
 }());
 export { DiceRoller };
