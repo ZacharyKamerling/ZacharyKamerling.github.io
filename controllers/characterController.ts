@@ -414,7 +414,7 @@ export class CharacterController {
         `;
 
         const textarea = document.createElement('textarea');
-        textarea.value = currentDescription;
+        textarea.value = currentDescription.trim();
         textarea.style.cssText = `
             min-height: 4em;
             padding: ${SPACING.sm};
@@ -426,6 +426,8 @@ export class CharacterController {
             font-size: 0.9em;
             box-sizing: border-box;
             resize: vertical;
+            text-align: left;
+            white-space: normal;
         `;
 
         const buttonContainer = document.createElement('div');
