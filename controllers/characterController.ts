@@ -279,22 +279,9 @@ export class CharacterController {
             const nameEl = element.querySelector('.item-ability-name') as HTMLElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
 
-            // Click name to edit
-            if (nameEl) {
-                nameEl.addEventListener('click', (e: Event) => {
-                    e.stopPropagation();
-                    this.editItemOrAbility(id, type);
-                });
-            }
-
-            // Click to toggle description (but not name, not checkbox)
+            // Click to toggle description
             element.addEventListener('click', (e: Event) => {
                 const target = e.target as HTMLElement;
-
-                // Don't toggle if clicking the name (opens edit mode)
-                if (target.classList.contains('item-ability-name')) {
-                    return;
-                }
 
                 // Don't toggle if clicking the checkbox (handled separately)
                 if (target.classList.contains('item-checkbox')) {
@@ -309,7 +296,7 @@ export class CharacterController {
                 }
             });
 
-            // Long press on name only for delete menu
+            // Long press on name for menu
             if (nameEl) {
                 nameEl.addEventListener('mousedown', (e: MouseEvent) => {
                     holdTimer = setTimeout(() => {

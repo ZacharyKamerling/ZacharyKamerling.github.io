@@ -265,20 +265,9 @@ var CharacterController = /** @class */ (function () {
             var description = element.querySelector('.item-ability-description');
             var nameEl = element.querySelector('.item-ability-name');
             var holdTimer;
-            // Click name to edit
-            if (nameEl) {
-                nameEl.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    _this.editItemOrAbility(id, type);
-                });
-            }
-            // Click to toggle description (but not name, not checkbox)
+            // Click to toggle description
             element.addEventListener('click', function (e) {
                 var target = e.target;
-                // Don't toggle if clicking the name (opens edit mode)
-                if (target.classList.contains('item-ability-name')) {
-                    return;
-                }
                 // Don't toggle if clicking the checkbox (handled separately)
                 if (target.classList.contains('item-checkbox')) {
                     return;
@@ -291,7 +280,7 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Long press on name only for delete menu
+            // Long press on name for menu
             if (nameEl) {
                 nameEl.addEventListener('mousedown', function (e) {
                     holdTimer = setTimeout(function () {
