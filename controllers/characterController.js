@@ -312,6 +312,14 @@ var CharacterController = /** @class */ (function () {
         container.appendChild(title);
         var buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
+        var editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.success, "; color: ").concat(COLORS.textDark, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
+        editBtn.onclick = function () {
+            modal.remove();
+            _this.editItemOrAbility(id, type);
+        };
+        buttonContainer.appendChild(editBtn);
         var deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.danger, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");

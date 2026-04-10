@@ -1,7 +1,7 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
         // REMEMBER: Increment VERSION when making UI changes
-        this.VERSION = '1.0.27';
+        this.VERSION = '1.0.28';
         this.currentPage = 0;
         this.pages = ['Stats', 'Items', 'Abilities', 'Notes'];
         this.TAB_HEIGHT = '70px'; // Approximate height of tab bar

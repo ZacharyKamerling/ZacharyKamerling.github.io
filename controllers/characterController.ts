@@ -353,6 +353,15 @@ export class CharacterController {
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
 
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
+        editBtn.onclick = () => {
+            modal.remove();
+            this.editItemOrAbility(id, type);
+        };
+        buttonContainer.appendChild(editBtn);
+
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.danger}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
