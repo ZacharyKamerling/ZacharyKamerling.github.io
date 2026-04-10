@@ -25,8 +25,10 @@ export class EditPopover {
             z-index: ${Z_INDEX.modal};
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
             max-width: 90vw;
-            width: 100%;
-            max-width: ${MODAL.maxWidth};
+            max-height: 90vh;
+            width: 500px;
+            overflow-y: auto;
+            box-sizing: border-box;
         `;
         document.body.appendChild(this.container);
     }
@@ -55,20 +57,21 @@ export class EditPopover {
 
         fields.push({ name: 'description', label: 'Description', value: data.description || '' });
 
-        let html = `<h3 style="margin-top: 0; font-size: 1.1em;">${type === 'item' ? 'Edit Item' : 'Edit Ability'}</h3>`;
+        let html = `<h3 style="margin-top: 0; margin-bottom: ${SPACING.md}; font-size: 1.1em;">${type === 'item' ? 'Edit Item' : 'Edit Ability'}</h3>`;
+        html += `<div style="display: flex; flex-direction: column; height: 50vh; gap: ${SPACING.md};">`;
 
-        fields.forEach(field => {
+        fields.forEach((field, idx) => {
             if (field.name === 'description') {
                 html += `
-                    <div style="margin-bottom: 0.8em;">
+                    <div style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
                         <label style="display: block; margin-bottom: 0.3em; font-weight: 500;">${field.label}</label>
-                        <textarea name="${field.name}" style="width: 100%; min-height: 4em; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.medium}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; font-family: monospace; font-size: 0.9em;">${field.value}</textarea>
+                        <textarea name="${field.name}" style="flex: 1; min-height: 0; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.medium}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; font-family: monospace; font-size: 0.9em; resize: none; box-sizing: border-box;">${field.value}</textarea>
                         ${type === 'item' ? `<div style="font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;">Use $$stat_name:value for buffs (e.g., $$melee_power:2)</div>` : ''}
                     </div>
                 `;
             } else {
                 html += `
-                    <div style="margin-bottom: 0.8em;">
+                    <div>
                         <label style="display: block; margin-bottom: 0.3em; font-weight: 500;">${field.label}</label>
                         <input type="text" name="${field.name}" value="${field.value}" style="width: 100%; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.medium}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; box-sizing: border-box;">
                     </div>
@@ -77,6 +80,7 @@ export class EditPopover {
         });
 
         html += `
+            </div>
             <div style="display: flex; gap: ${SPACING.sm}; margin-top: ${SPACING.lg};">
                 <button class="popover-save-btn" style="flex: 1; padding: 0.6em; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;">Save</button>
                 <button class="popover-cancel-btn" style="flex: 1; padding: 0.6em; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;">Cancel</button>
