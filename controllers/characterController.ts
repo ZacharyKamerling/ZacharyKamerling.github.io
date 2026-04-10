@@ -276,10 +276,32 @@ export class CharacterController {
             const id = element.dataset.id!;
             const type = element.dataset.type as 'item' | 'ability';
             const description = element.querySelector('.item-ability-description') as HTMLElement;
+            const nameEl = element.querySelector('.item-ability-name') as HTMLElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
 
-            // Tap to toggle description
-            element.addEventListener('click', () => {
+            // Click name to edit
+            if (nameEl) {
+                nameEl.addEventListener('click', (e: Event) => {
+                    e.stopPropagation();
+                    this.editItemOrAbility(id, type);
+                });
+            }
+
+            // Click to toggle description (but not name, not checkbox)
+            element.addEventListener('click', (e: Event) => {
+                const target = e.target as HTMLElement;
+
+                // Don't toggle if clicking the name (opens edit mode)
+                if (target.classList.contains('item-ability-name')) {
+                    return;
+                }
+
+                // Don't toggle if clicking the checkbox (handled separately)
+                if (target.classList.contains('item-checkbox')) {
+                    return;
+                }
+
+                // Toggle description visibility
                 if (description.style.display === 'none') {
                     description.style.display = 'block';
                 } else {
@@ -287,7 +309,7 @@ export class CharacterController {
                 }
             });
 
-            // Long press to edit/delete
+            // Long press for delete menu
             element.addEventListener('mousedown', (e: MouseEvent) => {
                 holdTimer = setTimeout(() => {
                     this.showItemAbilityMenu(id, type);
@@ -340,15 +362,6 @@ export class CharacterController {
 
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
-
-        const editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.primary}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
-        editBtn.onclick = () => {
-            modal.remove();
-            this.editItemOrAbility(id, type);
-        };
-        buttonContainer.appendChild(editBtn);
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
@@ -736,6 +749,11 @@ export class CharacterController {
                     this.character.invalidateEffectiveStatsCache();
                     db.saveCharacter(this.character);
                 }
+            });
+
+            // Prevent checkbox click from affecting parent element
+            input.addEventListener('click', (e: Event) => {
+                e.stopPropagation();
             });
         });
     }

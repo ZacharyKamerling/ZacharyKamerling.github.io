@@ -263,9 +263,27 @@ var CharacterController = /** @class */ (function () {
             var id = element.dataset.id;
             var type = element.dataset.type;
             var description = element.querySelector('.item-ability-description');
+            var nameEl = element.querySelector('.item-ability-name');
             var holdTimer;
-            // Tap to toggle description
-            element.addEventListener('click', function () {
+            // Click name to edit
+            if (nameEl) {
+                nameEl.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    _this.editItemOrAbility(id, type);
+                });
+            }
+            // Click to toggle description (but not name, not checkbox)
+            element.addEventListener('click', function (e) {
+                var target = e.target;
+                // Don't toggle if clicking the name (opens edit mode)
+                if (target.classList.contains('item-ability-name')) {
+                    return;
+                }
+                // Don't toggle if clicking the checkbox (handled separately)
+                if (target.classList.contains('item-checkbox')) {
+                    return;
+                }
+                // Toggle description visibility
                 if (description.style.display === 'none') {
                     description.style.display = 'block';
                 }
@@ -273,7 +291,7 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Long press to edit/delete
+            // Long press for delete menu
             element.addEventListener('mousedown', function (e) {
                 holdTimer = setTimeout(function () {
                     _this.showItemAbilityMenu(id, type);
@@ -303,14 +321,6 @@ var CharacterController = /** @class */ (function () {
         container.appendChild(title);
         var buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
-        var editBtn = document.createElement('button');
-        editBtn.textContent = 'Edit';
-        editBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.primary, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
-        editBtn.onclick = function () {
-            modal.remove();
-            _this.editItemOrAbility(id, type);
-        };
-        buttonContainer.appendChild(editBtn);
         var deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
         deleteBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.danger, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
@@ -610,6 +620,10 @@ var CharacterController = /** @class */ (function () {
                     _this.character.invalidateEffectiveStatsCache();
                     db.saveCharacter(_this.character);
                 }
+            });
+            // Prevent checkbox click from affecting parent element
+            input.addEventListener('click', function (e) {
+                e.stopPropagation();
             });
         });
     };
