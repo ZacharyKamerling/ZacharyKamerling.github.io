@@ -3,6 +3,7 @@ import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer } from '../utils/cardDrawers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { editPopover } from '../utils/editPopover.js';
+import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
         var _a, _b;
@@ -83,7 +84,7 @@ var CharacterController = /** @class */ (function () {
                             }
                         });
                     }
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             };
             var endHold = function (doClick) {
                 clearTimeout(holdTimer);
@@ -123,14 +124,14 @@ var CharacterController = /** @class */ (function () {
                     return;
                 holdTimer_1 = setTimeout(function () {
                     showEditNameModal(_this.character, nameDiv);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             nameDiv.addEventListener('mouseup', function () { return clearTimeout(holdTimer_1); });
             nameDiv.addEventListener('mouseleave', function () { return clearTimeout(holdTimer_1); });
             nameDiv.addEventListener('touchstart', function (e) {
                 holdTimer_1 = setTimeout(function () {
                     showEditNameModal(_this.character, nameDiv);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             nameDiv.addEventListener('touchend', function () { clearTimeout(holdTimer_1); });
             nameDiv.addEventListener('touchcancel', function () { return clearTimeout(holdTimer_1); });
@@ -168,7 +169,7 @@ var CharacterController = /** @class */ (function () {
                                 _this.saveAndRender();
                             }
                         });
-                    }, 600);
+                    }, HOLD_PRESS_DURATION_MS);
                 };
                 el.onmouseup = function (e) {
                     clearTimeout(holdTimer_2);
@@ -193,7 +194,7 @@ var CharacterController = /** @class */ (function () {
                                 _this.saveAndRender();
                             }
                         });
-                    }, 600);
+                    }, HOLD_PRESS_DURATION_MS);
                 };
                 el.ontouchend = function () {
                     clearTimeout(holdTimer_2);
@@ -277,14 +278,14 @@ var CharacterController = /** @class */ (function () {
             element.addEventListener('mousedown', function (e) {
                 holdTimer = setTimeout(function () {
                     _this.showItemAbilityMenu(id, type);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             element.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
             element.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
             element.addEventListener('touchstart', function (e) {
                 holdTimer = setTimeout(function () {
                     _this.showItemAbilityMenu(id, type);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             element.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
             element.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
@@ -294,18 +295,18 @@ var CharacterController = /** @class */ (function () {
     CharacterController.prototype.showItemAbilityMenu = function (id, type) {
         var _this = this;
         var modal = document.createElement('div');
-        modal.style.cssText = "\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.5);\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            z-index: 1000;\n        ";
+        modal.style.cssText = "\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, ".concat(MODAL.overlayOpacity, ");\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            z-index: ").concat(Z_INDEX.modalOverlay, ";\n        ");
         var container = document.createElement('div');
-        container.style.cssText = "\n            background: #2a2a2a;\n            border: 2px solid #666;\n            border-radius: 0.5em;\n            padding: 1.5em;\n            z-index: 1001;\n            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n            max-width: 300px;\n        ";
+        container.style.cssText = "\n            background: ".concat(COLORS.dark, ";\n            border: 2px solid ").concat(COLORS.borderDark, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            padding: ").concat(SPACING.xl, ";\n            z-index: ").concat(Z_INDEX.modalHigh, ";\n            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n            max-width: ").concat(MODAL.menuMaxWidth, ";\n        ");
         var title = document.createElement('h3');
         title.textContent = "".concat(type === 'item' ? 'Item' : 'Ability', " Options");
-        title.style.cssText = 'margin-top: 0; margin-bottom: 1em; font-size: 1.1em;';
+        title.style.cssText = "margin-top: 0; margin-bottom: ".concat(SPACING.lg, "; font-size: 1.1em;");
         container.appendChild(title);
         var buttonContainer = document.createElement('div');
-        buttonContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.5em;';
+        buttonContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
         var editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.style.cssText = 'padding: 0.7em; background: #4a9eff; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        editBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.primary, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
         editBtn.onclick = function () {
             modal.remove();
             _this.editItemOrAbility(id, type);
@@ -313,7 +314,7 @@ var CharacterController = /** @class */ (function () {
         buttonContainer.appendChild(editBtn);
         var deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.style.cssText = 'padding: 0.7em; background: #ff6b6b; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        deleteBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.danger, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
         deleteBtn.onclick = function () {
             modal.remove();
             _this.deleteItemOrAbility(id, type);
@@ -321,7 +322,7 @@ var CharacterController = /** @class */ (function () {
         buttonContainer.appendChild(deleteBtn);
         var cancelBtn = document.createElement('button');
         cancelBtn.textContent = 'Cancel';
-        cancelBtn.style.cssText = 'padding: 0.7em; background: #666; color: #fff; border: none; border-radius: 0.3em; cursor: pointer;';
+        cancelBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer;");
         cancelBtn.onclick = function () { return modal.remove(); };
         buttonContainer.appendChild(cancelBtn);
         container.appendChild(buttonContainer);

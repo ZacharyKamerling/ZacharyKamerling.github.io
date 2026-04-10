@@ -5,6 +5,7 @@ import { CardDrawer } from '../utils/cardDrawers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { editPopover } from '../utils/editPopover.js';
+import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
 
 export class CharacterController {
     private character: Character;
@@ -94,7 +95,7 @@ export class CharacterController {
                             }
                         });
                     }
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             };
 
             const endHold = (doClick: boolean) => {
@@ -132,14 +133,14 @@ export class CharacterController {
                 if (e.button === 2) return;
                 holdTimer = setTimeout(() => {
                     showEditNameModal(this.character, nameDiv);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             nameDiv.addEventListener('mouseup', () => clearTimeout(holdTimer));
             nameDiv.addEventListener('mouseleave', () => clearTimeout(holdTimer));
             nameDiv.addEventListener('touchstart', (e: TouchEvent) => {
                 holdTimer = setTimeout(() => {
                     showEditNameModal(this.character, nameDiv);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             nameDiv.addEventListener('touchend', () => { clearTimeout(holdTimer); });
             nameDiv.addEventListener('touchcancel', () => clearTimeout(holdTimer));
@@ -176,7 +177,7 @@ export class CharacterController {
                                 this.saveAndRender();
                             }
                         });
-                    }, 600);
+                    }, HOLD_PRESS_DURATION_MS);
                 };
                 el.onmouseup = (e: MouseEvent) => {
                     clearTimeout(holdTimer);
@@ -200,7 +201,7 @@ export class CharacterController {
                                 this.saveAndRender();
                             }
                         });
-                    }, 600);
+                    }, HOLD_PRESS_DURATION_MS);
                 };
                 el.ontouchend = () => {
                     clearTimeout(holdTimer);
@@ -291,7 +292,7 @@ export class CharacterController {
             element.addEventListener('mousedown', (e: MouseEvent) => {
                 holdTimer = setTimeout(() => {
                     this.showItemAbilityMenu(id, type);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             element.addEventListener('mouseup', () => clearTimeout(holdTimer));
             element.addEventListener('mouseleave', () => clearTimeout(holdTimer));
@@ -299,7 +300,7 @@ export class CharacterController {
             element.addEventListener('touchstart', (e: TouchEvent) => {
                 holdTimer = setTimeout(() => {
                     this.showItemAbilityMenu(id, type);
-                }, 600);
+                }, HOLD_PRESS_DURATION_MS);
             });
             element.addEventListener('touchend', () => clearTimeout(holdTimer));
             element.addEventListener('touchcancel', () => clearTimeout(holdTimer));
@@ -315,35 +316,35 @@ export class CharacterController {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, ${MODAL.overlayOpacity});
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: ${Z_INDEX.modalOverlay};
         `;
 
         const container = document.createElement('div');
         container.style.cssText = `
-            background: #2a2a2a;
-            border: 2px solid #666;
-            border-radius: 0.5em;
-            padding: 1.5em;
-            z-index: 1001;
+            background: ${COLORS.dark};
+            border: 2px solid ${COLORS.borderDark};
+            border-radius: ${RADIUS.lg};
+            padding: ${SPACING.xl};
+            z-index: ${Z_INDEX.modalHigh};
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-            max-width: 300px;
+            max-width: ${MODAL.menuMaxWidth};
         `;
 
         const title = document.createElement('h3');
         title.textContent = `${type === 'item' ? 'Item' : 'Ability'} Options`;
-        title.style.cssText = 'margin-top: 0; margin-bottom: 1em; font-size: 1.1em;';
+        title.style.cssText = `margin-top: 0; margin-bottom: ${SPACING.lg}; font-size: 1.1em;`;
         container.appendChild(title);
 
         const buttonContainer = document.createElement('div');
-        buttonContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.5em;';
+        buttonContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
-        editBtn.style.cssText = 'padding: 0.7em; background: #4a9eff; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        editBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.primary}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
         editBtn.onclick = () => {
             modal.remove();
             this.editItemOrAbility(id, type);
@@ -352,7 +353,7 @@ export class CharacterController {
 
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.style.cssText = 'padding: 0.7em; background: #ff6b6b; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        deleteBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.danger}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
         deleteBtn.onclick = () => {
             modal.remove();
             this.deleteItemOrAbility(id, type);
@@ -361,7 +362,7 @@ export class CharacterController {
 
         const cancelBtn = document.createElement('button');
         cancelBtn.textContent = 'Cancel';
-        cancelBtn.style.cssText = 'padding: 0.7em; background: #666; color: #fff; border: none; border-radius: 0.3em; cursor: pointer;';
+        cancelBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer;`;
         cancelBtn.onclick = () => modal.remove();
         buttonContainer.appendChild(cancelBtn);
 

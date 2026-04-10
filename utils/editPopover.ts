@@ -1,3 +1,5 @@
+import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL } from './constants.js';
+
 /**
  * Edit popover for items and abilities
  * Shows inline form for editing with Save/Cancel buttons
@@ -5,6 +7,7 @@
 export class EditPopover {
     private container: HTMLDivElement | null = null;
     private onSave: ((data: any) => void) | null = null;
+    private escapeHandler: ((e: KeyboardEvent) => void) | null = null;
 
     constructor() {
         this.container = document.createElement('div');
@@ -15,15 +18,15 @@ export class EditPopover {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #2a2a2a;
-            border: 2px solid #666;
-            border-radius: 0.5em;
-            padding: 1em;
-            z-index: 1000;
+            background: ${COLORS.dark};
+            border: 2px solid ${COLORS.borderDark};
+            border-radius: ${RADIUS.lg};
+            padding: ${SPACING.lg};
+            z-index: ${Z_INDEX.modal};
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
             max-width: 90vw;
             width: 100%;
-            max-width: 400px;
+            max-width: ${MODAL.maxWidth};
         `;
         document.body.appendChild(this.container);
     }
@@ -38,6 +41,9 @@ export class EditPopover {
         onCancel?: () => void
     ): void {
         this.onSave = onSave;
+
+        // Clean up any previous escape handler
+        this.removeEscapeHandler();
 
         const fields: { name: string; label: string; value: string }[] = [
             { name: 'name', label: 'Name', value: data.name || '' },
@@ -56,24 +62,24 @@ export class EditPopover {
                 html += `
                     <div style="margin-bottom: 0.8em;">
                         <label style="display: block; margin-bottom: 0.3em; font-weight: 500;">${field.label}</label>
-                        <textarea name="${field.name}" style="width: 100%; min-height: 4em; padding: 0.5em; border-radius: 0.3em; background: #333; border: 1px solid #555; color: #fff; font-family: monospace; font-size: 0.9em;">${field.value}</textarea>
-                        ${type === 'item' ? '<div style="font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;">Use $$stat_name:value for buffs (e.g., $$melee_power:2)</div>' : ''}
+                        <textarea name="${field.name}" style="width: 100%; min-height: 4em; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.medium}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; font-family: monospace; font-size: 0.9em;">${field.value}</textarea>
+                        ${type === 'item' ? `<div style="font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;">Use $$stat_name:value for buffs (e.g., $$melee_power:2)</div>` : ''}
                     </div>
                 `;
             } else {
                 html += `
                     <div style="margin-bottom: 0.8em;">
                         <label style="display: block; margin-bottom: 0.3em; font-weight: 500;">${field.label}</label>
-                        <input type="text" name="${field.name}" value="${field.value}" style="width: 100%; padding: 0.5em; border-radius: 0.3em; background: #333; border: 1px solid #555; color: #fff; box-sizing: border-box;">
+                        <input type="text" name="${field.name}" value="${field.value}" style="width: 100%; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.medium}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; box-sizing: border-box;">
                     </div>
                 `;
             }
         });
 
         html += `
-            <div style="display: flex; gap: 0.5em; margin-top: 1em;">
-                <button class="popover-save-btn" style="flex: 1; padding: 0.6em; background: #4ade80; color: #000; border: none; border-radius: 0.3em; font-weight: 600; cursor: pointer;">Save</button>
-                <button class="popover-cancel-btn" style="flex: 1; padding: 0.6em; background: #666; color: #fff; border: none; border-radius: 0.3em; font-weight: 600; cursor: pointer;">Cancel</button>
+            <div style="display: flex; gap: ${SPACING.sm}; margin-top: ${SPACING.lg};">
+                <button class="popover-save-btn" style="flex: 1; padding: 0.6em; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;">Save</button>
+                <button class="popover-cancel-btn" style="flex: 1; padding: 0.6em; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;">Cancel</button>
             </div>
         `;
 
@@ -82,10 +88,8 @@ export class EditPopover {
             this.container.style.display = 'block';
 
             // Add focus to first input
-            setTimeout(() => {
-                const firstInput = this.container?.querySelector('input, textarea') as HTMLInputElement;
-                if (firstInput) firstInput.focus();
-            }, 0);
+            const firstInput = this.container.querySelector('input, textarea') as HTMLInputElement;
+            if (firstInput) firstInput.focus();
 
             // Save button
             this.container.querySelector('.popover-save-btn')?.addEventListener('click', () => {
@@ -104,22 +108,29 @@ export class EditPopover {
                 onCancel?.();
             });
 
-            // Close on Escape
-            const escapeHandler = (e: KeyboardEvent) => {
+            // Close on Escape - attach new handler and store reference
+            this.escapeHandler = (e: KeyboardEvent) => {
                 if (e.key === 'Escape') {
                     this.hide();
                     onCancel?.();
-                    document.removeEventListener('keydown', escapeHandler);
                 }
             };
-            document.addEventListener('keydown', escapeHandler);
+            document.addEventListener('keydown', this.escapeHandler);
+        }
+    }
+
+    private removeEscapeHandler(): void {
+        if (this.escapeHandler) {
+            document.removeEventListener('keydown', this.escapeHandler);
+            this.escapeHandler = null;
         }
     }
 
     /**
-     * Hide the popover
+     * Hide the popover and clean up event listeners
      */
     hide(): void {
+        this.removeEscapeHandler();
         if (this.container) {
             this.container.style.display = 'none';
         }
