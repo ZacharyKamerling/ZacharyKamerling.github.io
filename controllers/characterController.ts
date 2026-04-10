@@ -487,6 +487,15 @@ export class CharacterController {
         editContainer.appendChild(textarea);
         editContainer.appendChild(buttonContainer);
 
+        // Click name to cancel editing
+        const nameEl = entry.querySelector('.item-ability-name') as HTMLElement;
+        if (nameEl) {
+            nameEl.addEventListener('click', (e: Event) => {
+                e.stopPropagation();
+                this.saveAndRender();
+            });
+        }
+
         // Replace description with edit container
         descEl.replaceWith(editContainer);
 

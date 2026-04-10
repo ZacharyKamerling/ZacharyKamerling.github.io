@@ -394,6 +394,14 @@ var CharacterController = /** @class */ (function () {
         buttonContainer.appendChild(cancelBtn);
         editContainer.appendChild(textarea);
         editContainer.appendChild(buttonContainer);
+        // Click name to cancel editing
+        var nameEl = entry.querySelector('.item-ability-name');
+        if (nameEl) {
+            nameEl.addEventListener('click', function (e) {
+                e.stopPropagation();
+                _this.saveAndRender();
+            });
+        }
         // Replace description with edit container
         descEl.replaceWith(editContainer);
         // Focus on textarea
