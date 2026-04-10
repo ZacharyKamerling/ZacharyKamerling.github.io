@@ -4,7 +4,6 @@ import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer } from '../utils/cardDrawers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
-import { editPopover } from '../utils/editPopover.js';
 import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
 
 export class CharacterController {
@@ -530,41 +529,182 @@ export class CharacterController {
 
         const defaultDesc = template ? templateDescriptions[template] || '' : '';
 
-        editPopover.show('item', {
-            id: Date.now().toString(),
-            name: '',
-            location: '',
-            description: defaultDesc,
-            equipped: false
-        }, (data: any) => {
-            if (data.name.trim()) {
+        // Create form container
+        const formContainer = document.createElement('div');
+        formContainer.style.cssText = `
+            padding: ${SPACING.lg};
+            background: ${COLORS.medium};
+            border-radius: ${RADIUS.lg};
+            margin-bottom: ${SPACING.lg};
+        `;
+
+        // Name field
+        const nameDiv = document.createElement('div');
+        nameDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Name';
+        nameLabel.style.cssText = `display: block; margin-bottom: 0.3em; font-weight: 500;`;
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Item name';
+        nameInput.style.cssText = `width: 100%; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.dark}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; box-sizing: border-box;`;
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+
+        // Location field
+        const locationDiv = document.createElement('div');
+        locationDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
+        const locationLabel = document.createElement('label');
+        locationLabel.textContent = 'Location';
+        locationLabel.style.cssText = `display: block; margin-bottom: 0.3em; font-weight: 500;`;
+        const locationInput = document.createElement('input');
+        locationInput.type = 'text';
+        locationInput.placeholder = 'e.g., melee weapon, armor, storage';
+        locationInput.style.cssText = `width: 100%; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.dark}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; box-sizing: border-box;`;
+        locationDiv.appendChild(locationLabel);
+        locationDiv.appendChild(locationInput);
+
+        // Description field
+        const descDiv = document.createElement('div');
+        descDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
+        const descLabel = document.createElement('label');
+        descLabel.textContent = 'Description';
+        descLabel.style.cssText = `display: block; margin-bottom: 0.3em; font-weight: 500;`;
+        const descTextarea = document.createElement('textarea');
+        descTextarea.value = defaultDesc;
+        descTextarea.placeholder = 'Item description';
+        descTextarea.style.cssText = `width: 100%; min-height: 4em; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.dark}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;`;
+        descDiv.appendChild(descLabel);
+        descDiv.appendChild(descTextarea);
+
+        // Help text for templates
+        if (template) {
+            const helpText = document.createElement('div');
+            helpText.textContent = 'Use $$stat_name:value for buffs (e.g., $$melee_power:2)';
+            helpText.style.cssText = `font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;`;
+            descDiv.appendChild(helpText);
+        }
+
+        // Button container
+        const buttonDiv = document.createElement('div');
+        buttonDiv.style.cssText = `display: flex; gap: ${SPACING.sm};`;
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = `flex: 1; padding: ${SPACING.md}; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;`;
+        saveBtn.addEventListener('click', () => {
+            if (nameInput.value.trim()) {
                 this.character.items.push({
                     id: Date.now().toString(),
-                    name: data.name.trim(),
-                    location: data.location.trim(),
-                    description: data.description.trim(),
+                    name: nameInput.value.trim(),
+                    location: locationInput.value.trim(),
+                    description: descTextarea.value.trim(),
                     equipped: false
                 });
                 this.saveAndRender();
             }
         });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = `flex: 1; padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;`;
+        cancelBtn.addEventListener('click', () => {
+            this.saveAndRender();
+        });
+
+        buttonDiv.appendChild(saveBtn);
+        buttonDiv.appendChild(cancelBtn);
+
+        formContainer.appendChild(nameDiv);
+        formContainer.appendChild(locationDiv);
+        formContainer.appendChild(descDiv);
+        formContainer.appendChild(buttonDiv);
+
+        // Insert form before the item template select
+        const templateSelect_el = document.getElementById('item-template-select');
+        if (templateSelect_el && templateSelect_el.parentElement) {
+            templateSelect_el.parentElement.insertBefore(formContainer, templateSelect_el);
+        }
+
+        // Focus on name input
+        nameInput.focus();
     }
 
     private createNewAbility() {
-        editPopover.show('ability', {
-            id: Date.now().toString(),
-            name: '',
-            description: ''
-        }, (data: any) => {
-            if (data.name.trim()) {
+        // Create form container
+        const formContainer = document.createElement('div');
+        formContainer.style.cssText = `
+            padding: ${SPACING.lg};
+            background: ${COLORS.medium};
+            border-radius: ${RADIUS.lg};
+            margin-bottom: ${SPACING.lg};
+        `;
+
+        // Name field
+        const nameDiv = document.createElement('div');
+        nameDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Name';
+        nameLabel.style.cssText = `display: block; margin-bottom: 0.3em; font-weight: 500;`;
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Ability name';
+        nameInput.style.cssText = `width: 100%; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.dark}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; box-sizing: border-box;`;
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+
+        // Description field
+        const descDiv = document.createElement('div');
+        descDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
+        const descLabel = document.createElement('label');
+        descLabel.textContent = 'Description';
+        descLabel.style.cssText = `display: block; margin-bottom: 0.3em; font-weight: 500;`;
+        const descTextarea = document.createElement('textarea');
+        descTextarea.placeholder = 'Ability description';
+        descTextarea.style.cssText = `width: 100%; min-height: 4em; padding: ${SPACING.sm}; border-radius: ${RADIUS.md}; background: ${COLORS.dark}; border: 1px solid ${COLORS.border}; color: ${COLORS.text}; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;`;
+        descDiv.appendChild(descLabel);
+        descDiv.appendChild(descTextarea);
+
+        // Button container
+        const buttonDiv = document.createElement('div');
+        buttonDiv.style.cssText = `display: flex; gap: ${SPACING.sm};`;
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = `flex: 1; padding: ${SPACING.md}; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;`;
+        saveBtn.addEventListener('click', () => {
+            if (nameInput.value.trim()) {
                 this.character.abilities.push({
                     id: Date.now().toString(),
-                    name: data.name.trim(),
-                    description: data.description.trim()
+                    name: nameInput.value.trim(),
+                    description: descTextarea.value.trim()
                 });
                 this.saveAndRender();
             }
         });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = `flex: 1; padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; font-weight: 600; cursor: pointer;`;
+        cancelBtn.addEventListener('click', () => {
+            this.saveAndRender();
+        });
+
+        buttonDiv.appendChild(saveBtn);
+        buttonDiv.appendChild(cancelBtn);
+
+        formContainer.appendChild(nameDiv);
+        formContainer.appendChild(descDiv);
+        formContainer.appendChild(buttonDiv);
+
+        // Insert form before the "New Ability" button
+        const newAbilityBtn = document.querySelector('.new-ability-btn') as HTMLElement;
+        if (newAbilityBtn && newAbilityBtn.parentElement) {
+            newAbilityBtn.parentElement.insertBefore(formContainer, newAbilityBtn);
+        }
+
+        // Focus on name input
+        nameInput.focus();
     }
 
     private attachCardDrawingListeners() {

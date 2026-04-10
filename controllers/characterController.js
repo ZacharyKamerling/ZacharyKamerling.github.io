@@ -2,7 +2,6 @@ import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer } from '../utils/cardDrawers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
-import { editPopover } from '../utils/editPopover.js';
 import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
@@ -436,41 +435,152 @@ var CharacterController = /** @class */ (function () {
             stamina_max: '$$stamina_max:1',
         };
         var defaultDesc = template ? templateDescriptions[template] || '' : '';
-        editPopover.show('item', {
-            id: Date.now().toString(),
-            name: '',
-            location: '',
-            description: defaultDesc,
-            equipped: false
-        }, function (data) {
-            if (data.name.trim()) {
+        // Create form container
+        var formContainer = document.createElement('div');
+        formContainer.style.cssText = "\n            padding: ".concat(SPACING.lg, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            margin-bottom: ").concat(SPACING.lg, ";\n        ");
+        // Name field
+        var nameDiv = document.createElement('div');
+        nameDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
+        var nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Name';
+        nameLabel.style.cssText = "display: block; margin-bottom: 0.3em; font-weight: 500;";
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Item name';
+        nameInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+        // Location field
+        var locationDiv = document.createElement('div');
+        locationDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
+        var locationLabel = document.createElement('label');
+        locationLabel.textContent = 'Location';
+        locationLabel.style.cssText = "display: block; margin-bottom: 0.3em; font-weight: 500;";
+        var locationInput = document.createElement('input');
+        locationInput.type = 'text';
+        locationInput.placeholder = 'e.g., melee weapon, armor, storage';
+        locationInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
+        locationDiv.appendChild(locationLabel);
+        locationDiv.appendChild(locationInput);
+        // Description field
+        var descDiv = document.createElement('div');
+        descDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
+        var descLabel = document.createElement('label');
+        descLabel.textContent = 'Description';
+        descLabel.style.cssText = "display: block; margin-bottom: 0.3em; font-weight: 500;";
+        var descTextarea = document.createElement('textarea');
+        descTextarea.value = defaultDesc;
+        descTextarea.placeholder = 'Item description';
+        descTextarea.style.cssText = "width: 100%; min-height: 4em; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;");
+        descDiv.appendChild(descLabel);
+        descDiv.appendChild(descTextarea);
+        // Help text for templates
+        if (template) {
+            var helpText = document.createElement('div');
+            helpText.textContent = 'Use $$stat_name:value for buffs (e.g., $$melee_power:2)';
+            helpText.style.cssText = "font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;";
+            descDiv.appendChild(helpText);
+        }
+        // Button container
+        var buttonDiv = document.createElement('div');
+        buttonDiv.style.cssText = "display: flex; gap: ".concat(SPACING.sm, ";");
+        var saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = "flex: 1; padding: ".concat(SPACING.md, "; background: ").concat(COLORS.success, "; color: ").concat(COLORS.textDark, "; border: none; border-radius: ").concat(RADIUS.md, "; font-weight: 600; cursor: pointer;");
+        saveBtn.addEventListener('click', function () {
+            if (nameInput.value.trim()) {
                 _this.character.items.push({
                     id: Date.now().toString(),
-                    name: data.name.trim(),
-                    location: data.location.trim(),
-                    description: data.description.trim(),
+                    name: nameInput.value.trim(),
+                    location: locationInput.value.trim(),
+                    description: descTextarea.value.trim(),
                     equipped: false
                 });
                 _this.saveAndRender();
             }
         });
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = "flex: 1; padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; font-weight: 600; cursor: pointer;");
+        cancelBtn.addEventListener('click', function () {
+            _this.saveAndRender();
+        });
+        buttonDiv.appendChild(saveBtn);
+        buttonDiv.appendChild(cancelBtn);
+        formContainer.appendChild(nameDiv);
+        formContainer.appendChild(locationDiv);
+        formContainer.appendChild(descDiv);
+        formContainer.appendChild(buttonDiv);
+        // Insert form before the item template select
+        var templateSelect_el = document.getElementById('item-template-select');
+        if (templateSelect_el && templateSelect_el.parentElement) {
+            templateSelect_el.parentElement.insertBefore(formContainer, templateSelect_el);
+        }
+        // Focus on name input
+        nameInput.focus();
     };
     CharacterController.prototype.createNewAbility = function () {
         var _this = this;
-        editPopover.show('ability', {
-            id: Date.now().toString(),
-            name: '',
-            description: ''
-        }, function (data) {
-            if (data.name.trim()) {
+        // Create form container
+        var formContainer = document.createElement('div');
+        formContainer.style.cssText = "\n            padding: ".concat(SPACING.lg, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            margin-bottom: ").concat(SPACING.lg, ";\n        ");
+        // Name field
+        var nameDiv = document.createElement('div');
+        nameDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
+        var nameLabel = document.createElement('label');
+        nameLabel.textContent = 'Name';
+        nameLabel.style.cssText = "display: block; margin-bottom: 0.3em; font-weight: 500;";
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = 'Ability name';
+        nameInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
+        nameDiv.appendChild(nameLabel);
+        nameDiv.appendChild(nameInput);
+        // Description field
+        var descDiv = document.createElement('div');
+        descDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
+        var descLabel = document.createElement('label');
+        descLabel.textContent = 'Description';
+        descLabel.style.cssText = "display: block; margin-bottom: 0.3em; font-weight: 500;";
+        var descTextarea = document.createElement('textarea');
+        descTextarea.placeholder = 'Ability description';
+        descTextarea.style.cssText = "width: 100%; min-height: 4em; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;");
+        descDiv.appendChild(descLabel);
+        descDiv.appendChild(descTextarea);
+        // Button container
+        var buttonDiv = document.createElement('div');
+        buttonDiv.style.cssText = "display: flex; gap: ".concat(SPACING.sm, ";");
+        var saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = "flex: 1; padding: ".concat(SPACING.md, "; background: ").concat(COLORS.success, "; color: ").concat(COLORS.textDark, "; border: none; border-radius: ").concat(RADIUS.md, "; font-weight: 600; cursor: pointer;");
+        saveBtn.addEventListener('click', function () {
+            if (nameInput.value.trim()) {
                 _this.character.abilities.push({
                     id: Date.now().toString(),
-                    name: data.name.trim(),
-                    description: data.description.trim()
+                    name: nameInput.value.trim(),
+                    description: descTextarea.value.trim()
                 });
                 _this.saveAndRender();
             }
         });
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = "flex: 1; padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; font-weight: 600; cursor: pointer;");
+        cancelBtn.addEventListener('click', function () {
+            _this.saveAndRender();
+        });
+        buttonDiv.appendChild(saveBtn);
+        buttonDiv.appendChild(cancelBtn);
+        formContainer.appendChild(nameDiv);
+        formContainer.appendChild(descDiv);
+        formContainer.appendChild(buttonDiv);
+        // Insert form before the "New Ability" button
+        var newAbilityBtn = document.querySelector('.new-ability-btn');
+        if (newAbilityBtn && newAbilityBtn.parentElement) {
+            newAbilityBtn.parentElement.insertBefore(formContainer, newAbilityBtn);
+        }
+        // Focus on name input
+        nameInput.focus();
     };
     CharacterController.prototype.attachCardDrawingListeners = function () {
         var _this = this;
