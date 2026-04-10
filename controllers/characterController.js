@@ -339,27 +339,57 @@ var CharacterController = /** @class */ (function () {
     };
     CharacterController.prototype.editItemOrAbility = function (id, type) {
         var _this = this;
-        if (type === 'item') {
-            var item_1 = this.character.items.find(function (i) { return i.id === id; });
-            if (!item_1)
-                return;
-            editPopover.show('item', item_1, function (updatedData) {
-                item_1.name = updatedData.name;
-                item_1.location = updatedData.location;
-                item_1.description = updatedData.description;
-                _this.saveAndRender();
-            });
-        }
-        else {
-            var ability_1 = this.character.abilities.find(function (a) { return a.id === id; });
-            if (!ability_1)
-                return;
-            editPopover.show('ability', ability_1, function (updatedData) {
-                ability_1.name = updatedData.name;
-                ability_1.description = updatedData.description;
-                _this.saveAndRender();
-            });
-        }
+        var entry = document.querySelector("[data-id=\"".concat(id, "\"][data-type=\"").concat(type, "\"]"));
+        if (!entry)
+            return;
+        var descEl = entry.querySelector('.item-ability-description');
+        if (!descEl)
+            return;
+        var currentDescription = descEl.textContent || '';
+        // Create edit container with textarea
+        var editContainer = document.createElement('div');
+        editContainer.style.cssText = "\n            display: flex;\n            flex-direction: column;\n            gap: ".concat(SPACING.sm, ";\n            padding: ").concat(SPACING.sm, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.md, ";\n            margin-top: ").concat(SPACING.sm, ";\n        ");
+        var textarea = document.createElement('textarea');
+        textarea.value = currentDescription;
+        textarea.style.cssText = "\n            min-height: 4em;\n            padding: ".concat(SPACING.sm, ";\n            border-radius: ").concat(RADIUS.md, ";\n            background: ").concat(COLORS.darker, ";\n            border: 1px solid ").concat(COLORS.border, ";\n            color: ").concat(COLORS.text, ";\n            font-family: monospace;\n            font-size: 0.9em;\n            box-sizing: border-box;\n            resize: vertical;\n        ");
+        var buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = "\n            display: flex;\n            gap: ".concat(SPACING.sm, ";\n        ");
+        var saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = "\n            flex: 1;\n            padding: ".concat(SPACING.md, ";\n            background: ").concat(COLORS.success, ";\n            color: ").concat(COLORS.textDark, ";\n            border: none;\n            border-radius: ").concat(RADIUS.md, ";\n            font-weight: 600;\n            cursor: pointer;\n        ");
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = "\n            flex: 1;\n            padding: ".concat(SPACING.md, ";\n            background: ").concat(COLORS.borderDark, ";\n            color: ").concat(COLORS.text, ";\n            border: none;\n            border-radius: ").concat(RADIUS.md, ";\n            font-weight: 600;\n            cursor: pointer;\n        ");
+        // Save handler
+        saveBtn.addEventListener('click', function () {
+            if (type === 'item') {
+                var item = _this.character.items.find(function (i) { return i.id === id; });
+                if (item) {
+                    item.description = textarea.value.trim();
+                    _this.saveAndRender();
+                }
+            }
+            else {
+                var ability = _this.character.abilities.find(function (a) { return a.id === id; });
+                if (ability) {
+                    ability.description = textarea.value.trim();
+                    _this.saveAndRender();
+                }
+            }
+        });
+        // Cancel handler
+        cancelBtn.addEventListener('click', function () {
+            _this.saveAndRender();
+        });
+        buttonContainer.appendChild(saveBtn);
+        buttonContainer.appendChild(cancelBtn);
+        editContainer.appendChild(textarea);
+        editContainer.appendChild(buttonContainer);
+        // Replace description with edit container
+        descEl.replaceWith(editContainer);
+        // Focus on textarea
+        textarea.focus();
+        textarea.select();
     };
     CharacterController.prototype.deleteItemOrAbility = function (id, type) {
         var confirm = window.confirm("Delete this ".concat(type, "?"));

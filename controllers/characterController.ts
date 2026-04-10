@@ -381,26 +381,106 @@ export class CharacterController {
     }
 
     private editItemOrAbility(id: string, type: 'item' | 'ability') {
-        if (type === 'item') {
-            const item = this.character.items.find(i => i.id === id);
-            if (!item) return;
+        const entry = document.querySelector(`[data-id="${id}"][data-type="${type}"]`) as HTMLElement;
+        if (!entry) return;
 
-            editPopover.show('item', item, (updatedData: any) => {
-                item.name = updatedData.name;
-                item.location = updatedData.location;
-                item.description = updatedData.description;
-                this.saveAndRender();
-            });
-        } else {
-            const ability = this.character.abilities.find(a => a.id === id);
-            if (!ability) return;
+        const descEl = entry.querySelector('.item-ability-description') as HTMLElement;
+        if (!descEl) return;
 
-            editPopover.show('ability', ability, (updatedData: any) => {
-                ability.name = updatedData.name;
-                ability.description = updatedData.description;
-                this.saveAndRender();
-            });
-        }
+        const currentDescription = descEl.textContent || '';
+
+        // Create edit container with textarea
+        const editContainer = document.createElement('div');
+        editContainer.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            gap: ${SPACING.sm};
+            padding: ${SPACING.sm};
+            background: ${COLORS.medium};
+            border-radius: ${RADIUS.md};
+            margin-top: ${SPACING.sm};
+        `;
+
+        const textarea = document.createElement('textarea');
+        textarea.value = currentDescription;
+        textarea.style.cssText = `
+            min-height: 4em;
+            padding: ${SPACING.sm};
+            border-radius: ${RADIUS.md};
+            background: ${COLORS.darker};
+            border: 1px solid ${COLORS.border};
+            color: ${COLORS.text};
+            font-family: monospace;
+            font-size: 0.9em;
+            box-sizing: border-box;
+            resize: vertical;
+        `;
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `
+            display: flex;
+            gap: ${SPACING.sm};
+        `;
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.style.cssText = `
+            flex: 1;
+            padding: ${SPACING.md};
+            background: ${COLORS.success};
+            color: ${COLORS.textDark};
+            border: none;
+            border-radius: ${RADIUS.md};
+            font-weight: 600;
+            cursor: pointer;
+        `;
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = `
+            flex: 1;
+            padding: ${SPACING.md};
+            background: ${COLORS.borderDark};
+            color: ${COLORS.text};
+            border: none;
+            border-radius: ${RADIUS.md};
+            font-weight: 600;
+            cursor: pointer;
+        `;
+
+        // Save handler
+        saveBtn.addEventListener('click', () => {
+            if (type === 'item') {
+                const item = this.character.items.find(i => i.id === id);
+                if (item) {
+                    item.description = textarea.value.trim();
+                    this.saveAndRender();
+                }
+            } else {
+                const ability = this.character.abilities.find(a => a.id === id);
+                if (ability) {
+                    ability.description = textarea.value.trim();
+                    this.saveAndRender();
+                }
+            }
+        });
+
+        // Cancel handler
+        cancelBtn.addEventListener('click', () => {
+            this.saveAndRender();
+        });
+
+        buttonContainer.appendChild(saveBtn);
+        buttonContainer.appendChild(cancelBtn);
+        editContainer.appendChild(textarea);
+        editContainer.appendChild(buttonContainer);
+
+        // Replace description with edit container
+        descEl.replaceWith(editContainer);
+
+        // Focus on textarea
+        textarea.focus();
+        textarea.select();
     }
 
     private deleteItemOrAbility(id: string, type: 'item' | 'ability') {
