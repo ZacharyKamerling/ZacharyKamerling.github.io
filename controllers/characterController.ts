@@ -309,22 +309,25 @@ export class CharacterController {
                 }
             });
 
-            // Long press for delete menu
-            element.addEventListener('mousedown', (e: MouseEvent) => {
-                holdTimer = setTimeout(() => {
-                    this.showItemAbilityMenu(id, type);
-                }, HOLD_PRESS_DURATION_MS);
-            });
-            element.addEventListener('mouseup', () => clearTimeout(holdTimer));
-            element.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+            // Long press on name only for delete menu
+            if (nameEl) {
+                nameEl.addEventListener('mousedown', (e: MouseEvent) => {
+                    holdTimer = setTimeout(() => {
+                        this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                nameEl.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                nameEl.addEventListener('mouseleave', () => clearTimeout(holdTimer));
 
-            element.addEventListener('touchstart', (e: TouchEvent) => {
-                holdTimer = setTimeout(() => {
-                    this.showItemAbilityMenu(id, type);
-                }, HOLD_PRESS_DURATION_MS);
-            });
-            element.addEventListener('touchend', () => clearTimeout(holdTimer));
-            element.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+                nameEl.addEventListener('touchstart', (e: TouchEvent) => {
+                    holdTimer = setTimeout(() => {
+                        this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                nameEl.addEventListener('touchend', () => clearTimeout(holdTimer));
+                nameEl.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            }
+
             element.addEventListener('contextmenu', (e) => e.preventDefault());
         });
     }
@@ -416,7 +419,7 @@ export class CharacterController {
         const textarea = document.createElement('textarea');
         textarea.value = currentDescription.trim();
         textarea.style.cssText = `
-            min-height: 4em;
+            min-height: 10em;
             padding: ${SPACING.sm};
             border-radius: ${RADIUS.md};
             background: ${COLORS.darker};

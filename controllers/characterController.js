@@ -291,21 +291,23 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Long press for delete menu
-            element.addEventListener('mousedown', function (e) {
-                holdTimer = setTimeout(function () {
-                    _this.showItemAbilityMenu(id, type);
-                }, HOLD_PRESS_DURATION_MS);
-            });
-            element.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('touchstart', function (e) {
-                holdTimer = setTimeout(function () {
-                    _this.showItemAbilityMenu(id, type);
-                }, HOLD_PRESS_DURATION_MS);
-            });
-            element.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
-            element.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+            // Long press on name only for delete menu
+            if (nameEl) {
+                nameEl.addEventListener('mousedown', function (e) {
+                    holdTimer = setTimeout(function () {
+                        _this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                nameEl.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
+                nameEl.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
+                nameEl.addEventListener('touchstart', function (e) {
+                    holdTimer = setTimeout(function () {
+                        _this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                nameEl.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
+                nameEl.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+            }
             element.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         });
     };
@@ -360,7 +362,7 @@ var CharacterController = /** @class */ (function () {
         editContainer.style.cssText = "\n            display: flex;\n            flex-direction: column;\n            gap: ".concat(SPACING.sm, ";\n            padding: ").concat(SPACING.sm, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.md, ";\n            margin-top: ").concat(SPACING.sm, ";\n        ");
         var textarea = document.createElement('textarea');
         textarea.value = currentDescription.trim();
-        textarea.style.cssText = "\n            min-height: 4em;\n            padding: ".concat(SPACING.sm, ";\n            border-radius: ").concat(RADIUS.md, ";\n            background: ").concat(COLORS.darker, ";\n            border: 1px solid ").concat(COLORS.border, ";\n            color: ").concat(COLORS.text, ";\n            font-family: monospace;\n            font-size: 0.9em;\n            box-sizing: border-box;\n            resize: vertical;\n            text-align: left;\n            white-space: normal;\n        ");
+        textarea.style.cssText = "\n            min-height: 10em;\n            padding: ".concat(SPACING.sm, ";\n            border-radius: ").concat(RADIUS.md, ";\n            background: ").concat(COLORS.darker, ";\n            border: 1px solid ").concat(COLORS.border, ";\n            color: ").concat(COLORS.text, ";\n            font-family: monospace;\n            font-size: 0.9em;\n            box-sizing: border-box;\n            resize: vertical;\n            text-align: left;\n            white-space: normal;\n        ");
         var buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = "\n            display: flex;\n            gap: ".concat(SPACING.sm, ";\n        ");
         var saveBtn = document.createElement('button');
