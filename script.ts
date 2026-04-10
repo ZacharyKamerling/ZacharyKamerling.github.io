@@ -2,6 +2,7 @@
 import { db } from './data/db.js';
 import { Character } from './models/character.js';
 import { STARTING_ABILITIES } from './data/startingAbilities.js';
+import { COLORS, SPACING, RADIUS, Z_INDEX } from './utils/constants.js';
 
 function renderCharacterList() {
     const list = document.getElementById('character-list');
@@ -28,29 +29,12 @@ function renderCharacterList() {
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.dataset.id = character.id;
 
-        // Delete character: click prompts, hold for 1s deletes immediately
-        let holdTimer: number | undefined;
-        deleteBtn.addEventListener('mousedown', (e) => {
-            if (confirm('Delete this character?')) {
-                db.deleteCharacter(character.id);
-                renderCharacterList();
-            }
+        // Delete character with modal confirmation
+        deleteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showDeleteConfirmation(character.id, character.name);
         });
-        deleteBtn.addEventListener('touchstart', (e) => {
-            holdTimer = setTimeout(() => {
-                db.deleteCharacter(character.id);
-                renderCharacterList();
-            }, 1000);
-        });
-        deleteBtn.addEventListener('touchend', (e) => {
-            clearTimeout(holdTimer);
-            if (e.detail === 1) {
-                if (confirm('Delete this character?')) {
-                    renderCharacterList();
-                }
-            }
-        });
-        deleteBtn.addEventListener('touchcancel', () => clearTimeout(holdTimer));
 
         // Assemble
         li.appendChild(link);
@@ -60,8 +44,159 @@ function renderCharacterList() {
 
     // Show empty state if no characters
     if (characters.length === 0) {
-        list.innerHTML = '<li>No characters yet. Create one!</li>';
+        list.innerHTML = '<li class="empty-state"><p>No characters yet</p></li>';
     }
+}
+
+function showDeleteConfirmation(characterId: string, characterName: string): void {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: ${Z_INDEX.modal};
+    `;
+
+    const container = document.createElement('div');
+    container.style.cssText = `
+        background: ${COLORS.dark};
+        border: 2px solid ${COLORS.borderDark};
+        border-radius: ${RADIUS.lg};
+        padding: ${SPACING.xl};
+        z-index: ${Z_INDEX.modalHigh};
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        max-width: 300px;
+        text-align: center;
+    `;
+
+    const title = document.createElement('h3');
+    title.textContent = 'Delete Character?';
+    title.style.cssText = `margin-top: 0; margin-bottom: ${SPACING.md}; font-size: 1.1em;`;
+    container.appendChild(title);
+
+    const message = document.createElement('p');
+    message.textContent = `Delete "${characterName}"? This cannot be undone.`;
+    message.style.cssText = `margin: ${SPACING.md} 0; color: #ccc;`;
+    container.appendChild(message);
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.danger}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
+    deleteBtn.addEventListener('click', () => {
+        db.deleteCharacter(characterId);
+        modal.remove();
+        renderCharacterList();
+    });
+    buttonContainer.appendChild(deleteBtn);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer;`;
+    cancelBtn.addEventListener('click', () => modal.remove());
+    buttonContainer.appendChild(cancelBtn);
+
+    container.appendChild(buttonContainer);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+}
+
+function showCharacterNameForm(): Promise<string | null> {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: ${Z_INDEX.modal};
+        `;
+
+        const container = document.createElement('div');
+        container.style.cssText = `
+            background: ${COLORS.dark};
+            border: 2px solid ${COLORS.borderDark};
+            border-radius: ${RADIUS.lg};
+            padding: ${SPACING.xl};
+            z-index: ${Z_INDEX.modalHigh};
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            max-width: 300px;
+            width: 90%;
+            box-sizing: border-box;
+        `;
+
+        const title = document.createElement('h2');
+        title.textContent = 'Character Name';
+        title.style.cssText = `margin-top: 0; margin-bottom: ${SPACING.md}; font-size: 1.2em;`;
+        container.appendChild(title);
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Enter character name';
+        input.maxLength = 40;
+        input.style.cssText = `
+            width: 100%;
+            padding: ${SPACING.md};
+            border-radius: ${RADIUS.md};
+            background: ${COLORS.medium};
+            border: 1px solid ${COLORS.border};
+            color: ${COLORS.text};
+            box-sizing: border-box;
+            font-size: 1em;
+            margin-bottom: ${SPACING.lg};
+        `;
+        container.appendChild(input);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
+
+        const createBtn = document.createElement('button');
+        createBtn.textContent = 'Create';
+        createBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.success}; color: ${COLORS.textDark}; border: none; border-radius: ${RADIUS.md}; cursor: pointer; font-weight: 600;`;
+        createBtn.addEventListener('click', () => {
+            const name = input.value.trim();
+            if (name) {
+                modal.remove();
+                resolve(name);
+            }
+        });
+        buttonContainer.appendChild(createBtn);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = `padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text}; border: none; border-radius: ${RADIUS.md}; cursor: pointer;`;
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+            resolve(null);
+        });
+        buttonContainer.appendChild(cancelBtn);
+
+        container.appendChild(buttonContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+
+        // Focus and select input, support Enter key
+        setTimeout(() => {
+            input.focus();
+        }, 0);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') createBtn.click();
+            if (e.key === 'Escape') cancelBtn.click();
+        });
+    });
 }
 
 function showAbilitySelection(characterName: string): Promise<string | null> {
@@ -178,7 +313,7 @@ function showAbilitySelection(characterName: string): Promise<string | null> {
 
 // Init
 document.getElementById('create-character')?.addEventListener('click', async () => {
-    const name = prompt("Character name:");
+    const name = await showCharacterNameForm();
     if (name) {
         const abilityName = await showAbilitySelection(name);
         if (abilityName !== null) {
@@ -198,7 +333,8 @@ document.getElementById('create-character')?.addEventListener('click', async () 
             }
 
             db.saveCharacter(character);
-            renderCharacterList();
+            // Navigate to the newly created character
+            window.location.href = `character.html?id=${character.id}`;
         }
     }
 });

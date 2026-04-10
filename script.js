@@ -38,6 +38,7 @@ var _a;
 import { db } from './data/db.js';
 import { Character } from './models/character.js';
 import { STARTING_ABILITIES } from './data/startingAbilities.js';
+import { COLORS, SPACING, RADIUS, Z_INDEX } from './utils/constants.js';
 function renderCharacterList() {
     var list = document.getElementById('character-list');
     if (!list)
@@ -58,29 +59,12 @@ function renderCharacterList() {
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.dataset.id = character.id;
-        // Delete character: click prompts, hold for 1s deletes immediately
-        var holdTimer;
-        deleteBtn.addEventListener('mousedown', function (e) {
-            if (confirm('Delete this character?')) {
-                db.deleteCharacter(character.id);
-                renderCharacterList();
-            }
+        // Delete character with modal confirmation
+        deleteBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            showDeleteConfirmation(character.id, character.name);
         });
-        deleteBtn.addEventListener('touchstart', function (e) {
-            holdTimer = setTimeout(function () {
-                db.deleteCharacter(character.id);
-                renderCharacterList();
-            }, 1000);
-        });
-        deleteBtn.addEventListener('touchend', function (e) {
-            clearTimeout(holdTimer);
-            if (e.detail === 1) {
-                if (confirm('Delete this character?')) {
-                    renderCharacterList();
-                }
-            }
-        });
-        deleteBtn.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
         // Assemble
         li.appendChild(link);
         li.appendChild(deleteBtn);
@@ -88,8 +72,93 @@ function renderCharacterList() {
     });
     // Show empty state if no characters
     if (characters.length === 0) {
-        list.innerHTML = '<li>No characters yet. Create one!</li>';
+        list.innerHTML = '<li class="empty-state"><p>No characters yet</p></li>';
     }
+}
+function showDeleteConfirmation(characterId, characterName) {
+    var modal = document.createElement('div');
+    modal.style.cssText = "\n        position: fixed;\n        top: 0;\n        left: 0;\n        width: 100%;\n        height: 100%;\n        background: rgba(0, 0, 0, 0.5);\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        z-index: ".concat(Z_INDEX.modal, ";\n    ");
+    var container = document.createElement('div');
+    container.style.cssText = "\n        background: ".concat(COLORS.dark, ";\n        border: 2px solid ").concat(COLORS.borderDark, ";\n        border-radius: ").concat(RADIUS.lg, ";\n        padding: ").concat(SPACING.xl, ";\n        z-index: ").concat(Z_INDEX.modalHigh, ";\n        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n        max-width: 300px;\n        text-align: center;\n    ");
+    var title = document.createElement('h3');
+    title.textContent = 'Delete Character?';
+    title.style.cssText = "margin-top: 0; margin-bottom: ".concat(SPACING.md, "; font-size: 1.1em;");
+    container.appendChild(title);
+    var message = document.createElement('p');
+    message.textContent = "Delete \"".concat(characterName, "\"? This cannot be undone.");
+    message.style.cssText = "margin: ".concat(SPACING.md, " 0; color: #ccc;");
+    container.appendChild(message);
+    var buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
+    var deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.danger, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
+    deleteBtn.addEventListener('click', function () {
+        db.deleteCharacter(characterId);
+        modal.remove();
+        renderCharacterList();
+    });
+    buttonContainer.appendChild(deleteBtn);
+    var cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer;");
+    cancelBtn.addEventListener('click', function () { return modal.remove(); });
+    buttonContainer.appendChild(cancelBtn);
+    container.appendChild(buttonContainer);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+}
+function showCharacterNameForm() {
+    return new Promise(function (resolve) {
+        var modal = document.createElement('div');
+        modal.style.cssText = "\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.5);\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            z-index: ".concat(Z_INDEX.modal, ";\n        ");
+        var container = document.createElement('div');
+        container.style.cssText = "\n            background: ".concat(COLORS.dark, ";\n            border: 2px solid ").concat(COLORS.borderDark, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            padding: ").concat(SPACING.xl, ";\n            z-index: ").concat(Z_INDEX.modalHigh, ";\n            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n            max-width: 300px;\n            width: 90%;\n            box-sizing: border-box;\n        ");
+        var title = document.createElement('h2');
+        title.textContent = 'Character Name';
+        title.style.cssText = "margin-top: 0; margin-bottom: ".concat(SPACING.md, "; font-size: 1.2em;");
+        container.appendChild(title);
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Enter character name';
+        input.maxLength = 40;
+        input.style.cssText = "\n            width: 100%;\n            padding: ".concat(SPACING.md, ";\n            border-radius: ").concat(RADIUS.md, ";\n            background: ").concat(COLORS.medium, ";\n            border: 1px solid ").concat(COLORS.border, ";\n            color: ").concat(COLORS.text, ";\n            box-sizing: border-box;\n            font-size: 1em;\n            margin-bottom: ").concat(SPACING.lg, ";\n        ");
+        container.appendChild(input);
+        var buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
+        var createBtn = document.createElement('button');
+        createBtn.textContent = 'Create';
+        createBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.success, "; color: ").concat(COLORS.textDark, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer; font-weight: 600;");
+        createBtn.addEventListener('click', function () {
+            var name = input.value.trim();
+            if (name) {
+                modal.remove();
+                resolve(name);
+            }
+        });
+        buttonContainer.appendChild(createBtn);
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = "padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, "; border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer;");
+        cancelBtn.addEventListener('click', function () {
+            modal.remove();
+            resolve(null);
+        });
+        buttonContainer.appendChild(cancelBtn);
+        container.appendChild(buttonContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+        // Focus and select input, support Enter key
+        setTimeout(function () {
+            input.focus();
+        }, 0);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter')
+                createBtn.click();
+            if (e.key === 'Escape')
+                cancelBtn.click();
+        });
+    });
 }
 function showAbilitySelection(characterName) {
     return new Promise(function (resolve) {
@@ -148,11 +217,12 @@ function showAbilitySelection(characterName) {
     var name, abilityName_1, character, selectedAbility;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                name = prompt("Character name:");
-                if (!name) return [3 /*break*/, 2];
-                return [4 /*yield*/, showAbilitySelection(name)];
+            case 0: return [4 /*yield*/, showCharacterNameForm()];
             case 1:
+                name = _a.sent();
+                if (!name) return [3 /*break*/, 3];
+                return [4 /*yield*/, showAbilitySelection(name)];
+            case 2:
                 abilityName_1 = _a.sent();
                 if (abilityName_1 !== null) {
                     character = Character.default();
@@ -169,10 +239,11 @@ function showAbilitySelection(characterName) {
                         }
                     }
                     db.saveCharacter(character);
-                    renderCharacterList();
+                    // Navigate to the newly created character
+                    window.location.href = "character.html?id=".concat(character.id);
                 }
-                _a.label = 2;
-            case 2: return [2 /*return*/];
+                _a.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); });
