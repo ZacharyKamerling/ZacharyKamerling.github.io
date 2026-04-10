@@ -2,6 +2,7 @@ import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer } from '../utils/cardDrawers.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
+import { editPopover } from '../utils/editPopover.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
         var _a, _b;
@@ -291,47 +292,73 @@ var CharacterController = /** @class */ (function () {
         });
     };
     CharacterController.prototype.showItemAbilityMenu = function (id, type) {
-        var options = ['Edit', 'Delete', 'Cancel'];
-        var choice = prompt("".concat(type === 'item' ? 'Item' : 'Ability', " options:\n").concat(options.map(function (o, i) { return "".concat(i + 1, ". ").concat(o); }).join('\n'), "\n\nEnter number or cancel"));
-        if (choice === '1' || (choice === null || choice === void 0 ? void 0 : choice.toLowerCase()) === 'edit') {
-            this.editItemOrAbility(id, type);
-        }
-        else if (choice === '2' || (choice === null || choice === void 0 ? void 0 : choice.toLowerCase()) === 'delete') {
-            this.deleteItemOrAbility(id, type);
-        }
+        var _this = this;
+        var modal = document.createElement('div');
+        modal.style.cssText = "\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.5);\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            z-index: 1000;\n        ";
+        var container = document.createElement('div');
+        container.style.cssText = "\n            background: #2a2a2a;\n            border: 2px solid #666;\n            border-radius: 0.5em;\n            padding: 1.5em;\n            z-index: 1001;\n            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);\n            max-width: 300px;\n        ";
+        var title = document.createElement('h3');
+        title.textContent = "".concat(type === 'item' ? 'Item' : 'Ability', " Options");
+        title.style.cssText = 'margin-top: 0; margin-bottom: 1em; font-size: 1.1em;';
+        container.appendChild(title);
+        var buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.5em;';
+        var editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.style.cssText = 'padding: 0.7em; background: #4a9eff; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        editBtn.onclick = function () {
+            modal.remove();
+            _this.editItemOrAbility(id, type);
+        };
+        buttonContainer.appendChild(editBtn);
+        var deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.style.cssText = 'padding: 0.7em; background: #ff6b6b; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        deleteBtn.onclick = function () {
+            modal.remove();
+            _this.deleteItemOrAbility(id, type);
+        };
+        buttonContainer.appendChild(deleteBtn);
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = 'padding: 0.7em; background: #666; color: #fff; border: none; border-radius: 0.3em; cursor: pointer;';
+        cancelBtn.onclick = function () { return modal.remove(); };
+        buttonContainer.appendChild(cancelBtn);
+        container.appendChild(buttonContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+        // Close on Escape
+        var escapeHandler = function (e) {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
     };
     CharacterController.prototype.editItemOrAbility = function (id, type) {
+        var _this = this;
         if (type === 'item') {
-            var item = this.character.items.find(function (i) { return i.id === id; });
-            if (!item)
+            var item_1 = this.character.items.find(function (i) { return i.id === id; });
+            if (!item_1)
                 return;
-            var name_1 = prompt('Item name:', item.name);
-            if (name_1 === null)
-                return;
-            var location_1 = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
-            if (location_1 === null)
-                return;
-            var description = prompt('Description:', item.description);
-            if (description === null)
-                return;
-            item.name = name_1;
-            item.location = location_1;
-            item.description = description;
+            editPopover.show('item', item_1, function (updatedData) {
+                item_1.name = updatedData.name;
+                item_1.location = updatedData.location;
+                item_1.description = updatedData.description;
+                _this.saveAndRender();
+            });
         }
         else {
-            var ability = this.character.abilities.find(function (a) { return a.id === id; });
-            if (!ability)
+            var ability_1 = this.character.abilities.find(function (a) { return a.id === id; });
+            if (!ability_1)
                 return;
-            var name_2 = prompt('Ability name:', ability.name);
-            if (name_2 === null)
-                return;
-            var description = prompt('Description:', ability.description);
-            if (description === null)
-                return;
-            ability.name = name_2;
-            ability.description = description;
+            editPopover.show('ability', ability_1, function (updatedData) {
+                ability_1.name = updatedData.name;
+                ability_1.description = updatedData.description;
+                _this.saveAndRender();
+            });
         }
-        this.saveAndRender();
     };
     CharacterController.prototype.deleteItemOrAbility = function (id, type) {
         var confirm = window.confirm("Delete this ".concat(type, "?"));
@@ -364,6 +391,7 @@ var CharacterController = /** @class */ (function () {
         }
     };
     CharacterController.prototype.createNewItem = function () {
+        var _this = this;
         var templateSelect = document.getElementById('item-template-select');
         var template = (templateSelect === null || templateSelect === void 0 ? void 0 : templateSelect.value) || '';
         var templateDescriptions = {
@@ -376,38 +404,42 @@ var CharacterController = /** @class */ (function () {
             blood_max: '$$blood_max:1',
             stamina_max: '$$stamina_max:1',
         };
-        var name = prompt('Item name:');
-        if (!name)
-            return;
-        var location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
-        if (location === null)
-            return;
         var defaultDesc = template ? templateDescriptions[template] || '' : '';
-        var description = prompt('Description:', defaultDesc);
-        if (description === null)
-            return;
-        this.character.items.push({
+        editPopover.show('item', {
             id: Date.now().toString(),
-            name: name,
-            location: location,
-            description: description,
+            name: '',
+            location: '',
+            description: defaultDesc,
             equipped: false
+        }, function (data) {
+            if (data.name.trim()) {
+                _this.character.items.push({
+                    id: Date.now().toString(),
+                    name: data.name.trim(),
+                    location: data.location.trim(),
+                    description: data.description.trim(),
+                    equipped: false
+                });
+                _this.saveAndRender();
+            }
         });
-        this.saveAndRender();
     };
     CharacterController.prototype.createNewAbility = function () {
-        var name = prompt('Ability name:');
-        if (!name)
-            return;
-        var description = prompt('Description:');
-        if (description === null)
-            return;
-        this.character.abilities.push({
+        var _this = this;
+        editPopover.show('ability', {
             id: Date.now().toString(),
-            name: name,
-            description: description
+            name: '',
+            description: ''
+        }, function (data) {
+            if (data.name.trim()) {
+                _this.character.abilities.push({
+                    id: Date.now().toString(),
+                    name: data.name.trim(),
+                    description: data.description.trim()
+                });
+                _this.saveAndRender();
+            }
         });
-        this.saveAndRender();
     };
     CharacterController.prototype.attachCardDrawingListeners = function () {
         var _this = this;

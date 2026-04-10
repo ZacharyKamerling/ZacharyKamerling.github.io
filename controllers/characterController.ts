@@ -4,6 +4,7 @@ import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer } from '../utils/cardDrawers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
+import { editPopover } from '../utils/editPopover.js';
 
 export class CharacterController {
     private character: Character;
@@ -307,14 +308,75 @@ export class CharacterController {
     }
 
     private showItemAbilityMenu(id: string, type: 'item' | 'ability') {
-        const options = ['Edit', 'Delete', 'Cancel'];
-        const choice = prompt(`${type === 'item' ? 'Item' : 'Ability'} options:\n${options.map((o, i) => `${i + 1}. ${o}`).join('\n')}\n\nEnter number or cancel`);
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        `;
 
-        if (choice === '1' || choice?.toLowerCase() === 'edit') {
+        const container = document.createElement('div');
+        container.style.cssText = `
+            background: #2a2a2a;
+            border: 2px solid #666;
+            border-radius: 0.5em;
+            padding: 1.5em;
+            z-index: 1001;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            max-width: 300px;
+        `;
+
+        const title = document.createElement('h3');
+        title.textContent = `${type === 'item' ? 'Item' : 'Ability'} Options`;
+        title.style.cssText = 'margin-top: 0; margin-bottom: 1em; font-size: 1.1em;';
+        container.appendChild(title);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.5em;';
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.style.cssText = 'padding: 0.7em; background: #4a9eff; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        editBtn.onclick = () => {
+            modal.remove();
             this.editItemOrAbility(id, type);
-        } else if (choice === '2' || choice?.toLowerCase() === 'delete') {
+        };
+        buttonContainer.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.style.cssText = 'padding: 0.7em; background: #ff6b6b; color: #fff; border: none; border-radius: 0.3em; cursor: pointer; font-weight: 600;';
+        deleteBtn.onclick = () => {
+            modal.remove();
             this.deleteItemOrAbility(id, type);
-        }
+        };
+        buttonContainer.appendChild(deleteBtn);
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.cssText = 'padding: 0.7em; background: #666; color: #fff; border: none; border-radius: 0.3em; cursor: pointer;';
+        cancelBtn.onclick = () => modal.remove();
+        buttonContainer.appendChild(cancelBtn);
+
+        container.appendChild(buttonContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+
+        // Close on Escape
+        const escapeHandler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
     }
 
     private editItemOrAbility(id: string, type: 'item' | 'ability') {
@@ -322,33 +384,22 @@ export class CharacterController {
             const item = this.character.items.find(i => i.id === id);
             if (!item) return;
 
-            const name = prompt('Item name:', item.name);
-            if (name === null) return;
-
-            const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):', item.location);
-            if (location === null) return;
-
-            const description = prompt('Description:', item.description);
-            if (description === null) return;
-
-            item.name = name;
-            item.location = location;
-            item.description = description;
+            editPopover.show('item', item, (updatedData: any) => {
+                item.name = updatedData.name;
+                item.location = updatedData.location;
+                item.description = updatedData.description;
+                this.saveAndRender();
+            });
         } else {
             const ability = this.character.abilities.find(a => a.id === id);
             if (!ability) return;
 
-            const name = prompt('Ability name:', ability.name);
-            if (name === null) return;
-
-            const description = prompt('Description:', ability.description);
-            if (description === null) return;
-
-            ability.name = name;
-            ability.description = description;
+            editPopover.show('ability', ability, (updatedData: any) => {
+                ability.name = updatedData.name;
+                ability.description = updatedData.description;
+                this.saveAndRender();
+            });
         }
-
-        this.saveAndRender();
     }
 
     private deleteItemOrAbility(id: string, type: 'item' | 'ability') {
@@ -396,41 +447,43 @@ export class CharacterController {
             stamina_max:  '$$stamina_max:1',
         };
 
-        const name = prompt('Item name:');
-        if (!name) return;
-
-        const location = prompt('Location (e.g., melee weapon, ranged weapon, armor, storage, or custom):');
-        if (location === null) return;
-
         const defaultDesc = template ? templateDescriptions[template] || '' : '';
-        const description = prompt('Description:', defaultDesc);
-        if (description === null) return;
 
-        this.character.items.push({
+        editPopover.show('item', {
             id: Date.now().toString(),
-            name,
-            location,
-            description,
+            name: '',
+            location: '',
+            description: defaultDesc,
             equipped: false
+        }, (data: any) => {
+            if (data.name.trim()) {
+                this.character.items.push({
+                    id: Date.now().toString(),
+                    name: data.name.trim(),
+                    location: data.location.trim(),
+                    description: data.description.trim(),
+                    equipped: false
+                });
+                this.saveAndRender();
+            }
         });
-
-        this.saveAndRender();
     }
 
     private createNewAbility() {
-        const name = prompt('Ability name:');
-        if (!name) return;
-
-        const description = prompt('Description:');
-        if (description === null) return;
-
-        this.character.abilities.push({
+        editPopover.show('ability', {
             id: Date.now().toString(),
-            name,
-            description
+            name: '',
+            description: ''
+        }, (data: any) => {
+            if (data.name.trim()) {
+                this.character.abilities.push({
+                    id: Date.now().toString(),
+                    name: data.name.trim(),
+                    description: data.description.trim()
+                });
+                this.saveAndRender();
+            }
         });
-
-        this.saveAndRender();
     }
 
     private attachCardDrawingListeners() {
