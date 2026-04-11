@@ -289,7 +289,7 @@ export class CharacterController {
 
                 // Toggle description visibility
                 if (description.style.display === 'none') {
-                    description.style.display = 'block';
+                    description.style.display = 'flex';
                 } else {
                     description.style.display = 'none';
                 }
