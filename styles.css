@@ -310,11 +310,8 @@ button {
     word-wrap: break-word;
     text-align: left !important;
     display: block !important;
-}
-
-.item-ability-description, .item-ability-description * {
-    text-align: left !important;
-    vertical-align: baseline !important;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .new-item-btn,
