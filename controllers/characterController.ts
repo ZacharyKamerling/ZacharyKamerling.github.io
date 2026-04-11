@@ -276,7 +276,6 @@ export class CharacterController {
             const id = element.dataset.id!;
             const type = element.dataset.type as 'item' | 'ability';
             const description = element.querySelector('.item-ability-description') as HTMLElement;
-            const nameEl = element.querySelector('.item-ability-name') as HTMLElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
 
             // Click to toggle description
@@ -296,32 +295,22 @@ export class CharacterController {
                 }
             });
 
-            // Helper function to attach hold listeners
-            const attachHoldListeners = (target: HTMLElement) => {
-                target.addEventListener('mousedown', (e: MouseEvent) => {
-                    holdTimer = setTimeout(() => {
-                        this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                target.addEventListener('mouseup', () => clearTimeout(holdTimer));
-                target.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+            // Long press on container for menu
+            element.addEventListener('mousedown', (e: MouseEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, HOLD_PRESS_DURATION_MS);
+            });
+            element.addEventListener('mouseup', () => clearTimeout(holdTimer));
+            element.addEventListener('mouseleave', () => clearTimeout(holdTimer));
 
-                target.addEventListener('touchstart', (e: TouchEvent) => {
-                    holdTimer = setTimeout(() => {
-                        this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                target.addEventListener('touchend', () => clearTimeout(holdTimer));
-                target.addEventListener('touchcancel', () => clearTimeout(holdTimer));
-            };
-
-            // Long press on name or description for menu
-            if (nameEl) {
-                attachHoldListeners(nameEl);
-            }
-            if (description) {
-                attachHoldListeners(description);
-            }
+            element.addEventListener('touchstart', (e: TouchEvent) => {
+                holdTimer = setTimeout(() => {
+                    this.showItemAbilityMenu(id, type);
+                }, HOLD_PRESS_DURATION_MS);
+            });
+            element.addEventListener('touchend', () => clearTimeout(holdTimer));
+            element.addEventListener('touchcancel', () => clearTimeout(holdTimer));
 
             element.addEventListener('contextmenu', (e) => e.preventDefault());
         });

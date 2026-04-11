@@ -263,7 +263,6 @@ var CharacterController = /** @class */ (function () {
             var id = element.dataset.id;
             var type = element.dataset.type;
             var description = element.querySelector('.item-ability-description');
-            var nameEl = element.querySelector('.item-ability-name');
             var holdTimer;
             // Click to toggle description
             element.addEventListener('click', function (e) {
@@ -280,30 +279,21 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Helper function to attach hold listeners
-            var attachHoldListeners = function (target) {
-                target.addEventListener('mousedown', function (e) {
-                    holdTimer = setTimeout(function () {
-                        _this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                target.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-                target.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-                target.addEventListener('touchstart', function (e) {
-                    holdTimer = setTimeout(function () {
-                        _this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                target.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
-                target.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
-            };
-            // Long press on name or description for menu
-            if (nameEl) {
-                attachHoldListeners(nameEl);
-            }
-            if (description) {
-                attachHoldListeners(description);
-            }
+            // Long press on container for menu
+            element.addEventListener('mousedown', function (e) {
+                holdTimer = setTimeout(function () {
+                    _this.showItemAbilityMenu(id, type);
+                }, HOLD_PRESS_DURATION_MS);
+            });
+            element.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('touchstart', function (e) {
+                holdTimer = setTimeout(function () {
+                    _this.showItemAbilityMenu(id, type);
+                }, HOLD_PRESS_DURATION_MS);
+            });
+            element.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
+            element.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
             element.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         });
     };
