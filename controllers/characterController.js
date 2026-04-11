@@ -280,22 +280,29 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Long press on name for menu
+            // Helper function to attach hold listeners
+            var attachHoldListeners = function (target) {
+                target.addEventListener('mousedown', function (e) {
+                    holdTimer = setTimeout(function () {
+                        _this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                target.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
+                target.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
+                target.addEventListener('touchstart', function (e) {
+                    holdTimer = setTimeout(function () {
+                        _this.showItemAbilityMenu(id, type);
+                    }, HOLD_PRESS_DURATION_MS);
+                });
+                target.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
+                target.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+            };
+            // Long press on name or description for menu
             if (nameEl) {
-                nameEl.addEventListener('mousedown', function (e) {
-                    holdTimer = setTimeout(function () {
-                        _this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                nameEl.addEventListener('mouseup', function () { return clearTimeout(holdTimer); });
-                nameEl.addEventListener('mouseleave', function () { return clearTimeout(holdTimer); });
-                nameEl.addEventListener('touchstart', function (e) {
-                    holdTimer = setTimeout(function () {
-                        _this.showItemAbilityMenu(id, type);
-                    }, HOLD_PRESS_DURATION_MS);
-                });
-                nameEl.addEventListener('touchend', function () { return clearTimeout(holdTimer); });
-                nameEl.addEventListener('touchcancel', function () { return clearTimeout(holdTimer); });
+                attachHoldListeners(nameEl);
+            }
+            if (description) {
+                attachHoldListeners(description);
             }
             element.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         });

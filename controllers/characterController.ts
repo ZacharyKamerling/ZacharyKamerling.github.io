@@ -296,23 +296,31 @@ export class CharacterController {
                 }
             });
 
-            // Long press on name for menu
-            if (nameEl) {
-                nameEl.addEventListener('mousedown', (e: MouseEvent) => {
+            // Helper function to attach hold listeners
+            const attachHoldListeners = (target: HTMLElement) => {
+                target.addEventListener('mousedown', (e: MouseEvent) => {
                     holdTimer = setTimeout(() => {
                         this.showItemAbilityMenu(id, type);
                     }, HOLD_PRESS_DURATION_MS);
                 });
-                nameEl.addEventListener('mouseup', () => clearTimeout(holdTimer));
-                nameEl.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+                target.addEventListener('mouseup', () => clearTimeout(holdTimer));
+                target.addEventListener('mouseleave', () => clearTimeout(holdTimer));
 
-                nameEl.addEventListener('touchstart', (e: TouchEvent) => {
+                target.addEventListener('touchstart', (e: TouchEvent) => {
                     holdTimer = setTimeout(() => {
                         this.showItemAbilityMenu(id, type);
                     }, HOLD_PRESS_DURATION_MS);
                 });
-                nameEl.addEventListener('touchend', () => clearTimeout(holdTimer));
-                nameEl.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+                target.addEventListener('touchend', () => clearTimeout(holdTimer));
+                target.addEventListener('touchcancel', () => clearTimeout(holdTimer));
+            };
+
+            // Long press on name or description for menu
+            if (nameEl) {
+                attachHoldListeners(nameEl);
+            }
+            if (description) {
+                attachHoldListeners(description);
             }
 
             element.addEventListener('contextmenu', (e) => e.preventDefault());
