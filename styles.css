@@ -309,6 +309,8 @@ button {
     white-space: pre-wrap;
     word-wrap: break-word;
     text-align: left;
+    display: block;
+    vertical-align: top;
 }
 
 .new-item-btn,
