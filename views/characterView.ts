@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.31';
+    private VERSION = '1.0.32';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
