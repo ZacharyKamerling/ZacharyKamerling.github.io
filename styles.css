@@ -308,9 +308,13 @@ button {
     line-height: 1.4;
     white-space: pre-wrap;
     word-wrap: break-word;
-    text-align: left;
-    display: block;
-    vertical-align: top;
+    text-align: left !important;
+    display: block !important;
+}
+
+.item-ability-description, .item-ability-description * {
+    text-align: left !important;
+    vertical-align: baseline !important;
 }
 
 .new-item-btn,
