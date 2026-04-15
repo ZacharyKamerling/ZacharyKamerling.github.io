@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.32';
+    private VERSION = '1.0.33';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -165,9 +165,7 @@ export class CharacterView {
                     <span class="item-ability-name">${item.name}</span>
                     <span class="item-location">${item.location}</span>
                 </div>
-                <div class="item-ability-description" style="display: none;">
-                    ${item.description}
-                </div>
+                <div class="item-ability-description" style="display: none;">${item.description}</div>
             </div>
         `).join('');
 
@@ -202,9 +200,7 @@ export class CharacterView {
                 <div class="item-ability-header">
                     <span class="item-ability-name">${ability.name}</span>
                 </div>
-                <div class="item-ability-description" style="display: none;">
-                    ${ability.description}
-                </div>
+                <div class="item-ability-description" style="display: none;">${ability.description}</div>
             </div>
         `).join('');
 
