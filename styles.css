@@ -308,7 +308,7 @@ button {
     line-height: 1.4;
     white-space: pre-wrap;
     word-wrap: break-word;
-    text-align: left;
+    text-align: left !important;
     width: 100%;
     box-sizing: border-box;
 }
