@@ -13,127 +13,148 @@ var CARD_POOL = [
         id: 'neg-1',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Blood Token</b><br><br>- Lose a <b>Blood Token</b>'
+        description: '- Lose a <b>Blood Token</b><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'blood_loss' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-2',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- Lose a <b>Blood Token</b>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'stamina_loss' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-3',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- Lose a <b>Stamina Token</b>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- Lose a <b>Stamina Token</b>',
+        effects: [{ type: 'stamina_loss' }, { type: 'stamina_loss' }]
     },
     {
         id: 'neg-4',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>',
+        effects: [{ type: 'stamina_loss' }, { type: 'panic' }]
     },
     {
         id: 'neg-5',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i>',
+        effects: [{ type: 'stamina_loss' }, { type: 'stunned' }]
     },
     {
         id: 'neg-6',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>',
+        effects: [{ type: 'stamina_loss' }, { type: 'dismemberment' }]
     },
     {
         id: 'neg-7',
         type: 'negative',
         title: 'Negative',
-        description: '- Lose a <b>Stamina Token</b><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>'
+        description: '- Lose a <b>Stamina Token</b><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>',
+        effects: [{ type: 'stamina_loss' }, { type: 'wound' }]
     },
     {
         id: 'neg-8',
         type: 'negative',
         title: 'Negative',
-        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- Lose a <b>Blood Token</b>'
+        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'panic' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-9',
         type: 'negative',
         title: 'Negative',
-        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>'
+        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>',
+        effects: [{ type: 'panic' }, { type: 'panic' }]
     },
     {
         id: 'neg-10',
         type: 'negative',
         title: 'Negative',
-        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>'
+        description: '- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>',
+        effects: [{ type: 'panic' }, { type: 'dismemberment' }]
     },
     {
         id: 'neg-11',
         type: 'negative',
         title: 'Negative',
-        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- Lose a <b>Blood Token</b>'
+        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'stunned' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-12',
         type: 'negative',
         title: 'Negative',
-        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>'
+        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>',
+        effects: [{ type: 'stunned' }, { type: 'panic' }]
     },
     {
         id: 'neg-13',
         type: 'negative',
         title: 'Negative',
-        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br><i>These stack</i>'
+        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br><i>These stack</i>',
+        effects: [{ type: 'stunned' }, { type: 'stunned' }]
     },
     {
         id: 'neg-14',
         type: 'negative',
         title: 'Negative',
-        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>'
+        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>',
+        effects: [{ type: 'stunned' }, { type: 'dismemberment' }]
     },
     {
         id: 'neg-15',
         type: 'negative',
         title: 'Negative',
-        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>'
+        description: '- You are <b>Stunned</b><br><i>(Can\'t use abilities next round)</i><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>',
+        effects: [{ type: 'stunned' }, { type: 'wound' }]
     },
     {
         id: 'neg-16',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i><br><br>- Lose a <b>Blood Token</b>'
+        description: '- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'dismemberment' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-17',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>'
+        description: '- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>',
+        effects: [{ type: 'dismemberment' }, { type: 'dismemberment' }]
     },
     {
         id: 'neg-18',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- Lose a <b>Blood Token</b>'
+        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- Lose a <b>Blood Token</b>',
+        effects: [{ type: 'wound' }, { type: 'blood_loss' }]
     },
     {
         id: 'neg-19',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>'
+        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You <b>Panic!</b> You gain <b>Stress</b><br><i>(Roll on the Panic table)</i>',
+        effects: [{ type: 'wound' }, { type: 'panic' }]
     },
     {
         id: 'neg-20',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>'
+        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You have been <b>Dismembered</b><br><i>(Roll on the Dismember table)</i>',
+        effects: [{ type: 'wound' }, { type: 'dismemberment' }]
     },
     {
         id: 'neg-21',
         type: 'negative',
         title: 'Negative',
-        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>'
+        description: '- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i><br><br>- You have been <b>Wounded</b><br><i>(Roll on the Wound table)</i>',
+        effects: [{ type: 'wound' }, { type: 'wound' }]
     },
     // POSITIVE CARDS
     {
@@ -271,6 +292,7 @@ var CARD_POOL = [
 ];
 var CardDrawer = /** @class */ (function () {
     function CardDrawer(character, resultBox) {
+        this.onApplyEffects = null;
         this.character = character;
         this.resultBox = resultBox;
         this.lastDrawnCards = null;
@@ -288,9 +310,11 @@ var CardDrawer = /** @class */ (function () {
     CardDrawer.prototype.renderCards = function (cards) {
         var cardsHtml = cards.map(function (card) {
             var borderColor = card.type === 'positive' ? '#3b82f6' : '#f59e0b';
-            return "\n                <div class=\"card\" style=\"\n                    border: 2px solid ".concat(borderColor, ";\n                    border-radius: 8px;\n                    padding: 1em;\n                    margin: 0.5em 0;\n                    background: rgba(0, 0, 0, 0.3);\n                    flex: 1;\n                    min-width: 200px;\n                \">\n                    <div style=\"font-weight: bold; margin-bottom: 0.5em;\">").concat(card.title, "</div>\n                    <div style=\"font-size: 0.95em; line-height: 1.4;\">").concat(card.description, "</div>\n                </div>\n            ");
+            var applyHint = card.type === 'negative'
+                ? "<div class=\"card-apply-hint\" style=\"margin-top:0.7em;font-size:0.8em;color:#aaa;text-align:center;\">Tap to apply</div>"
+                : '';
+            return "\n                <div class=\"card\" data-card-id=\"".concat(card.id, "\" data-card-type=\"").concat(card.type, "\" style=\"\n                    border: 2px solid ").concat(borderColor, ";\n                    border-radius: 8px;\n                    padding: 1em;\n                    margin: 0.5em 0;\n                    background: rgba(0, 0, 0, 0.3);\n                    flex: 1;\n                    min-width: 200px;\n                    cursor: ").concat(card.type === 'negative' ? 'pointer' : 'default', ";\n                \">\n                    <div style=\"font-weight: bold; margin-bottom: 0.5em;\">").concat(card.title, "</div>\n                    <div style=\"font-size: 0.95em; line-height: 1.4;\">").concat(card.description, "</div>\n                    ").concat(applyHint, "\n                </div>\n            ");
         }).join('');
-        // Create a wrapper div for cards to isolate event listeners
         var wrapper = document.createElement('div');
         wrapper.style.display = 'flex';
         wrapper.style.flexDirection = 'column';
@@ -305,9 +329,7 @@ var CardDrawer = /** @class */ (function () {
         this.resultBox.innerHTML = '';
         this.resultBox.appendChild(wrapper);
         this.resultBox.appendChild(dismissText);
-        // Allow pointer events to pass through when needed
         this.resultBox.style.pointerEvents = 'auto';
-        // Scroll the Draw Cards button to the top of the page
         var drawButton = document.getElementById('draw-cards-btn');
         if (drawButton && drawButton.parentElement) {
             var page = drawButton.closest('[style*="overflow-y"]');
@@ -315,7 +337,30 @@ var CardDrawer = /** @class */ (function () {
                 page.scrollTop = drawButton.offsetTop - 100;
             }
         }
+        this.attachApplyListeners(cards);
         this.attachDismissListener();
+    };
+    CardDrawer.prototype.attachApplyListeners = function (cards) {
+        var _this = this;
+        cards.filter(function (c) { return c.type === 'negative'; }).forEach(function (card) {
+            var cardEl = _this.resultBox.querySelector(".card[data-card-id=\"".concat(card.id, "\"]"));
+            if (!cardEl || !card.effects)
+                return;
+            cardEl.addEventListener('click', function () {
+                if (cardEl.classList.contains('applied'))
+                    return;
+                cardEl.classList.add('applied');
+                cardEl.style.opacity = '0.5';
+                var hint = cardEl.querySelector('.card-apply-hint');
+                if (hint) {
+                    hint.textContent = '✓ Applied';
+                    hint.style.color = '#4ade80';
+                }
+                if (_this.onApplyEffects) {
+                    _this.onApplyEffects(card.effects);
+                }
+            });
+        });
     };
     CardDrawer.prototype.attachDismissListener = function () {
         var _this = this;
@@ -323,7 +368,6 @@ var CardDrawer = /** @class */ (function () {
         var isHolding = false;
         var touchMoved = false;
         var startHold = function (e) {
-            // Only listen for events on the cards themselves or their descendants
             var target = e.target;
             if (!target.closest('.card') && e.target !== _this.resultBox) {
                 return;
@@ -349,7 +393,6 @@ var CardDrawer = /** @class */ (function () {
             touchMoved = true;
             endHold();
         };
-        // Only attach to direct card children to avoid interfering with page scrolling
         var cards = this.resultBox.querySelectorAll('.card');
         cards.forEach(function (card) {
             card.addEventListener('mousedown', startHold);
@@ -358,7 +401,6 @@ var CardDrawer = /** @class */ (function () {
         this.resultBox.addEventListener('mouseup', endHold);
         this.resultBox.addEventListener('touchend', endHold);
         this.resultBox.addEventListener('mouseleave', endHold);
-        // Only track touch moves on the cards to avoid interfering with page scrolling
         cards.forEach(function (card) {
             card.addEventListener('touchmove', handleMove);
         });

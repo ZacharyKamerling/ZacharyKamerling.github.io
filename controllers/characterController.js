@@ -5,15 +5,14 @@ import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
 var CharacterController = /** @class */ (function () {
     function CharacterController(character, view) {
+        var _this = this;
         var _a, _b;
         this.character = character;
         this.view = view;
-        // Render view first to create DOM elements
         this.view.render(this.character);
-        // Initialize components after DOM exists
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results'));
         this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box'));
-        // Attach all listeners
+        this.cardDrawer.onApplyEffects = function (effects) { return _this.applyCardEffects(effects); };
         (_a = document.getElementById('token-section')) === null || _a === void 0 ? void 0 : _a.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         (_b = document.getElementById('stat-section')) === null || _b === void 0 ? void 0 : _b.addEventListener('contextmenu', function (e) { return e.preventDefault(); });
         this.attachNameEditListener();
@@ -26,11 +25,12 @@ var CharacterController = /** @class */ (function () {
         this.attachCardDrawingListeners();
         this.attachItemCheckboxListeners();
         this.attachNotesListener();
+        this.attachStatusRemoveListeners();
     }
     CharacterController.prototype.saveAndRender = function () {
+        var _this = this;
         db.saveCharacter(this.character.toJSON());
         this.view.render(this.character);
-        // Re-initialize diceRoller and cardDrawer after DOM is ready
         var diceResultBox = document.getElementById('dice-results');
         if (diceResultBox) {
             this.diceRoller.resultBox = diceResultBox;
@@ -39,8 +39,8 @@ var CharacterController = /** @class */ (function () {
         var cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {
             this.cardDrawer = new CardDrawer(this.character, cardResultBox);
+            this.cardDrawer.onApplyEffects = function (effects) { return _this.applyCardEffects(effects); };
         }
-        // Re-attach all listeners immediately (DOM is already rendered)
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
         this.attachCustomRollListeners();
@@ -50,7 +50,138 @@ var CharacterController = /** @class */ (function () {
         this.attachCardDrawingListeners();
         this.attachItemCheckboxListeners();
         this.attachNotesListener();
+        this.attachStatusRemoveListeners();
     };
+    // --- Card effect application ---
+    CharacterController.prototype.applyCardEffects = function (effects) {
+        var _this = this;
+        if (this.character.heavyArmor && effects.length >= 2) {
+            this.showHeavyArmorChoiceModal(effects, function (reducedEffects) {
+                _this.doApplyEffects(reducedEffects);
+            });
+        }
+        else {
+            this.doApplyEffects(effects);
+        }
+    };
+    CharacterController.prototype.doApplyEffects = function (effects) {
+        var _this = this;
+        effects.forEach(function (effect) {
+            switch (effect.type) {
+                case 'blood_loss':
+                    _this.character.bloodTokens = Math.max(0, _this.character.bloodTokens - 1);
+                    break;
+                case 'stamina_loss':
+                    _this.character.staminaTokens = Math.max(0, _this.character.staminaTokens - 1);
+                    break;
+                case 'wound':
+                case 'dismemberment':
+                case 'stunned':
+                case 'panic':
+                    _this.character.statuses.push({
+                        id: Date.now().toString() + Math.random().toString().slice(2),
+                        type: effect.type
+                    });
+                    _this.character.invalidateEffectiveStatsCache();
+                    break;
+            }
+        });
+        db.saveCharacter(this.character);
+        this.updateTokenDisplay();
+        this.updateStatusDisplay();
+    };
+    CharacterController.prototype.showHeavyArmorChoiceModal = function (effects, onChoose) {
+        var effectLabels = {
+            blood_loss: 'Lose a Blood Token',
+            stamina_loss: 'Lose a Stamina Token',
+            panic: 'Panic!',
+            stunned: 'Stunned',
+            wound: 'Wounded',
+            dismemberment: 'Dismembered'
+        };
+        var modal = document.createElement('div');
+        modal.style.cssText = "\n            position: fixed; top: 0; left: 0; width: 100%; height: 100%;\n            background: rgba(0,0,0,0.7); display: flex; align-items: center;\n            justify-content: center; z-index: ".concat(Z_INDEX.modalOverlay, ";\n        ");
+        var container = document.createElement('div');
+        container.style.cssText = "\n            background: ".concat(COLORS.medium, "; border: 2px solid ").concat(COLORS.borderDark, ";\n            border-radius: ").concat(RADIUS.lg, "; padding: ").concat(SPACING.xl, "; max-width: ").concat(MODAL.menuMaxWidth, ";\n            width: 90%; box-shadow: 0 4px 16px rgba(0,0,0,0.5);\n        ");
+        var title = document.createElement('div');
+        title.textContent = '🛡️ Heavy Armor: choose one effect to ignore';
+        title.style.cssText = "font-weight: 600; margin-bottom: ".concat(SPACING.lg, "; font-size: 0.95em;");
+        container.appendChild(title);
+        var btnContainer = document.createElement('div');
+        btnContainer.style.cssText = "display: flex; flex-direction: column; gap: ".concat(SPACING.sm, ";");
+        effects.forEach(function (effect, idx) {
+            var btn = document.createElement('button');
+            btn.textContent = "Ignore: ".concat(effectLabels[effect.type] || effect.type);
+            btn.style.cssText = "\n                padding: ".concat(SPACING.md, "; background: ").concat(COLORS.dark, "; color: ").concat(COLORS.text, ";\n                border: 1px solid ").concat(COLORS.borderDark, "; border-radius: ").concat(RADIUS.md, ";\n                cursor: pointer; font-size: 0.9em; text-align: left;\n            ");
+            btn.addEventListener('click', function () {
+                modal.remove();
+                var reducedEffects = effects.filter(function (_, i) { return i !== idx; });
+                onChoose(reducedEffects);
+            });
+            btnContainer.appendChild(btn);
+        });
+        var cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Apply all (ignore none)';
+        cancelBtn.style.cssText = "\n            padding: ".concat(SPACING.md, "; background: ").concat(COLORS.borderDark, "; color: ").concat(COLORS.text, ";\n            border: none; border-radius: ").concat(RADIUS.md, "; cursor: pointer;\n            font-size: 0.85em; margin-top: ").concat(SPACING.xs, ";\n        ");
+        cancelBtn.addEventListener('click', function () {
+            modal.remove();
+            onChoose(effects);
+        });
+        btnContainer.appendChild(cancelBtn);
+        container.appendChild(btnContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+        var escapeHandler = function (e) {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    };
+    // --- Partial DOM updates (don't re-render cards) ---
+    CharacterController.prototype.updateTokenDisplay = function () {
+        var _this = this;
+        var _a, _b;
+        var effectiveStats = this.character.getEffectiveStats();
+        var bloodMax = (_a = effectiveStats['bloodMax']) !== null && _a !== void 0 ? _a : this.character.bloodMax;
+        var staminaMax = (_b = effectiveStats['staminaMax']) !== null && _b !== void 0 ? _b : this.character.staminaMax;
+        var bloodLabel = document.getElementById('blood-label');
+        if (bloodLabel) {
+            bloodLabel.textContent = "Blood (".concat(this.character.bloodTokens, " / ").concat(bloodMax, ")");
+        }
+        var staminaLabel = document.getElementById('stamina-label');
+        if (staminaLabel) {
+            staminaLabel.textContent = "Stamina (".concat(this.character.staminaTokens, " / ").concat(staminaMax, ")");
+        }
+        document.querySelectorAll('.token-btn[data-type="blood"]').forEach(function (btn, i) {
+            btn.style.opacity = i < _this.character.bloodTokens ? '' : '0.3';
+        });
+        document.querySelectorAll('.token-btn[data-type="stamina"]').forEach(function (btn, i) {
+            btn.style.opacity = i < _this.character.staminaTokens ? '' : '0.3';
+        });
+    };
+    CharacterController.prototype.updateStatusDisplay = function () {
+        var el = document.getElementById('status-section');
+        if (el) {
+            el.innerHTML = this.view.renderStatusSection(this.character);
+            this.attachStatusRemoveListeners();
+        }
+    };
+    CharacterController.prototype.attachStatusRemoveListeners = function () {
+        var _this = this;
+        document.querySelectorAll('.remove-status-btn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var statusId = btn.dataset.statusId;
+                _this.character.statuses = _this.character.statuses.filter(function (s) { return s.id !== statusId; });
+                _this.character.invalidateEffectiveStatsCache();
+                db.saveCharacter(_this.character);
+                _this.updateStatusDisplay();
+            });
+        });
+    };
+    // --- Existing listeners ---
     CharacterController.prototype.attachTokenListeners = function () {
         var _this = this;
         document.querySelectorAll('.token-btn').forEach(function (btn) {
@@ -157,7 +288,7 @@ var CharacterController = /** @class */ (function () {
                 var held_1 = false;
                 el.onmousedown = function (e) {
                     if (e.button === 2)
-                        return; // ignore right click
+                        return;
                     held_1 = false;
                     holdTimer_2 = setTimeout(function () {
                         held_1 = true;
@@ -220,36 +351,29 @@ var CharacterController = /** @class */ (function () {
         var minusBtn = document.getElementById('custom-neg-btn');
         var plusBtn = document.getElementById('custom-pos-btn');
         var rollBtn = document.getElementById('custom-roll-btn');
-        // Update the input field with current value and save
         var updateInput = function () {
             customRollInput.value = _this.character.customRoll.toString();
             db.saveCharacter(_this.character.toJSON());
         };
-        // Set initial value
         updateInput();
-        // Handle -1 button
         minusBtn.addEventListener('click', function () {
             _this.character.customRoll = Math.max(1, _this.character.customRoll - 1);
             _this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
-        // Handle +1 button
         plusBtn.addEventListener('click', function () {
             _this.character.customRoll = Math.min(100, _this.character.customRoll + 1);
             _this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
-        // Handle direct input changes
         customRollInput.addEventListener('change', function () {
             var value = parseInt(customRollInput.value) || 1;
             _this.character.customRoll = Math.max(1, Math.min(100, value));
             _this.saveAndRender();
         });
-        // Handle roll button
         rollBtn.addEventListener('click', function () {
             _this.diceRoller.rollPMAR('customRoll', 'Custom');
         });
-        // Handle Enter key to trigger roll
         customRollInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 _this.diceRoller.rollPMAR('customRoll', 'Custom');
@@ -264,14 +388,11 @@ var CharacterController = /** @class */ (function () {
             var type = element.dataset.type;
             var description = element.querySelector('.item-ability-description');
             var holdTimer;
-            // Click to toggle description
             element.addEventListener('click', function (e) {
                 var target = e.target;
-                // Don't toggle if clicking the checkbox (handled separately)
                 if (target.classList.contains('item-checkbox')) {
                     return;
                 }
-                // Toggle description visibility
                 if (description.style.display === 'none') {
                     description.style.display = 'block';
                 }
@@ -279,7 +400,6 @@ var CharacterController = /** @class */ (function () {
                     description.style.display = 'none';
                 }
             });
-            // Long press on container for menu
             element.addEventListener('mousedown', function (e) {
                 holdTimer = setTimeout(function () {
                     _this.showItemAbilityMenu(id, type);
@@ -333,7 +453,6 @@ var CharacterController = /** @class */ (function () {
         container.appendChild(buttonContainer);
         modal.appendChild(container);
         document.body.appendChild(modal);
-        // Close on Escape
         var escapeHandler = function (e) {
             if (e.key === 'Escape') {
                 modal.remove();
@@ -351,7 +470,6 @@ var CharacterController = /** @class */ (function () {
         if (!descEl)
             return;
         var currentDescription = descEl.textContent || '';
-        // Create edit container with textarea
         var editContainer = document.createElement('div');
         editContainer.style.cssText = "\n            display: flex;\n            flex-direction: column;\n            gap: ".concat(SPACING.sm, ";\n            padding: ").concat(SPACING.sm, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.md, ";\n            margin-top: ").concat(SPACING.sm, ";\n        ");
         var textarea = document.createElement('textarea');
@@ -365,7 +483,6 @@ var CharacterController = /** @class */ (function () {
         var cancelBtn = document.createElement('button');
         cancelBtn.textContent = 'Cancel';
         cancelBtn.style.cssText = "\n            flex: 1;\n            padding: ".concat(SPACING.md, ";\n            background: ").concat(COLORS.borderDark, ";\n            color: ").concat(COLORS.text, ";\n            border: none;\n            border-radius: ").concat(RADIUS.md, ";\n            font-weight: 600;\n            cursor: pointer;\n        ");
-        // Save handler
         saveBtn.addEventListener('click', function () {
             if (type === 'item') {
                 var item = _this.character.items.find(function (i) { return i.id === id; });
@@ -382,7 +499,6 @@ var CharacterController = /** @class */ (function () {
                 }
             }
         });
-        // Cancel handler
         cancelBtn.addEventListener('click', function () {
             _this.saveAndRender();
         });
@@ -390,7 +506,6 @@ var CharacterController = /** @class */ (function () {
         buttonContainer.appendChild(cancelBtn);
         editContainer.appendChild(textarea);
         editContainer.appendChild(buttonContainer);
-        // Click name to cancel editing
         var nameEl = entry.querySelector('.item-ability-name');
         if (nameEl) {
             nameEl.addEventListener('click', function (e) {
@@ -398,9 +513,7 @@ var CharacterController = /** @class */ (function () {
                 _this.saveAndRender();
             });
         }
-        // Replace description with edit container
         descEl.replaceWith(editContainer);
-        // Focus on textarea
         textarea.focus();
         textarea.select();
     };
@@ -449,10 +562,8 @@ var CharacterController = /** @class */ (function () {
             stamina_max: '$$stamina_max:1',
         };
         var defaultDesc = template ? templateDescriptions[template] || '' : '';
-        // Create form container
         var formContainer = document.createElement('div');
         formContainer.style.cssText = "\n            padding: ".concat(SPACING.lg, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            margin-bottom: ").concat(SPACING.lg, ";\n        ");
-        // Name field
         var nameDiv = document.createElement('div');
         nameDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
         var nameLabel = document.createElement('label');
@@ -464,7 +575,6 @@ var CharacterController = /** @class */ (function () {
         nameInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
         nameDiv.appendChild(nameLabel);
         nameDiv.appendChild(nameInput);
-        // Location field
         var locationDiv = document.createElement('div');
         locationDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
         var locationLabel = document.createElement('label');
@@ -476,7 +586,6 @@ var CharacterController = /** @class */ (function () {
         locationInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
         locationDiv.appendChild(locationLabel);
         locationDiv.appendChild(locationInput);
-        // Description field
         var descDiv = document.createElement('div');
         descDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
         var descLabel = document.createElement('label');
@@ -488,14 +597,12 @@ var CharacterController = /** @class */ (function () {
         descTextarea.style.cssText = "width: 100%; min-height: 4em; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;");
         descDiv.appendChild(descLabel);
         descDiv.appendChild(descTextarea);
-        // Help text for templates
         if (template) {
             var helpText = document.createElement('div');
             helpText.textContent = 'Use $$stat_name:value for buffs (e.g., $$melee_power:2)';
             helpText.style.cssText = "font-size: 0.8em; opacity: 0.6; margin-top: 0.2em;";
             descDiv.appendChild(helpText);
         }
-        // Button container
         var buttonDiv = document.createElement('div');
         buttonDiv.style.cssText = "display: flex; gap: ".concat(SPACING.sm, ";");
         var saveBtn = document.createElement('button');
@@ -525,20 +632,16 @@ var CharacterController = /** @class */ (function () {
         formContainer.appendChild(locationDiv);
         formContainer.appendChild(descDiv);
         formContainer.appendChild(buttonDiv);
-        // Insert form before the item template select
         var templateSelect_el = document.getElementById('item-template-select');
         if (templateSelect_el && templateSelect_el.parentElement) {
             templateSelect_el.parentElement.insertBefore(formContainer, templateSelect_el);
         }
-        // Focus on name input
         nameInput.focus();
     };
     CharacterController.prototype.createNewAbility = function () {
         var _this = this;
-        // Create form container
         var formContainer = document.createElement('div');
         formContainer.style.cssText = "\n            padding: ".concat(SPACING.lg, ";\n            background: ").concat(COLORS.medium, ";\n            border-radius: ").concat(RADIUS.lg, ";\n            margin-bottom: ").concat(SPACING.lg, ";\n        ");
-        // Name field
         var nameDiv = document.createElement('div');
         nameDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
         var nameLabel = document.createElement('label');
@@ -550,7 +653,6 @@ var CharacterController = /** @class */ (function () {
         nameInput.style.cssText = "width: 100%; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; box-sizing: border-box;");
         nameDiv.appendChild(nameLabel);
         nameDiv.appendChild(nameInput);
-        // Description field
         var descDiv = document.createElement('div');
         descDiv.style.cssText = "margin-bottom: ".concat(SPACING.md, ";");
         var descLabel = document.createElement('label');
@@ -561,7 +663,6 @@ var CharacterController = /** @class */ (function () {
         descTextarea.style.cssText = "width: 100%; min-height: 4em; padding: ".concat(SPACING.sm, "; border-radius: ").concat(RADIUS.md, "; background: ").concat(COLORS.dark, "; border: 1px solid ").concat(COLORS.border, "; color: ").concat(COLORS.text, "; font-family: monospace; font-size: 0.9em; box-sizing: border-box; resize: vertical;");
         descDiv.appendChild(descLabel);
         descDiv.appendChild(descTextarea);
-        // Button container
         var buttonDiv = document.createElement('div');
         buttonDiv.style.cssText = "display: flex; gap: ".concat(SPACING.sm, ";");
         var saveBtn = document.createElement('button');
@@ -588,18 +689,17 @@ var CharacterController = /** @class */ (function () {
         formContainer.appendChild(nameDiv);
         formContainer.appendChild(descDiv);
         formContainer.appendChild(buttonDiv);
-        // Insert form before the "New Ability" button
         var newAbilityBtn = document.querySelector('.new-ability-btn');
         if (newAbilityBtn && newAbilityBtn.parentElement) {
             newAbilityBtn.parentElement.insertBefore(formContainer, newAbilityBtn);
         }
-        // Focus on name input
         nameInput.focus();
     };
     CharacterController.prototype.attachCardDrawingListeners = function () {
         var _this = this;
         var drawBtn = document.getElementById('draw-cards-btn');
         var unarmoredToggle = document.getElementById('unarmored-toggle');
+        var heavyArmorToggle = document.getElementById('heavy-armor-toggle');
         if (drawBtn) {
             drawBtn.addEventListener('click', function () {
                 _this.cardDrawer.drawCards();
@@ -609,6 +709,12 @@ var CharacterController = /** @class */ (function () {
             unarmoredToggle.addEventListener('change', function () {
                 _this.character.unarmored = unarmoredToggle.checked;
                 _this.saveAndRender();
+            });
+        }
+        if (heavyArmorToggle) {
+            heavyArmorToggle.addEventListener('change', function () {
+                _this.character.heavyArmor = heavyArmorToggle.checked;
+                db.saveCharacter(_this.character.toJSON());
             });
         }
     };
@@ -625,7 +731,6 @@ var CharacterController = /** @class */ (function () {
                     db.saveCharacter(_this.character);
                 }
             });
-            // Prevent checkbox click from affecting parent element
             input.addEventListener('click', function (e) {
                 e.stopPropagation();
             });

@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.33';
+    private VERSION = '1.0.34';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -96,6 +96,7 @@ export class CharacterView {
 
         return `
             <div style="display: flex; flex-direction: column; gap: 1em; padding: 1em; max-width: 24em; margin: 0 auto; width: 100%;">
+                <div id="status-section" style="width: 100%;">${this.renderStatusSection(character)}</div>
                 <div id="token-section" style="width: 100%;">
                     <div style="font-size:1.2em; margin-bottom:0.5em; display: flex; flex-direction: column; gap: 0.5em;">
                         <div style="display: flex; flex-direction: column; align-items: flex-start;">
@@ -144,6 +145,10 @@ export class CharacterView {
                             <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
                                 <input type="checkbox" id="unarmored-toggle" ${character.unarmored ? 'checked' : ''} style="cursor: pointer;">
                                 <span>Unarmored</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5em; cursor: pointer;">
+                                <input type="checkbox" id="heavy-armor-toggle" ${character.heavyArmor ? 'checked' : ''} style="cursor: pointer;">
+                                <span>Heavy Armor</span>
                             </label>
                         </div>
                         <div id="card-result-box"></div>
@@ -238,6 +243,39 @@ export class CharacterView {
                 </div>
             </div>
         `;
+    }
+
+    renderStatusSection(character: Character): string {
+        if (character.statuses.length === 0) return '';
+
+        const penaltyCount = character.statuses.filter(
+            s => s.type === 'wound' || s.type === 'dismemberment'
+        ).length;
+
+        const chipColors: Record<string, string> = {
+            wound: '#dc2626',
+            dismemberment: '#ea580c',
+            stunned: '#d97706',
+            panic: '#7c3aed'
+        };
+        const chipLabels: Record<string, string> = {
+            wound: 'Wound',
+            dismemberment: 'Dismembered',
+            stunned: 'Stunned',
+            panic: 'Panic!'
+        };
+
+        const chips = character.statuses.map(s => {
+            const color = chipColors[s.type] || '#555';
+            const label = chipLabels[s.type] || s.type;
+            return `<div style="display:inline-flex;align-items:center;gap:0.3em;background:${color};color:#fff;padding:0.2em 0.4em 0.2em 0.55em;border-radius:0.4em;font-size:0.85em;font-weight:600;">${label}<button class="remove-status-btn" data-status-id="${s.id}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1em;line-height:1;padding:0;margin:0;opacity:0.75;flex-shrink:0;">×</button></div>`;
+        }).join('');
+
+        const penalty = penaltyCount > 0
+            ? `<div style="font-size:0.8em;color:#dc2626;margin-top:0.3em;">Power dice −${penaltyCount} (wounds/dismemberments)</div>`
+            : '';
+
+        return `<div style="display:flex;flex-wrap:wrap;gap:0.4em;align-items:center;margin-bottom:0.3em;">${chips}</div>${penalty}`;
     }
 
     private setupPageNavigation() {

@@ -1,7 +1,7 @@
 import { Character } from '../models/character.js';
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
-import { CardDrawer } from '../utils/cardDrawers.js';
+import { CardDrawer, CardEffect } from '../utils/cardDrawers.js';
 import { CharacterView } from '../views/characterView.js';
 import { showEditNameModal, numberPrompt } from '../utils/ui.js';
 import { COLORS, SPACING, RADIUS, Z_INDEX, MODAL, HOLD_PRESS_DURATION_MS } from '../utils/constants.js';
@@ -16,14 +16,12 @@ export class CharacterController {
         this.character = character;
         this.view = view;
 
-        // Render view first to create DOM elements
         this.view.render(this.character);
 
-        // Initialize components after DOM exists
         this.diceRoller = new DiceRoller(character, document.getElementById('dice-results')!);
         this.cardDrawer = new CardDrawer(character, document.getElementById('card-result-box')!);
+        this.cardDrawer.onApplyEffects = (effects) => this.applyCardEffects(effects);
 
-        // Attach all listeners
         document.getElementById('token-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         document.getElementById('stat-section')?.addEventListener('contextmenu', (e) => e.preventDefault());
         this.attachNameEditListener();
@@ -36,13 +34,13 @@ export class CharacterController {
         this.attachCardDrawingListeners();
         this.attachItemCheckboxListeners();
         this.attachNotesListener();
+        this.attachStatusRemoveListeners();
     }
 
     private saveAndRender() {
         db.saveCharacter(this.character.toJSON());
         this.view.render(this.character);
 
-        // Re-initialize diceRoller and cardDrawer after DOM is ready
         const diceResultBox = document.getElementById('dice-results');
         if (diceResultBox) {
             this.diceRoller.resultBox = diceResultBox;
@@ -51,9 +49,9 @@ export class CharacterController {
         const cardResultBox = document.getElementById('card-result-box');
         if (cardResultBox) {
             this.cardDrawer = new CardDrawer(this.character, cardResultBox);
+            this.cardDrawer.onApplyEffects = (effects) => this.applyCardEffects(effects);
         }
 
-        // Re-attach all listeners immediately (DOM is already rendered)
         this.attachStatMaxSetListeners();
         this.attachTokenListeners();
         this.attachCustomRollListeners();
@@ -63,7 +61,166 @@ export class CharacterController {
         this.attachCardDrawingListeners();
         this.attachItemCheckboxListeners();
         this.attachNotesListener();
+        this.attachStatusRemoveListeners();
     }
+
+    // --- Card effect application ---
+
+    private applyCardEffects(effects: CardEffect[]) {
+        if (this.character.heavyArmor && effects.length >= 2) {
+            this.showHeavyArmorChoiceModal(effects, (reducedEffects) => {
+                this.doApplyEffects(reducedEffects);
+            });
+        } else {
+            this.doApplyEffects(effects);
+        }
+    }
+
+    private doApplyEffects(effects: CardEffect[]) {
+        effects.forEach(effect => {
+            switch (effect.type) {
+                case 'blood_loss':
+                    this.character.bloodTokens = Math.max(0, this.character.bloodTokens - 1);
+                    break;
+                case 'stamina_loss':
+                    this.character.staminaTokens = Math.max(0, this.character.staminaTokens - 1);
+                    break;
+                case 'wound':
+                case 'dismemberment':
+                case 'stunned':
+                case 'panic':
+                    this.character.statuses.push({
+                        id: Date.now().toString() + Math.random().toString().slice(2),
+                        type: effect.type
+                    });
+                    this.character.invalidateEffectiveStatsCache();
+                    break;
+            }
+        });
+        db.saveCharacter(this.character);
+        this.updateTokenDisplay();
+        this.updateStatusDisplay();
+    }
+
+    private showHeavyArmorChoiceModal(effects: CardEffect[], onChoose: (reducedEffects: CardEffect[]) => void) {
+        const effectLabels: Record<string, string> = {
+            blood_loss: 'Lose a Blood Token',
+            stamina_loss: 'Lose a Stamina Token',
+            panic: 'Panic!',
+            stunned: 'Stunned',
+            wound: 'Wounded',
+            dismemberment: 'Dismembered'
+        };
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; align-items: center;
+            justify-content: center; z-index: ${Z_INDEX.modalOverlay};
+        `;
+
+        const container = document.createElement('div');
+        container.style.cssText = `
+            background: ${COLORS.medium}; border: 2px solid ${COLORS.borderDark};
+            border-radius: ${RADIUS.lg}; padding: ${SPACING.xl}; max-width: ${MODAL.menuMaxWidth};
+            width: 90%; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+        `;
+
+        const title = document.createElement('div');
+        title.textContent = '🛡️ Heavy Armor: choose one effect to ignore';
+        title.style.cssText = `font-weight: 600; margin-bottom: ${SPACING.lg}; font-size: 0.95em;`;
+        container.appendChild(title);
+
+        const btnContainer = document.createElement('div');
+        btnContainer.style.cssText = `display: flex; flex-direction: column; gap: ${SPACING.sm};`;
+
+        effects.forEach((effect, idx) => {
+            const btn = document.createElement('button');
+            btn.textContent = `Ignore: ${effectLabels[effect.type] || effect.type}`;
+            btn.style.cssText = `
+                padding: ${SPACING.md}; background: ${COLORS.dark}; color: ${COLORS.text};
+                border: 1px solid ${COLORS.borderDark}; border-radius: ${RADIUS.md};
+                cursor: pointer; font-size: 0.9em; text-align: left;
+            `;
+            btn.addEventListener('click', () => {
+                modal.remove();
+                const reducedEffects = effects.filter((_, i) => i !== idx);
+                onChoose(reducedEffects);
+            });
+            btnContainer.appendChild(btn);
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Apply all (ignore none)';
+        cancelBtn.style.cssText = `
+            padding: ${SPACING.md}; background: ${COLORS.borderDark}; color: ${COLORS.text};
+            border: none; border-radius: ${RADIUS.md}; cursor: pointer;
+            font-size: 0.85em; margin-top: ${SPACING.xs};
+        `;
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+            onChoose(effects);
+        });
+        btnContainer.appendChild(cancelBtn);
+
+        container.appendChild(btnContainer);
+        modal.appendChild(container);
+        document.body.appendChild(modal);
+
+        const escapeHandler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    }
+
+    // --- Partial DOM updates (don't re-render cards) ---
+
+    private updateTokenDisplay() {
+        const effectiveStats = this.character.getEffectiveStats();
+        const bloodMax = effectiveStats['bloodMax'] ?? this.character.bloodMax;
+        const staminaMax = effectiveStats['staminaMax'] ?? this.character.staminaMax;
+
+        const bloodLabel = document.getElementById('blood-label');
+        if (bloodLabel) {
+            bloodLabel.textContent = `Blood (${this.character.bloodTokens} / ${bloodMax})`;
+        }
+        const staminaLabel = document.getElementById('stamina-label');
+        if (staminaLabel) {
+            staminaLabel.textContent = `Stamina (${this.character.staminaTokens} / ${staminaMax})`;
+        }
+        document.querySelectorAll<HTMLElement>('.token-btn[data-type="blood"]').forEach((btn, i) => {
+            btn.style.opacity = i < this.character.bloodTokens ? '' : '0.3';
+        });
+        document.querySelectorAll<HTMLElement>('.token-btn[data-type="stamina"]').forEach((btn, i) => {
+            btn.style.opacity = i < this.character.staminaTokens ? '' : '0.3';
+        });
+    }
+
+    private updateStatusDisplay() {
+        const el = document.getElementById('status-section');
+        if (el) {
+            el.innerHTML = this.view.renderStatusSection(this.character);
+            this.attachStatusRemoveListeners();
+        }
+    }
+
+    private attachStatusRemoveListeners() {
+        document.querySelectorAll('.remove-status-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const statusId = (btn as HTMLElement).dataset.statusId!;
+                this.character.statuses = this.character.statuses.filter(s => s.id !== statusId);
+                this.character.invalidateEffectiveStatsCache();
+                db.saveCharacter(this.character);
+                this.updateStatusDisplay();
+            });
+        });
+    }
+
+    // --- Existing listeners ---
 
     private attachTokenListeners() {
         document.querySelectorAll('.token-btn').forEach(btn => {
@@ -165,7 +322,7 @@ export class CharacterController {
                 let holdTimer: ReturnType<typeof setTimeout> | undefined;
                 let held = false;
                 el.onmousedown = (e: MouseEvent) => {
-                    if (e.button === 2) return; // ignore right click
+                    if (e.button === 2) return;
                     held = false;
                     holdTimer = setTimeout(() => {
                         held = true;
@@ -227,42 +384,35 @@ export class CharacterController {
         const plusBtn = document.getElementById('custom-pos-btn') as HTMLButtonElement;
         const rollBtn = document.getElementById('custom-roll-btn') as HTMLButtonElement;
 
-        // Update the input field with current value and save
         const updateInput = () => {
             customRollInput.value = this.character.customRoll.toString();
             db.saveCharacter(this.character.toJSON());
         };
 
-        // Set initial value
         updateInput();
 
-        // Handle -1 button
         minusBtn.addEventListener('click', () => {
             this.character.customRoll = Math.max(1, this.character.customRoll - 1);
             this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
 
-        // Handle +1 button
         plusBtn.addEventListener('click', () => {
             this.character.customRoll = Math.min(100, this.character.customRoll + 1);
             this.character.invalidateEffectiveStatsCache();
             updateInput();
         });
 
-        // Handle direct input changes
         customRollInput.addEventListener('change', () => {
             const value = parseInt(customRollInput.value) || 1;
             this.character.customRoll = Math.max(1, Math.min(100, value));
             this.saveAndRender();
         });
 
-        // Handle roll button
         rollBtn.addEventListener('click', () => {
             this.diceRoller.rollPMAR('customRoll', 'Custom');
         });
 
-        // Handle Enter key to trigger roll
         customRollInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.diceRoller.rollPMAR('customRoll', 'Custom');
@@ -278,16 +428,11 @@ export class CharacterController {
             const description = element.querySelector('.item-ability-description') as HTMLElement;
             let holdTimer: ReturnType<typeof setTimeout> | undefined;
 
-            // Click to toggle description
             element.addEventListener('click', (e: Event) => {
                 const target = e.target as HTMLElement;
-
-                // Don't toggle if clicking the checkbox (handled separately)
                 if (target.classList.contains('item-checkbox')) {
                     return;
                 }
-
-                // Toggle description visibility
                 if (description.style.display === 'none') {
                     description.style.display = 'block';
                 } else {
@@ -295,7 +440,6 @@ export class CharacterController {
                 }
             });
 
-            // Long press on container for menu
             element.addEventListener('mousedown', (e: MouseEvent) => {
                 holdTimer = setTimeout(() => {
                     this.showItemAbilityMenu(id, type);
@@ -378,7 +522,6 @@ export class CharacterController {
         modal.appendChild(container);
         document.body.appendChild(modal);
 
-        // Close on Escape
         const escapeHandler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 modal.remove();
@@ -397,7 +540,6 @@ export class CharacterController {
 
         const currentDescription = descEl.textContent || '';
 
-        // Create edit container with textarea
         const editContainer = document.createElement('div');
         editContainer.style.cssText = `
             display: flex;
@@ -458,7 +600,6 @@ export class CharacterController {
             cursor: pointer;
         `;
 
-        // Save handler
         saveBtn.addEventListener('click', () => {
             if (type === 'item') {
                 const item = this.character.items.find(i => i.id === id);
@@ -475,7 +616,6 @@ export class CharacterController {
             }
         });
 
-        // Cancel handler
         cancelBtn.addEventListener('click', () => {
             this.saveAndRender();
         });
@@ -485,7 +625,6 @@ export class CharacterController {
         editContainer.appendChild(textarea);
         editContainer.appendChild(buttonContainer);
 
-        // Click name to cancel editing
         const nameEl = entry.querySelector('.item-ability-name') as HTMLElement;
         if (nameEl) {
             nameEl.addEventListener('click', (e: Event) => {
@@ -494,10 +633,7 @@ export class CharacterController {
             });
         }
 
-        // Replace description with edit container
         descEl.replaceWith(editContainer);
-
-        // Focus on textarea
         textarea.focus();
         textarea.select();
     }
@@ -549,7 +685,6 @@ export class CharacterController {
 
         const defaultDesc = template ? templateDescriptions[template] || '' : '';
 
-        // Create form container
         const formContainer = document.createElement('div');
         formContainer.style.cssText = `
             padding: ${SPACING.lg};
@@ -558,7 +693,6 @@ export class CharacterController {
             margin-bottom: ${SPACING.lg};
         `;
 
-        // Name field
         const nameDiv = document.createElement('div');
         nameDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
         const nameLabel = document.createElement('label');
@@ -571,7 +705,6 @@ export class CharacterController {
         nameDiv.appendChild(nameLabel);
         nameDiv.appendChild(nameInput);
 
-        // Location field
         const locationDiv = document.createElement('div');
         locationDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
         const locationLabel = document.createElement('label');
@@ -584,7 +717,6 @@ export class CharacterController {
         locationDiv.appendChild(locationLabel);
         locationDiv.appendChild(locationInput);
 
-        // Description field
         const descDiv = document.createElement('div');
         descDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
         const descLabel = document.createElement('label');
@@ -597,7 +729,6 @@ export class CharacterController {
         descDiv.appendChild(descLabel);
         descDiv.appendChild(descTextarea);
 
-        // Help text for templates
         if (template) {
             const helpText = document.createElement('div');
             helpText.textContent = 'Use $$stat_name:value for buffs (e.g., $$melee_power:2)';
@@ -605,7 +736,6 @@ export class CharacterController {
             descDiv.appendChild(helpText);
         }
 
-        // Button container
         const buttonDiv = document.createElement('div');
         buttonDiv.style.cssText = `display: flex; gap: ${SPACING.sm};`;
 
@@ -640,18 +770,15 @@ export class CharacterController {
         formContainer.appendChild(descDiv);
         formContainer.appendChild(buttonDiv);
 
-        // Insert form before the item template select
         const templateSelect_el = document.getElementById('item-template-select');
         if (templateSelect_el && templateSelect_el.parentElement) {
             templateSelect_el.parentElement.insertBefore(formContainer, templateSelect_el);
         }
 
-        // Focus on name input
         nameInput.focus();
     }
 
     private createNewAbility() {
-        // Create form container
         const formContainer = document.createElement('div');
         formContainer.style.cssText = `
             padding: ${SPACING.lg};
@@ -660,7 +787,6 @@ export class CharacterController {
             margin-bottom: ${SPACING.lg};
         `;
 
-        // Name field
         const nameDiv = document.createElement('div');
         nameDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
         const nameLabel = document.createElement('label');
@@ -673,7 +799,6 @@ export class CharacterController {
         nameDiv.appendChild(nameLabel);
         nameDiv.appendChild(nameInput);
 
-        // Description field
         const descDiv = document.createElement('div');
         descDiv.style.cssText = `margin-bottom: ${SPACING.md};`;
         const descLabel = document.createElement('label');
@@ -685,7 +810,6 @@ export class CharacterController {
         descDiv.appendChild(descLabel);
         descDiv.appendChild(descTextarea);
 
-        // Button container
         const buttonDiv = document.createElement('div');
         buttonDiv.style.cssText = `display: flex; gap: ${SPACING.sm};`;
 
@@ -717,19 +841,18 @@ export class CharacterController {
         formContainer.appendChild(descDiv);
         formContainer.appendChild(buttonDiv);
 
-        // Insert form before the "New Ability" button
         const newAbilityBtn = document.querySelector('.new-ability-btn') as HTMLElement;
         if (newAbilityBtn && newAbilityBtn.parentElement) {
             newAbilityBtn.parentElement.insertBefore(formContainer, newAbilityBtn);
         }
 
-        // Focus on name input
         nameInput.focus();
     }
 
     private attachCardDrawingListeners() {
         const drawBtn = document.getElementById('draw-cards-btn') as HTMLButtonElement;
         const unarmoredToggle = document.getElementById('unarmored-toggle') as HTMLInputElement;
+        const heavyArmorToggle = document.getElementById('heavy-armor-toggle') as HTMLInputElement;
 
         if (drawBtn) {
             drawBtn.addEventListener('click', () => {
@@ -741,6 +864,13 @@ export class CharacterController {
             unarmoredToggle.addEventListener('change', () => {
                 this.character.unarmored = unarmoredToggle.checked;
                 this.saveAndRender();
+            });
+        }
+
+        if (heavyArmorToggle) {
+            heavyArmorToggle.addEventListener('change', () => {
+                this.character.heavyArmor = heavyArmorToggle.checked;
+                db.saveCharacter(this.character.toJSON());
             });
         }
     }
@@ -758,7 +888,6 @@ export class CharacterController {
                 }
             });
 
-            // Prevent checkbox click from affecting parent element
             input.addEventListener('click', (e: Event) => {
                 e.stopPropagation();
             });

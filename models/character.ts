@@ -1,3 +1,10 @@
+export type StatusType = 'wound' | 'dismemberment' | 'stunned' | 'panic';
+
+export interface StatusData {
+    id: string;
+    type: StatusType;
+}
+
 export interface CharacterData {
     id: string;
     name: string;
@@ -13,9 +20,11 @@ export interface CharacterData {
     staminaTokens: number;
     customRoll: number;
     unarmored: boolean;
+    heavyArmor?: boolean;
     notes: string;
     items: ItemData[];
     abilities: AbilityData[];
+    statuses?: StatusData[];
 }
 
 export interface ItemData {
@@ -47,9 +56,11 @@ export class Character {
     staminaTokens: number;
     customRoll: number;
     unarmored: boolean;
+    heavyArmor: boolean;
     notes: string;
     items: ItemData[];
     abilities: AbilityData[];
+    statuses: StatusData[];
     private cachedEffectiveStats: { [key: string]: number } | null = null;
     [key: string]: any;
 
@@ -68,9 +79,11 @@ export class Character {
         this.staminaTokens = data.staminaTokens ?? 0;
         this.customRoll = data.customRoll ?? 1;
         this.unarmored = data.unarmored ?? false;
+        this.heavyArmor = data.heavyArmor ?? false;
         this.notes = data.notes ?? '';
         this.items = data.items || [];
         this.abilities = data.abilities || [];
+        this.statuses = data.statuses || [];
     }
 
     static default(): CharacterData {
@@ -89,9 +102,11 @@ export class Character {
             stress: 0,
             customRoll: 1,
             unarmored: false,
+            heavyArmor: false,
             notes: '',
             items: [],
-            abilities: []
+            abilities: [],
+            statuses: []
         };
     }
 
@@ -115,9 +130,11 @@ export class Character {
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
             unarmored: this.unarmored,
+            heavyArmor: this.heavyArmor,
             notes: this.notes,
             items: this.items || [],
-            abilities: this.abilities || []
+            abilities: this.abilities || [],
+            statuses: this.statuses || []
         };
     }
 
@@ -143,10 +160,14 @@ export class Character {
                 }
             });
 
+        const statusPenalty = this.statuses.filter(
+            s => s.type === 'wound' || s.type === 'dismemberment'
+        ).length;
+
         // Calculate and cache result
         this.cachedEffectiveStats = {
-            meleePower: this.meleePower + (buffs['melee_power'] || 0),
-            rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
+            meleePower: Math.max(0, this.meleePower + (buffs['melee_power'] || 0) - statusPenalty),
+            rangedPower: Math.max(0, this.rangedPower + (buffs['ranged_power'] || 0) - statusPenalty),
             might: this.might + (buffs['might'] || 0),
             awareness: this.awareness + (buffs['awareness'] || 0),
             resolve: this.resolve + (buffs['resolve'] || 0),

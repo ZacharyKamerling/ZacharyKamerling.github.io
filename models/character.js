@@ -1,6 +1,6 @@
 var Character = /** @class */ (function () {
     function Character(data) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         this.cachedEffectiveStats = null;
         this.id = data.id;
         this.name = data.name || 'Unnamed Character';
@@ -16,9 +16,11 @@ var Character = /** @class */ (function () {
         this.staminaTokens = (_k = data.staminaTokens) !== null && _k !== void 0 ? _k : 0;
         this.customRoll = (_l = data.customRoll) !== null && _l !== void 0 ? _l : 1;
         this.unarmored = (_m = data.unarmored) !== null && _m !== void 0 ? _m : false;
-        this.notes = (_o = data.notes) !== null && _o !== void 0 ? _o : '';
+        this.heavyArmor = (_o = data.heavyArmor) !== null && _o !== void 0 ? _o : false;
+        this.notes = (_p = data.notes) !== null && _p !== void 0 ? _p : '';
         this.items = data.items || [];
         this.abilities = data.abilities || [];
+        this.statuses = data.statuses || [];
     }
     Character.default = function () {
         return {
@@ -36,9 +38,11 @@ var Character = /** @class */ (function () {
             stress: 0,
             customRoll: 1,
             unarmored: false,
+            heavyArmor: false,
             notes: '',
             items: [],
-            abilities: []
+            abilities: [],
+            statuses: []
         };
     };
     Character.fromRaw = function (raw) {
@@ -60,9 +64,11 @@ var Character = /** @class */ (function () {
             staminaTokens: this.staminaTokens,
             customRoll: this.customRoll,
             unarmored: this.unarmored,
+            heavyArmor: this.heavyArmor,
             notes: this.notes,
             items: this.items || [],
-            abilities: this.abilities || []
+            abilities: this.abilities || [],
+            statuses: this.statuses || []
         };
     };
     Character.prototype.getEffectiveStats = function () {
@@ -84,10 +90,11 @@ var Character = /** @class */ (function () {
                 buffs[statName] = (buffs[statName] || 0) + value;
             }
         });
+        var statusPenalty = this.statuses.filter(function (s) { return s.type === 'wound' || s.type === 'dismemberment'; }).length;
         // Calculate and cache result
         this.cachedEffectiveStats = {
-            meleePower: this.meleePower + (buffs['melee_power'] || 0),
-            rangedPower: this.rangedPower + (buffs['ranged_power'] || 0),
+            meleePower: Math.max(0, this.meleePower + (buffs['melee_power'] || 0) - statusPenalty),
+            rangedPower: Math.max(0, this.rangedPower + (buffs['ranged_power'] || 0) - statusPenalty),
             might: this.might + (buffs['might'] || 0),
             awareness: this.awareness + (buffs['awareness'] || 0),
             resolve: this.resolve + (buffs['resolve'] || 0),
