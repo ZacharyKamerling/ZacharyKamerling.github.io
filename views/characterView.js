@@ -1,7 +1,7 @@
 var CharacterView = /** @class */ (function () {
     function CharacterView() {
         // REMEMBER: Increment VERSION when making UI changes
-        this.VERSION = '1.0.35';
+        this.VERSION = '1.0.36';
         this.currentPage = 0;
         this.pages = ['Stats', 'Items', 'Abilities', 'Notes'];
         this.TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -96,30 +96,30 @@ var CharacterView = /** @class */ (function () {
         return "\n            <div style=\"padding: 1em; max-width: 24em; margin: 0 auto; width: 100%; box-sizing: border-box;\">\n                <h3 style=\"margin: 0 0 0.5em 0; font-size: 1.2em;\">Campaign Notes</h3>\n                <div style=\"display: flex; flex-direction: column; height: 75vh;\">\n                    <textarea id=\"notes-input\" style=\"\n                        width: 100%;\n                        flex: 1;\n                        padding: 0.75em;\n                        border: 1px solid #666;\n                        border-radius: 4px;\n                        background: rgba(0, 0, 0, 0.3);\n                        color: #fff;\n                        font-family: monospace;\n                        font-size: 0.9em;\n                        resize: none;\n                        box-sizing: border-box;\n                        margin-bottom: 0.5em;\n                    \">".concat(character.notes, "</textarea>\n                    <button id=\"save-notes-btn\" class=\"round-style\" style=\"width: 100%; padding: 0.5em;\">Save Notes</button>\n                </div>\n            </div>\n        ");
     };
     CharacterView.prototype.renderStatusSection = function (character) {
-        if (character.statuses.length === 0)
-            return '';
         var penaltyCount = character.statuses.filter(function (s) { return s.type === 'wound' || s.type === 'dismemberment'; }).length;
         var chipColors = {
-            wound: '#dc2626',
-            dismemberment: '#ea580c',
-            stunned: '#d97706',
-            panic: '#7c3aed'
+            wound: '#dc2626', dismemberment: '#ea580c', stunned: '#d97706', panic: '#7c3aed'
         };
         var chipLabels = {
-            wound: 'Wound',
-            dismemberment: 'Dismembered',
-            stunned: 'Stunned',
-            panic: 'Panic!'
+            wound: 'Wound', dismemberment: 'Dismembered', stunned: 'Stunned', panic: 'Panic!'
         };
         var chips = character.statuses.map(function (s) {
             var color = chipColors[s.type] || '#555';
             var label = chipLabels[s.type] || s.type;
-            return "<div style=\"display:inline-flex;align-items:center;gap:0.3em;background:".concat(color, ";color:#fff;padding:0.2em 0.4em 0.2em 0.55em;border-radius:0.4em;font-size:0.85em;font-weight:600;\">").concat(label, "<button class=\"remove-status-btn\" data-status-id=\"").concat(s.id, "\" style=\"background:none;border:none;color:#fff;cursor:pointer;font-size:1.1em;line-height:1;padding:0;margin:0;opacity:0.75;flex-shrink:0;\">\u00D7</button></div>");
+            var labelHtml = s.type === 'panic'
+                ? "<span class=\"panic-roll-trigger\" style=\"cursor:pointer;\" title=\"Tap to roll panic dice\">".concat(label, " \uD83C\uDFB2</span>")
+                : label;
+            return "<div class=\"status-chip\" data-type=\"".concat(s.type, "\" data-status-id=\"").concat(s.id, "\" style=\"display:inline-flex;align-items:center;gap:0.3em;background:").concat(color, ";color:#fff;padding:0.2em 0.4em 0.2em 0.55em;border-radius:0.4em;font-size:0.85em;font-weight:600;\">").concat(labelHtml, "<button class=\"remove-status-btn\" data-status-id=\"").concat(s.id, "\" style=\"background:none;border:none;color:#fff;cursor:pointer;font-size:1.1em;line-height:1;padding:0;margin:0;opacity:0.75;flex-shrink:0;\">\u00D7</button></div>");
         }).join('');
-        var penalty = penaltyCount > 0
-            ? "<div style=\"font-size:0.8em;color:#dc2626;margin-top:0.3em;\">Power dice \u2212".concat(penaltyCount, " (wounds/dismemberments)</div>")
+        var activeRow = character.statuses.length > 0
+            ? "<div style=\"display:flex;flex-wrap:wrap;gap:0.4em;align-items:center;margin-bottom:0.3em;\">".concat(chips, "</div>")
             : '';
-        return "<div style=\"display:flex;flex-wrap:wrap;gap:0.4em;align-items:center;margin-bottom:0.3em;\">".concat(chips, "</div>").concat(penalty);
+        var penalty = penaltyCount > 0
+            ? "<div style=\"font-size:0.8em;color:#dc2626;margin-top:0.3em;margin-bottom:0.3em;\">Power dice \u2212".concat(penaltyCount, " (wounds/dismemberments)</div>")
+            : '';
+        var addBtnStyle = "background:#2a2a2a;border:1px dashed #555;border-radius:0.4em;padding:0.15em 0.45em;color:#888;font-size:0.75em;cursor:pointer;";
+        var addButtons = "<div style=\"display:flex;flex-wrap:wrap;gap:0.3em;margin-top:".concat(character.statuses.length > 0 ? '0.4em' : '0', ";\">\n            <button class=\"add-status-btn\" data-status-type=\"wound\" style=\"").concat(addBtnStyle, "\">+ Wound</button>\n            <button class=\"add-status-btn\" data-status-type=\"dismemberment\" style=\"").concat(addBtnStyle, "\">+ Dismember</button>\n            <button class=\"add-status-btn\" data-status-type=\"stunned\" style=\"").concat(addBtnStyle, "\">+ Stunned</button>\n            <button class=\"add-status-btn\" data-status-type=\"panic\" style=\"").concat(addBtnStyle, "\">+ Panic!</button>\n        </div>");
+        return "".concat(activeRow).concat(penalty).concat(addButtons);
     };
     CharacterView.prototype.setupPageNavigation = function () {
         var _this = this;

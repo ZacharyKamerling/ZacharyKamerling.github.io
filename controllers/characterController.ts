@@ -1,4 +1,4 @@
-import { Character } from '../models/character.js';
+import { Character, StatusType } from '../models/character.js';
 import { db } from '../data/db.js';
 import { DiceRoller } from '../utils/diceRollers.js';
 import { CardDrawer, CardEffect } from '../utils/cardDrawers.js';
@@ -212,6 +212,29 @@ export class CharacterController {
                 const statusId = (btn as HTMLElement).dataset.statusId!;
                 this.character.statuses = this.character.statuses.filter(s => s.id !== statusId);
                 this.character.invalidateEffectiveStatsCache();
+                db.saveCharacter(this.character);
+                this.updateStatusDisplay();
+            });
+        });
+
+        document.querySelectorAll('.panic-roll-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.diceRoller.rollStress();
+            });
+        });
+
+        document.querySelectorAll('.add-status-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const statusType = (btn as HTMLElement).dataset.statusType as StatusType;
+                if (!statusType) return;
+                this.character.statuses.push({
+                    id: Date.now().toString() + Math.random().toString().slice(2),
+                    type: statusType
+                });
+                if (statusType === 'wound' || statusType === 'dismemberment') {
+                    this.character.invalidateEffectiveStatsCache();
+                }
                 db.saveCharacter(this.character);
                 this.updateStatusDisplay();
             });

@@ -2,7 +2,7 @@ import { Character } from '../models/character.js';
 
 export class CharacterView {
     // REMEMBER: Increment VERSION when making UI changes
-    private VERSION = '1.0.35';
+    private VERSION = '1.0.36';
     private currentPage = 0;
     private pages = ['Stats', 'Items', 'Abilities', 'Notes'];
     private TAB_HEIGHT = '70px'; // Approximate height of tab bar
@@ -246,36 +246,43 @@ export class CharacterView {
     }
 
     renderStatusSection(character: Character): string {
-        if (character.statuses.length === 0) return '';
-
         const penaltyCount = character.statuses.filter(
             s => s.type === 'wound' || s.type === 'dismemberment'
         ).length;
 
         const chipColors: Record<string, string> = {
-            wound: '#dc2626',
-            dismemberment: '#ea580c',
-            stunned: '#d97706',
-            panic: '#7c3aed'
+            wound: '#dc2626', dismemberment: '#ea580c', stunned: '#d97706', panic: '#7c3aed'
         };
         const chipLabels: Record<string, string> = {
-            wound: 'Wound',
-            dismemberment: 'Dismembered',
-            stunned: 'Stunned',
-            panic: 'Panic!'
+            wound: 'Wound', dismemberment: 'Dismembered', stunned: 'Stunned', panic: 'Panic!'
         };
 
         const chips = character.statuses.map(s => {
             const color = chipColors[s.type] || '#555';
             const label = chipLabels[s.type] || s.type;
-            return `<div style="display:inline-flex;align-items:center;gap:0.3em;background:${color};color:#fff;padding:0.2em 0.4em 0.2em 0.55em;border-radius:0.4em;font-size:0.85em;font-weight:600;">${label}<button class="remove-status-btn" data-status-id="${s.id}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1em;line-height:1;padding:0;margin:0;opacity:0.75;flex-shrink:0;">×</button></div>`;
+            const labelHtml = s.type === 'panic'
+                ? `<span class="panic-roll-trigger" style="cursor:pointer;" title="Tap to roll panic dice">${label} 🎲</span>`
+                : label;
+            return `<div class="status-chip" data-type="${s.type}" data-status-id="${s.id}" style="display:inline-flex;align-items:center;gap:0.3em;background:${color};color:#fff;padding:0.2em 0.4em 0.2em 0.55em;border-radius:0.4em;font-size:0.85em;font-weight:600;">${labelHtml}<button class="remove-status-btn" data-status-id="${s.id}" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.1em;line-height:1;padding:0;margin:0;opacity:0.75;flex-shrink:0;">×</button></div>`;
         }).join('');
 
-        const penalty = penaltyCount > 0
-            ? `<div style="font-size:0.8em;color:#dc2626;margin-top:0.3em;">Power dice −${penaltyCount} (wounds/dismemberments)</div>`
+        const activeRow = character.statuses.length > 0
+            ? `<div style="display:flex;flex-wrap:wrap;gap:0.4em;align-items:center;margin-bottom:0.3em;">${chips}</div>`
             : '';
 
-        return `<div style="display:flex;flex-wrap:wrap;gap:0.4em;align-items:center;margin-bottom:0.3em;">${chips}</div>${penalty}`;
+        const penalty = penaltyCount > 0
+            ? `<div style="font-size:0.8em;color:#dc2626;margin-top:0.3em;margin-bottom:0.3em;">Power dice −${penaltyCount} (wounds/dismemberments)</div>`
+            : '';
+
+        const addBtnStyle = `background:#2a2a2a;border:1px dashed #555;border-radius:0.4em;padding:0.15em 0.45em;color:#888;font-size:0.75em;cursor:pointer;`;
+        const addButtons = `<div style="display:flex;flex-wrap:wrap;gap:0.3em;margin-top:${character.statuses.length > 0 ? '0.4em' : '0'};">
+            <button class="add-status-btn" data-status-type="wound" style="${addBtnStyle}">+ Wound</button>
+            <button class="add-status-btn" data-status-type="dismemberment" style="${addBtnStyle}">+ Dismember</button>
+            <button class="add-status-btn" data-status-type="stunned" style="${addBtnStyle}">+ Stunned</button>
+            <button class="add-status-btn" data-status-type="panic" style="${addBtnStyle}">+ Panic!</button>
+        </div>`;
+
+        return `${activeRow}${penalty}${addButtons}`;
     }
 
     private setupPageNavigation() {

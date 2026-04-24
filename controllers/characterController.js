@@ -178,6 +178,28 @@ var CharacterController = /** @class */ (function () {
                 _this.updateStatusDisplay();
             });
         });
+        document.querySelectorAll('.panic-roll-trigger').forEach(function (trigger) {
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                _this.diceRoller.rollStress();
+            });
+        });
+        document.querySelectorAll('.add-status-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var statusType = btn.dataset.statusType;
+                if (!statusType)
+                    return;
+                _this.character.statuses.push({
+                    id: Date.now().toString() + Math.random().toString().slice(2),
+                    type: statusType
+                });
+                if (statusType === 'wound' || statusType === 'dismemberment') {
+                    _this.character.invalidateEffectiveStatsCache();
+                }
+                db.saveCharacter(_this.character);
+                _this.updateStatusDisplay();
+            });
+        });
     };
     // --- Existing listeners ---
     CharacterController.prototype.attachTokenListeners = function () {
