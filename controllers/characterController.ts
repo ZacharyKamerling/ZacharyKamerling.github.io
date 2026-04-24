@@ -97,9 +97,7 @@ export class CharacterController {
                     break;
             }
         });
-        db.saveCharacter(this.character);
-        this.updateTokenDisplay();
-        this.updateStatusDisplay();
+        this.saveAndRender();
     }
 
     private showHeavyArmorChoiceModal(effects: CardEffect[], onChoose: (reducedEffects: CardEffect[]) => void) {

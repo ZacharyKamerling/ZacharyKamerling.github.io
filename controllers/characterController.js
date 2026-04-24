@@ -86,9 +86,7 @@ var CharacterController = /** @class */ (function () {
                     break;
             }
         });
-        db.saveCharacter(this.character);
-        this.updateTokenDisplay();
-        this.updateStatusDisplay();
+        this.saveAndRender();
     };
     CharacterController.prototype.showHeavyArmorChoiceModal = function (effects, onChoose) {
         var effectLabels = {
